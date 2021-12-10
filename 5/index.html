@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+
+    <title>Village</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+
+</head>
+
+<body>
+
+<div id="container">
+
+    <div class="boxed">
+        <p>Peer Connection String</p>
+        <input type="text" id="targetPeer" />
+        <button onclick="acceptOffer()">
+            Join Offer
+        </button>
+    </div>
+
+    <div class="boxed">
+        <p>Remote Connection String</p>
+        <input type="text" id="remotePeer" />
+        <button onclick="setRemote()">
+            Set Remote
+        </button>
+    </div>
+
+    <div class="boxed">
+        <p>Text to send</p>
+        <textarea type="text" id="messageText" ></textarea>
+        <button onclick="sendMsg()">
+            Send
+        </button>
+    </div>
+
+    <br />
+    <button onclick="createOffer()"> Create Offer </button>
+
+    <div id="logs">
+
+    </div>
+</div>
+
+<script src="js/main.js" async></script>
+</body>
+</html>

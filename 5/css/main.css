@@ -1,0 +1,39 @@
+
+#container > * {
+  margin: 10px;
+  font-family: Arial;
+  font-size: 14px;
+}
+
+#logs > * {
+  margin: 10px;
+  font-family: "Courier New";
+  font-size: 14px;
+  margin-left: 15px;
+}
+
+#logs b {
+  margin-left: -10px;
+  font-family: Arial;
+  font-size: 14px;
+}
+
+#logs .error {
+  color: red;
+}
+
+.boxed {
+  border: 1px solid lightgray;
+  padding: 10px;
+  display: inline-flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.boxed > * {
+  margin-bottom: 8px;
+}
+
+#targetPeer {
+  width: 200px;
+}
