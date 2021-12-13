@@ -4,6 +4,7 @@ const targetPeerEl = document.querySelector('#targetPeer');
 const remotePeerEl = document.querySelector('#remotePeer');
 const messagesEl = document.querySelector('#logs');
 const messageTextEl = document.querySelector('#messageText');
+const iceCandidateEl = document.querySelector('#iceCandidate');
 
 const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
 const pc = new RTCPeerConnection({'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]});
@@ -17,6 +18,9 @@ let logMessage = (message) => {
 };
 
 pc.onicecandidate = e => {
+  // if (e.candidate) {
+  //   logMessage("ICE CANDIDATE: " + JSON.stringify(e.candidate));
+  // }
   if (e.candidate == null) {
     logMessage("Connection string: <br />" + JSON.stringify(pc.localDescription));
   }
@@ -35,7 +39,7 @@ function createOffer() {
 
   pc.createOffer().then( (desc) => {
       pc.setLocalDescription(desc);
-      console.log(`Offer from localConnection\n${desc.sdp}`);
+      logMessage(`Local Description: \n${JSON.stringify(desc)}`);
     },
   );
 }
@@ -54,12 +58,27 @@ function setRemote() {
     return;
   }
 
-  const offer = new RTCSessionDescription(connectionObj);
-
-  pc.setRemoteDescription(offer);
+  pc.setRemoteDescription(connectionObj);
 }
 
-function acceptOffer() {
+function addIceCandidate() {
+  logMessage("<b>Setting ICE candidate</b>");
+
+  let candidateString = iceCandidateEl.value;
+
+  let candidateObj = {};
+
+  try{
+    candidateObj = JSON.parse(candidateString);
+  } catch (e) {
+    logMessage("<span class=\"error\"> Bad candidate string </span> ");
+    return;
+  }
+
+  pc.addIceCandidate(candidateObj);
+}
+
+async function acceptOffer() {
   logMessage("<b>Accepting Offer</b>");
 
   let connectionString = targetPeerEl.value;
@@ -74,18 +93,18 @@ function acceptOffer() {
   }
 
   pc.ondatachannel = (e) => {
+    logMessage("Got a data channel");
     dataChannel = e.channel;
     dataChannel.onmessage = (e) => {
       logMessage(`<i>${e.data}</i>`);
     }
   };
 
-  const offer = new RTCSessionDescription(connectionObj);
-
-  pc.setRemoteDescription(offer);
+  await pc.setRemoteDescription(connectionObj);
   pc.createAnswer().then((answerDesc) => {
-    logMessage("Answering connection string");
     pc.setLocalDescription(answerDesc);
+    logMessage(`Local Description: \n${JSON.stringify(answerDesc)}`);
+
   })
 
 }
