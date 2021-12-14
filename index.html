@@ -7,6 +7,7 @@
 
     <title>Village</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/bulma-prefers-dark" />
     <link rel="stylesheet" href="css/main.css"/>
 
 </head>
@@ -65,7 +66,128 @@
     </section>
 </div>
 <div id="osView" class="is-hidden">
-    OS View
+
+    <div class="card" id="offerCard">
+        <div class="card-content">
+            <p class="title">
+                No Peers!
+            </p>
+
+            <p class="subtitle is-size-4">
+                Share this link to invite a peer:
+            </p>
+            <section class="section">
+                <div class="container">
+                    <div class="overflow-elipsis is-clipped" id="offer"
+                         onmousedown="offerClicked()">
+                        Generating link ...
+                    </div>
+                </div>
+
+                <br />
+                <div id="copiedOfferNotification" class="notification is-primary is-hidden">
+                    Copied to clipboard!
+                </div>
+            </section>
+
+            <div class="container is-hidden" id="peerKeyPrompt">
+                <p class="title is-size-4">
+                    Next, paste the peer's response key below:
+                </p>
+
+                <textarea class="textarea" id="peerKey" onpaste="Village.peerKeyEntered()">
+
+                </textarea>
+            </div>
+        </div>
+        <footer class="card-footer">
+            <p class="card-footer-item">
+                <button class="button is-primary" id="submitKey" disabled onclick="Village.setRemote()">Submit Key</button>
+            </p>
+        </footer>
+    </div>
+
+    <div class="card is-hidden" id="answerCard">
+        <div class="card-content">
+            <p class="title">
+                Almost there!
+            </p>
+
+            <p class="subtitle is-size-4">
+                To accept, send this back to the person that invited you:
+            </p>
+            <section class="section">
+                <div class="container">
+                    <div class="overflow-elipsis is-clipped" id="answer"
+                         onmousedown="answerClicked()">
+                        Generating a response ...
+                    </div>
+                </div>
+
+                <br />
+                <div id="copiedAnswerNotification" class="notification is-primary is-hidden">
+                    Copied to clipboard!
+                </div>
+
+                <div class="container is-hidden" id="waitToConnect">
+                    <p class="title is-size-4">
+                        Once the host accepts you will be connected.
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <div id="connectedView" class="is-hidden">
+        <div class="tile is-ancestor">
+            <div class="tile is-vertical is-8">
+                <div class="tile">
+                    <div class="tile is-parent is-vertical">
+                        <article class="tile is-child notification is-primary">
+                            <p class="title">Vertical...</p>
+                            <p class="subtitle">Top tile</p>
+                        </article>
+                        <article class="tile is-child notification is-warning">
+                            <p class="title">...tiles</p>
+                            <p class="subtitle">Bottom tile</p>
+                        </article>
+                    </div>
+                    <div class="tile is-parent">
+                        <article class="tile is-child notification is-info">
+                            <p class="title">Middle tile</p>
+                            <p class="subtitle">With an image</p>
+                            <figure class="image is-4by3">
+                                <img src="https://bulma.io/images/placeholders/640x480.png">
+                            </figure>
+                        </article>
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <article class="tile is-child notification is-danger">
+                        <p class="title">Wide tile</p>
+                        <p class="subtitle">Aligned with the right tile</p>
+                        <div class="content">
+                            <!-- Content -->
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="tile is-parent">
+                <article class="tile is-child notification is-success">
+                    <div class="content">
+                        <p class="title">Chat</p>
+                        <div class="content" id="chatLog">
+                        </div>
+
+
+                        <input type="text" id="chatBoxMessage">
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+
 </div>
 <script src="js/main.js" async></script>
 </body>
