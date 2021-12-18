@@ -12,14 +12,14 @@ function show(elementId) {
 }
 
 function offerClicked() {
-  navigator.clipboard.writeText(document.getElementById('offer').innerText);
+  navigator.clipboard && navigator.clipboard.writeText(document.getElementById('offer').innerText);
   hide('offer');
   show('copiedOfferNotification');
   show('peerKeyPrompt');
 }
 
 function answerClicked() {
-  navigator.clipboard.writeText(document.getElementById('answer').innerText);
+  navigator.clipboard && navigator.clipboard.writeText(document.getElementById('answer').innerText);
   hide('answer');
   show('copiedAnswerNotification');
   show('waitToConnect');
