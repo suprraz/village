@@ -14,18 +14,17 @@ function show(elementId) {
 function offerClicked() {
   if(navigator.clipboard) {
     navigator.clipboard.writeText(document.getElementById('offer').innerText);
+    show('copiedOfferNotification');
   }
-  hide('offer');
-  show('copiedOfferNotification');
+
   show('peerKeyPrompt');
 }
 
 function answerClicked() {
   if(navigator.clipboard) {
     navigator.clipboard.writeText(document.getElementById('answer').innerText);
+    show('copiedAnswerNotification');
   }
-  hide('answer');
-  show('copiedAnswerNotification');
   show('waitToConnect');
 }
 
