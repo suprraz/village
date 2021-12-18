@@ -12,14 +12,18 @@ function show(elementId) {
 }
 
 function offerClicked() {
-  navigator.clipboard && navigator.clipboard.writeText(document.getElementById('offer').innerText);
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(document.getElementById('offer').innerText);
+  }
   hide('offer');
   show('copiedOfferNotification');
   show('peerKeyPrompt');
 }
 
 function answerClicked() {
-  navigator.clipboard && navigator.clipboard.writeText(document.getElementById('answer').innerText);
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(document.getElementById('answer').innerText);
+  }
   hide('answer');
   show('copiedAnswerNotification');
   show('waitToConnect');
