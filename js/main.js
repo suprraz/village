@@ -87,6 +87,13 @@ class _Village {
       this.chatLog.push('Them: ' + e.data);
       this.updateChat();
     }
+
+    this.pc.addEventListener("iceconnectionstatechange", ev => {
+      let stateElem = document.getElementById("connstate");
+      stateElem.innerText = this.pc.iceConnectionState;
+      logMessage(`Connection state: ${this.pc.iceConnectionState}`);
+    }, false);
+
     this.dataChannel.addEventListener("open", (event) => {
       logMessage('Data chennel open');
 
@@ -126,6 +133,12 @@ class _Village {
       logMessage("<span class=\"error\"> Bad connection string </span> ");
       return;
     }
+
+    this.pc.addEventListener("iceconnectionstatechange", ev => {
+      let stateElem = document.getElementById("connstate");
+      stateElem.innerText = this.pc.iceConnectionState;
+      logMessage(`Connection state: ${this.pc.iceConnectionState}`);
+    }, false);
 
     this.pc.ondatachannel = (e) => {
       logMessage("Got a data channel");
