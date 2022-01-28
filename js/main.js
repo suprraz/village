@@ -66,6 +66,24 @@ class _Village {
 
   }
 
+  onMessage (e) {
+    if(e.data) {
+      try {
+        const data = JSON.parse(e.data);
+
+        if (data.msg) {
+          logMessage(`<i>${data.msg}</i>`);
+          this.chatLog.push('Them: ' + data.msg);
+          this.updateChat();
+        } else if (data.code) {
+          logMessage(`<i>${data.code}</i>`);
+          document.getElementById('editor').value = data.code;
+          eval(data.code);
+        }
+      } catch (e) {};
+    }
+  }
+
   createOffer() {
     const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
     this.pc = new RTCPeerConnection(configRPC);
@@ -82,11 +100,8 @@ class _Village {
     };
 
     this.dataChannel = this.pc.createDataChannel('offerChannel');
-    this.dataChannel.onmessage = (e) => {
-      logMessage(`<i>${e.data}</i>`);
-      this.chatLog.push('Them: ' + e.data);
-      this.updateChat();
-    }
+    this.dataChannel.onmessage = (e) => this.onMessage(e);
+
 
     this.pc.addEventListener("iceconnectionstatechange", ev => {
       let stateElem = document.getElementById("connstate");
@@ -147,11 +162,7 @@ class _Village {
       hide('answerCard');
 
       this.dataChannel = e.channel;
-      this.dataChannel.onmessage = (e) => {
-        logMessage(`<i>${e.data}</i>`);
-        this.chatLog.push('Them: ' + e.data);
-        this.updateChat();
-      }
+      this.dataChannel.onmessage = (e) => this.onMessage(e);
     };
 
     this.pc.setRemoteDescription(connectionObj);
@@ -193,13 +204,27 @@ class _Village {
   }
   sendMessage() {
     const msg = document.getElementById('chatBoxMessage').value;
-    this.dataChannel.send(msg);
+    this.dataChannel.send(JSON.stringify({msg}));
     this.chatLog.push('Me: ' + msg);
     this.updateChat();
     document.getElementById('chatBoxMessage').value = '';
   }
   updateChat() {
     document.getElementById('chatLog').innerText = this.chatLog.join('\n');
+  }
+
+  runLocal() {
+    document.getElementById('editorlog').innerText = 'Running locally... ' + (new Date());
+    const code = document.getElementById('editor').value;
+
+    eval(code);
+  }
+
+  runRemote() {
+    document.getElementById('editorlog').innerText = 'Running remote... ' + (new Date());
+
+    const code = document.getElementById('editor').value;
+    this.dataChannel.send(JSON.stringify({code}));
   }
 }
 

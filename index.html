@@ -157,8 +157,12 @@
                     </div>
                     <div class="tile is-parent">
                         <article class="tile is-child notification is-info">
-                            <p class="title">Middle tile</p>
-                            <p class="subtitle">With an image</p>
+                            <p class="title">Chat</p>
+                            <div class="content" id="chatLog">
+                            </div>
+
+
+                            <input type="text" id="chatBoxMessage">
                             <figure class="image is-4by3">
                                 <img src="https://bulma.io/images/placeholders/640x480.png">
                             </figure>
@@ -178,12 +182,15 @@
             <div class="tile is-parent">
                 <article class="tile is-child notification is-success">
                     <div class="content">
-                        <p class="title">Chat</p>
-                        <div class="content" id="chatLog">
+                        <p class="title">Console</p>
+                        <div class="editorlog" id="editorlog">
                         </div>
 
-
-                        <input type="text" id="chatBoxMessage">
+                        <textarea id="editor" rows="20" cols="30"> </textarea>
+                        <div class="is-flex is-flex-direction-row">
+                        <button onclick="Village.runLocal()">Local</button>
+                        <button onclick="Village.runRemote()">Remote</button>
+                        </div>
                     </div>
                 </article>
             </div>
