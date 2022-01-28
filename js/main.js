@@ -1,3 +1,5 @@
+import AppStore from './appStore.js';
+
 const configRPC = {'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]};
 
 function logMessage(msg) {
@@ -9,23 +11,6 @@ function hide(elementId) {
 }
 function show(elementId) {
   document.getElementById(elementId).classList.remove('is-hidden');
-}
-
-function offerClicked() {
-  if(navigator.clipboard) {
-    navigator.clipboard.writeText(document.getElementById('offer').innerText);
-    show('copiedOfferNotification');
-  }
-
-  show('peerKeyPrompt');
-}
-
-function answerClicked() {
-  if(navigator.clipboard) {
-    navigator.clipboard.writeText(document.getElementById('answer').innerText);
-    show('copiedAnswerNotification');
-  }
-  show('waitToConnect');
 }
 
 class _Village {
@@ -41,6 +26,8 @@ class _Village {
       const offerKey = urlParams.get('offerKey');
       this.acceptOffer(offerKey);
     }
+
+    this.registerListeners();
   }
 
   startOS() {
@@ -226,13 +213,58 @@ class _Village {
     const code = document.getElementById('editor').value;
     this.dataChannel.send(JSON.stringify({code}));
   }
+
+  createApp(config) {
+    const code = document.getElementById('editor').value;
+
+    try {
+      AppStore.createApp({name: 'my first app', code});
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  offerClicked() {
+    if(navigator.clipboard) {
+      navigator.clipboard.writeText(document.getElementById('offer').innerText);
+      show('copiedOfferNotification');
+    }
+
+    show('peerKeyPrompt');
+  }
+
+  answerClicked() {
+    if(navigator.clipboard) {
+      navigator.clipboard.writeText(document.getElementById('answer').innerText);
+      show('copiedAnswerNotification');
+    }
+    show('waitToConnect');
+  }
+
+
+  registerListeners() {
+    document.getElementById("chatBoxMessage").addEventListener("keyup", (event) => {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        this.sendMessage();
+      }
+    });
+
+    document.getElementById('btn_start').addEventListener('click', () => this.start());
+    document.getElementById('submitKey').addEventListener('click', () => this.setRemote());
+    document.getElementById('offer').addEventListener('mousedown', () => this.offerClicked());
+    document.getElementById('answer').addEventListener('mousedown', () => this.answerClicked());
+    document.getElementById('peerKey').addEventListener('paste', () => this.peerKeyEntered());
+
+
+    document.getElementById('createApp').addEventListener('click', () => this.createApp());
+    document.getElementById('runLocal').addEventListener('click', () => this.runLocal());
+    document.getElementById('runRemote').addEventListener('click', () => this.runRemote());
+  }
+
 }
 
 const Village = new _Village();
 
-document.getElementById("chatBoxMessage").addEventListener("keyup", function(event) {
-  if (event.keyCode === 13) {
-    event.preventDefault();
-    Village.sendMessage();
-  }
-});
+
+export default Village;

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/bulma-prefers-dark" />
     <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/main.js" type="module" async></script>
 
 </head>
 
@@ -30,7 +31,7 @@
             <section class="container">
                 <p class="block is-size-3"> Ready to join peer-to-peer?</p>
 
-                <button class="button is-primary is-large" onclick="Village.start()">Bring me in!</button>
+                <button id="btn_start" class="button is-primary is-large" >Bring me in!</button>
             </section>
         </div>
     </section>
@@ -78,8 +79,7 @@
             </p>
             <section class="section">
                 <div class="container">
-                    <div class="" id="offer"
-                         onmousedown="offerClicked()">
+                    <div class="" id="offer">
                         Generating link ...
                     </div>
                 </div>
@@ -95,14 +95,14 @@
                     Next, paste the peer's response key below:
                 </p>
 
-                <textarea class="textarea" id="peerKey" onpaste="Village.peerKeyEntered()">
+                <textarea class="textarea" id="peerKey" >
 
                 </textarea>
             </div>
         </div>
         <footer class="card-footer">
             <p class="card-footer-item">
-                <button class="button is-primary" id="submitKey" disabled onclick="Village.setRemote()">Submit Key</button>
+                <button class="button is-primary" id="submitKey" disabled>Submit Key</button>
             </p>
         </footer>
     </div>
@@ -118,8 +118,7 @@
             </p>
             <section class="section">
                 <div class="container">
-                    <div class="is-clipped" id="answer"
-                         onmousedown="answerClicked()">
+                    <div class="is-clipped" id="answer">
                         Generating a response ...
                     </div>
                 </div>
@@ -188,8 +187,9 @@
 
                         <textarea id="editor" rows="20" cols="30"> </textarea>
                         <div class="is-flex is-flex-direction-row">
-                        <button onclick="Village.runLocal()">Local</button>
-                        <button onclick="Village.runRemote()">Remote</button>
+                            <button id="runLocal">Local</button>
+                            <button id="runRemote">Remote</button>
+                            <button id="createApp">Create App</button>
                         </div>
                     </div>
                 </article>
@@ -198,6 +198,5 @@
     </div>
 
 </div>
-<script src="js/main.js" async></script>
 </body>
 </html>
