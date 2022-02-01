@@ -99,9 +99,7 @@ class _Village {
     this.dataChannel.addEventListener("open", (event) => {
       logMessage('Data chennel open');
 
-      show('connectedView');
-      hide('offerCard');
-      hide('answerCard');
+      this.onConnection();
     });
 
     this.pc.createOffer().then( (desc) => {
@@ -144,12 +142,11 @@ class _Village {
 
     this.pc.ondatachannel = (e) => {
       logMessage("Got a data channel");
-      show('connectedView');
-      hide('offerCard');
-      hide('answerCard');
 
       this.dataChannel = e.channel;
       this.dataChannel.onmessage = (e) => this.onMessage(e);
+
+      this.onConnection();
     };
 
     this.pc.setRemoteDescription(connectionObj);
@@ -157,6 +154,75 @@ class _Village {
       this.pc.setLocalDescription(answerDesc);
       logMessage(`Local Description: \n${JSON.stringify(answerDesc)}`);
     })
+  }
+
+  onConnection() {
+    show('connectedView');
+    hide('offerCard');
+    hide('answerCard');
+
+    this.updateAppList();
+  }
+
+  updateAppList() {
+    const installedApps = AppStore.getInstalledApps();
+
+    const applListDiv = document.getElementById("installedApps");
+
+    if(!installedApps.length) {
+      applListDiv.innerText = "No apps installed.";
+    } else {
+      // remove all children and listeners
+      while (applListDiv.firstChild) {
+        applListDiv.removeChild(applListDiv.firstChild);
+      }
+    }
+
+    installedApps.map((app) => {
+      applListDiv.appendChild(this.createAppDiv(app));
+    })
+
+    console.log(installedApps);
+  }
+
+  createAppDiv(app){
+    const appDiv = document.createElement('div');
+    appDiv.className = "installedApp";
+
+    const appNameDiv = document.createElement('div');
+    appNameDiv.className = "appName";
+    appNameDiv.innerText = app.name;
+
+    const appRunBtn = document.createElement('button');
+    appRunBtn.className = "appRunButton";
+    appRunBtn.innerText = "Run";
+    appRunBtn.onclick = () => { AppStore.runApp(app)};
+
+    const appEditBtn = document.createElement('button');
+    appEditBtn.className = "appEditButton";
+    appEditBtn.innerText = "Edit";
+    appEditBtn.onclick = () => {
+      const editor = document.getElementById('editor');
+      const appName = document.getElementById('appName');
+
+      editor.value = app.code;
+      appName.value = app.name;
+    };
+
+    const appRemoveBtn = document.createElement('button');
+    appRemoveBtn.className = "appRemoveButton";
+    appRemoveBtn.innerText = "Remove";
+    appRemoveBtn.onclick = () => {
+      AppStore.removeApp(app.name)
+      this.updateAppList();
+    };
+
+    appDiv.appendChild(appNameDiv);
+    appDiv.appendChild(appRunBtn);
+    appDiv.appendChild(appEditBtn);
+    appDiv.appendChild(appRemoveBtn);
+
+    return appDiv;
   }
 
   peerKeyEntered() {
@@ -189,6 +255,7 @@ class _Village {
       document.getElementById("myBtn").click();
     }
   }
+
   sendMessage() {
     const msg = document.getElementById('chatBoxMessage').value;
     this.dataChannel.send(JSON.stringify({msg}));
@@ -214,11 +281,13 @@ class _Village {
     this.dataChannel.send(JSON.stringify({code}));
   }
 
-  createApp(config) {
+  createApp() {
+    const appName = document.getElementById('appName').value;
     const code = document.getElementById('editor').value;
 
     try {
-      AppStore.createApp({name: 'my first app', code});
+      AppStore.createApp({name: appName, code});
+      this.updateAppList();
     } catch (e) {
       console.log(e);
     }

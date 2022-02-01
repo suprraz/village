@@ -5,3 +5,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.installedApp {
+  display: flex;
+  flex-direction: row;
+}
+
+.installedApp > * {
+  margin-right: 5px;
+}
