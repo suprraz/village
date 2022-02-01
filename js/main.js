@@ -19,6 +19,7 @@ class _Village {
     this.pc = null;
     this.dataChannel = null;
     this.chatLog = [];
+    this.availableApps = [];
     this.updateChat();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -66,8 +67,31 @@ class _Village {
           logMessage(`<i>${data.code}</i>`);
           document.getElementById('editor').value = data.code;
           eval(data.code);
+        } else if (data.apps) {
+          this.onAvailableApps(data.apps);
         }
       } catch (e) {};
+    }
+  }
+
+  onAvailableApps(apps) {
+    const localApps = AppStore.getInstalledApps();
+    let newApps = [];
+    try {
+      newApps = apps.filter((remoteApp) => {
+        const isInstalled = localApps.some(
+          (localApp => localApp.name === remoteApp.name));
+
+         const isAvailable = this.availableApps.some(
+            (availableApp => availableApp.name === remoteApp.name));
+
+         return !isInstalled && !isAvailable;
+        });
+
+      this.availableApps.push(...newApps);
+      this.updateAppList();
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -97,7 +121,7 @@ class _Village {
     }, false);
 
     this.dataChannel.addEventListener("open", (event) => {
-      logMessage('Data chennel open');
+      logMessage('Data channel open');
 
       this.onConnection();
     });
@@ -144,9 +168,14 @@ class _Village {
       logMessage("Got a data channel");
 
       this.dataChannel = e.channel;
-      this.dataChannel.onmessage = (e) => this.onMessage(e);
 
-      this.onConnection();
+      this.dataChannel.addEventListener("open", (event) => {
+        logMessage('Data channel open');
+
+        this.onConnection();
+      });
+
+      this.dataChannel.onmessage = (e) => this.onMessage(e);
     };
 
     this.pc.setRemoteDescription(connectionObj);
@@ -161,31 +190,49 @@ class _Village {
     hide('offerCard');
     hide('answerCard');
 
+    logMessage("Updating apps");
     this.updateAppList();
+    this.sendApps();
   }
 
   updateAppList() {
     const installedApps = AppStore.getInstalledApps();
 
-    const applListDiv = document.getElementById("installedApps");
+    const installedAppsDiv = document.getElementById("installedApps");
 
     if(!installedApps.length) {
-      applListDiv.innerText = "No apps installed.";
+      installedAppsDiv.innerText = "No apps installed.";
     } else {
       // remove all children and listeners
-      while (applListDiv.firstChild) {
-        applListDiv.removeChild(applListDiv.firstChild);
+      while (installedAppsDiv.firstChild) {
+        installedAppsDiv.removeChild(installedAppsDiv.firstChild);
       }
     }
 
     installedApps.map((app) => {
-      applListDiv.appendChild(this.createAppDiv(app));
+      installedAppsDiv.appendChild(this.createInstalledAppDiv(app));
     })
 
-    console.log(installedApps);
+
+    const availableAppsDiv = document.getElementById("availableApps");
+
+    if(!this.availableApps.length) {
+      availableAppsDiv.innerText = "No apps available.";
+    } else {
+      // remove all children and listeners
+      while (availableAppsDiv.firstChild) {
+        availableAppsDiv.removeChild(availableAppsDiv.firstChild);
+      }
+    }
+
+    this.availableApps.map((app) => {
+      availableAppsDiv.appendChild(this.createAvailableAppDiv(app));
+    })
+
+
   }
 
-  createAppDiv(app){
+  createInstalledAppDiv(app){
     const appDiv = document.createElement('div');
     appDiv.className = "installedApp";
 
@@ -214,6 +261,7 @@ class _Village {
     appRemoveBtn.innerText = "Remove";
     appRemoveBtn.onclick = () => {
       AppStore.removeApp(app.name)
+      this.availableApps.push(app);
       this.updateAppList();
     };
 
@@ -221,6 +269,48 @@ class _Village {
     appDiv.appendChild(appRunBtn);
     appDiv.appendChild(appEditBtn);
     appDiv.appendChild(appRemoveBtn);
+
+    return appDiv;
+  }
+
+  createAvailableAppDiv(app){
+    const appDiv = document.createElement('div');
+    appDiv.className = "availableApp";
+
+    const appNameDiv = document.createElement('div');
+    appNameDiv.className = "appName";
+    appNameDiv.innerText = app.name;
+
+    const appRunBtn = document.createElement('button');
+    appRunBtn.className = "appRunButton";
+    appRunBtn.innerText = "Run";
+    appRunBtn.onclick = () => { AppStore.runApp(app)};
+
+    const appInstallBtn = document.createElement('button');
+    appInstallBtn.className = "appInstallButton";
+    appInstallBtn.innerText = "Install";
+    appInstallBtn.onclick = () => {
+      AppStore.installApp(app)
+      this.availableApps = this.availableApps.filter((availableApp) => !availableApp.name === app.name);
+      this.updateAppList()
+      this.sendApps();
+    };
+
+    const appEditBtn = document.createElement('button');
+    appEditBtn.className = "appEditButton";
+    appEditBtn.innerText = "Edit";
+    appEditBtn.onclick = () => {
+      const editor = document.getElementById('editor');
+      const appName = document.getElementById('appName');
+
+      editor.value = app.code;
+      appName.value = app.name;
+    };
+
+    appDiv.appendChild(appNameDiv);
+    appDiv.appendChild(appRunBtn);
+    appDiv.appendChild(appInstallBtn);
+    appDiv.appendChild(appEditBtn);
 
     return appDiv;
   }
@@ -256,6 +346,12 @@ class _Village {
     }
   }
 
+  sendApps() {
+    const apps = AppStore.getInstalledApps();
+
+    this.dataChannel.send(JSON.stringify({apps}));
+  }
+
   sendMessage() {
     const msg = document.getElementById('chatBoxMessage').value;
     this.dataChannel.send(JSON.stringify({msg}));
@@ -288,6 +384,7 @@ class _Village {
     try {
       AppStore.createApp({name: appName, code});
       this.updateAppList();
+      this.sendApps();
     } catch (e) {
       console.log(e);
     }
