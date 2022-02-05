@@ -59,12 +59,8 @@ class _AppStore {
       const code = app.code;
 
       try {
-        //
-        // const iframe = document.getElementById("appIframe");
-        // iframe.contentWindow.postMessage({run: code},'*');
-
-        const fn = Function.apply(null, [code]);
-        fn.apply({});
+        const iframe = document.getElementById("appIframe");
+        iframe.contentWindow.postMessage({run: code},'*');
       } catch (e) {
         console.error(e);
       }
