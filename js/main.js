@@ -103,7 +103,7 @@ class _Village {
       if (e.candidate == null) {
         logMessage("Connection string: <br />" + JSON.stringify(this.pc.localDescription));
 
-        var offerUrl = new URL(window.location.href);
+        const offerUrl = new URL(window.location.href);
         offerUrl.searchParams.set('offerKey', btoa(JSON.stringify(this.pc.localDescription)));
 
         document.getElementById('offer').innerText = offerUrl;
@@ -290,10 +290,14 @@ class _Village {
     appInstallBtn.className = "appInstallButton";
     appInstallBtn.innerText = "Install";
     appInstallBtn.onclick = () => {
-      AppStore.installApp(app)
-      this.availableApps = this.availableApps.filter((availableApp) => !availableApp.name === app.name);
-      this.updateAppList()
-      this.sendApps();
+      try {
+        AppStore.installApp(app)
+        this.availableApps = this.availableApps.filter((availableApp) => !availableApp.name === app.name);
+        this.updateAppList()
+        this.sendApps();
+      } catch (e) {
+        console.error(e);
+      }
     };
 
     const appEditBtn = document.createElement('button');
@@ -382,7 +386,7 @@ class _Village {
     const code = document.getElementById('editor').value;
 
     try {
-      AppStore.createApp({name: appName, code});
+      AppStore.installApp({name: appName, code});
       this.updateAppList();
       this.sendApps();
     } catch (e) {

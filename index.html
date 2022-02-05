@@ -203,6 +203,29 @@
         </div>
     </div>
 
+    <div style="margin: auto; width: 80%;">
+        <iframe sandbox="allow-popups allow-scripts allow-popups-to-escape-sandbox allow-modals"
+                height="100" width="100%" src="about:blank" name="appIframe"
+                id="appIframe" srcdoc="<!DOCTYPE html>
+            <html>
+            <head>
+                <script>
+                    window.addEventListener('message', (event) => {
+                      const data = event.data;
+                      if(data) {
+                        if(data.run) {
+                            eval(data.run);
+                        }
+                      }
+                    }, false);
+                </script>
+            </head>
+            </html>">
+
+        </iframe>
+        <br />
+    </div>
+
 </div>
 </body>
 </html>

@@ -1,28 +1,39 @@
 
 class _AppStore {
-  findApp() {
-    //finds an app in the network
+
+  validateCode(code) {
+    const unsupportedStrings = [
+      // /document/,
+      // /window/,
+      // /localStorage/,
+      // /indexedDB/,
+      // /eval/,
+      // /globalThis/,
+    ];
+
+    return !unsupportedStrings.some((us) => us.test(code));
   }
 
-  downloadApp() {
-    //finds app and downloads it with retry fallback
+  verifyApp(app) {
+    return this.validateCode(app.code);
   }
 
-  verifyApp() {
-    //authenticate and verify app authenticity and security
-  }
-
-  installApp(appConfig) {
+  installApp(app) {
     //install and register app
-    //TODO: use UUID for app registration
+    if(this.verifyApp(app)) {
+      const apps = this.getInstalledApps();
 
-    const apps = this.getInstalledApps();
+      app.installDate = new Date();
 
-    appConfig.installDate = new Date();
+      apps.push(app);
 
-    apps.push(appConfig);
+      localStorage.setItem('installedApps', JSON.stringify(apps));
+    } else {
+      alert('Error: Invalid app');
 
-    localStorage.setItem('installedApps', JSON.stringify(apps));
+      throw new Error('Invalid app');
+    }
+
   }
 
   getInstalledApps() {
@@ -43,19 +54,23 @@ class _AppStore {
     localStorage.setItem('installedApps', JSON.stringify(prunedApps));
   }
 
-  runApp(appConfig) {
-    eval(appConfig.code);
-  }
+  runApp(app) {
+    if(this.verifyApp(app)) {
+      const code = app.code;
 
-  createApp(appConfig) {
-    //TODO validation
-    try {
-      this.verifyApp(appConfig)
-    } catch (e) {
-      throw e;
+      try {
+        //
+        // const iframe = document.getElementById("appIframe");
+        // iframe.contentWindow.postMessage({run: code},'*');
+
+        const fn = Function.apply(null, [code]);
+        fn.apply({});
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      alert('Error: Invalid app')
     }
-
-    this.installApp(appConfig);
   }
 }
 
