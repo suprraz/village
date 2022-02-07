@@ -1,10 +1,7 @@
 import AppStore from './appStore.js';
-
-const configRPC = {'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]};
-
-function logMessage(msg) {
-  console.log(msg);
-}
+import NodeStore from "./nodeStore.js";
+import { logMessage, logError } from './logger.js';
+import _Node from "./node.js";
 
 function hide(elementId) {
   document.getElementById(elementId).classList.add('is-hidden');
@@ -15,17 +12,16 @@ function show(elementId) {
 
 class _Village {
   constructor() {
-    this.nodeCount = 0;
-    this.pc = null;
-    this.dataChannel = null;
     this.chatLog = [];
     this.availableApps = [];
     this.updateChat();
 
+    this.connectingNode = null;
+
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('offerKey')) {
       const offerKey = urlParams.get('offerKey');
-      this.acceptOffer(offerKey);
+      this.offerRoute(offerKey);
     }
 
     this.registerListeners();
@@ -46,12 +42,46 @@ class _Village {
     }
      */
 
-    if(this.nodeCount > 0) {
+    if(NodeStore.getNodeCount() > 0) {
 
     } else {
-      this.createOffer();
-    }
 
+      const node = new _Node({
+        onConnection: () => this.onConnection(),
+        onMessage: (e) => this.onMessage(e),
+        onOfferUrl: (url) => this.onOfferUrl(url),
+      });
+      try {
+        node.createOffer();
+        NodeStore.addNode(node);
+        this.connectingNode = node;
+      } catch (e) {
+        logMessage(e);
+      }
+
+    }
+  }
+
+  offerRoute(offerKey) {
+    this.startOS();
+    hide('offerCard');
+    show('answerCard');
+
+    const node = new _Node({
+      onConnection: () => this.onConnection(),
+      onMessage: (e) => this.onMessage(e),
+      onOfferUrl: () => (url) => this.onOfferUrl(url),
+    });
+    try {
+      node.acceptOffer(offerKey);
+      NodeStore.addNode(node);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  onOfferUrl(offerUrl) {
+    document.getElementById('offer').innerText = offerUrl;
   }
 
   onMessage (e) {
@@ -95,95 +125,7 @@ class _Village {
     }
   }
 
-  createOffer() {
-    const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
-    this.pc = new RTCPeerConnection(configRPC);
 
-    this.pc.onicecandidate = e => {
-      if (e.candidate == null) {
-        logMessage("Connection string: <br />" + JSON.stringify(this.pc.localDescription));
-
-        const offerUrl = new URL(window.location.href);
-        offerUrl.searchParams.set('offerKey', btoa(JSON.stringify(this.pc.localDescription)));
-
-        document.getElementById('offer').innerText = offerUrl;
-      }
-    };
-
-    this.dataChannel = this.pc.createDataChannel('offerChannel');
-    this.dataChannel.onmessage = (e) => this.onMessage(e);
-
-
-    this.pc.addEventListener("iceconnectionstatechange", ev => {
-      let stateElem = document.getElementById("connstate");
-      stateElem.innerText = this.pc.iceConnectionState;
-      logMessage(`Connection state: ${this.pc.iceConnectionState}`);
-    }, false);
-
-    this.dataChannel.addEventListener("open", (event) => {
-      logMessage('Data channel open');
-
-      this.onConnection();
-    });
-
-    this.pc.createOffer().then( (desc) => {
-        this.pc.setLocalDescription(desc);
-        logMessage(`Local Description: \n${JSON.stringify(desc)}`);
-      },
-    );
-  }
-
-  acceptOffer(offerKey) {
-    this.startOS();
-    hide('offerCard');
-    show('answerCard');
-
-    logMessage("<b>Accepting Offer</b>");
-    const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
-    this.pc = new RTCPeerConnection(configRPC);
-
-    this.pc.onicecandidate = e => {
-      if (e.candidate == null) {
-        logMessage("Connection string: <br />" + JSON.stringify(this.pc.localDescription));
-        document.getElementById('answer').innerText = btoa(JSON.stringify(this.pc.localDescription));
-      }
-    };
-
-    let connectionObj = {};
-
-    try{
-      connectionObj = JSON.parse(atob(offerKey));
-    } catch (e) {
-      logMessage("<span class=\"error\"> Bad connection string </span> ");
-      return;
-    }
-
-    this.pc.addEventListener("iceconnectionstatechange", ev => {
-      let stateElem = document.getElementById("connstate");
-      stateElem.innerText = this.pc.iceConnectionState;
-      logMessage(`Connection state: ${this.pc.iceConnectionState}`);
-    }, false);
-
-    this.pc.ondatachannel = (e) => {
-      logMessage("Got a data channel");
-
-      this.dataChannel = e.channel;
-
-      this.dataChannel.addEventListener("open", (event) => {
-        logMessage('Data channel open');
-
-        this.onConnection();
-      });
-
-      this.dataChannel.onmessage = (e) => this.onMessage(e);
-    };
-
-    this.pc.setRemoteDescription(connectionObj);
-    this.pc.createAnswer().then((answerDesc) => {
-      this.pc.setLocalDescription(answerDesc);
-      logMessage(`Local Description: \n${JSON.stringify(answerDesc)}`);
-    })
-  }
 
   onConnection() {
     show('connectedView');
@@ -338,7 +280,7 @@ class _Village {
       return;
     }
 
-    this.pc.setRemoteDescription(connectionObj);
+    this.connectingNode.setRemoteDescription(connectionObj);
   }
 
   chatKeyUp(event) {
@@ -353,16 +295,18 @@ class _Village {
   sendApps() {
     const apps = AppStore.getInstalledApps();
 
-    this.dataChannel.send(JSON.stringify({apps}));
+    NodeStore.broadcast(JSON.stringify({apps}));
   }
 
   sendMessage() {
     const msg = document.getElementById('chatBoxMessage').value;
-    this.dataChannel.send(JSON.stringify({msg}));
+    NodeStore.broadcast(JSON.stringify({msg}));
+
     this.chatLog.push('Me: ' + msg);
     this.updateChat();
     document.getElementById('chatBoxMessage').value = '';
   }
+
   updateChat() {
     document.getElementById('chatLog').innerText = this.chatLog.join('\n');
   }
@@ -378,7 +322,8 @@ class _Village {
     document.getElementById('editorlog').innerText = 'Running remote... ' + (new Date());
 
     const code = document.getElementById('editor').value;
-    this.dataChannel.send(JSON.stringify({code}));
+
+    NodeStore.broadcast(JSON.stringify({code}));
   }
 
   createApp() {
