@@ -32,6 +32,10 @@ class _AddPeer {
     }
   }
 
+  morePeers() {
+    alert('more peers!');
+  }
+
   preparePeer() {
     const node = new _Node({
       onConnection: () => this.onConnection(),
@@ -68,8 +72,6 @@ class _AddPeer {
   onOfferUrl(offerUrl) {
     document.getElementById('offer').innerText = offerUrl;
     document.getElementById('peerKey').innerText = '';
-
-    document.getElementById('inviteLink').innerText = offerUrl;
   }
 
   peerKeyEntered() {

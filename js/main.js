@@ -86,6 +86,7 @@ class _Village {
 
   registerListeners() {
     document.getElementById('btn_start').addEventListener('click', () => this.start());
+    document.getElementById('peerAppBtn').addEventListener('click', () => this.coreApps.AddPeer.morePeers());
   }
 
 }

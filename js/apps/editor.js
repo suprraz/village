@@ -59,14 +59,16 @@ const editorHtml = `
     <p class="title">Console</p>
     <div class="editorlog" id="editorlog"></div>
 
-    <textarea id="editor" rows="20" cols="30"> </textarea>
-
-    <input type="text" name="appName" id="appName" />
-
-    <div class="is-flex is-flex-direction-row">
-        <button id="runLocal">Local</button>
-        <button id="runRemote">Remote</button>
-        <button id="createApp">Create App</button>
+  <div>
+      <textarea id="editor" class="textarea my-2" rows="20" cols="30"> </textarea>
+  
+      <input type="text" class="input" name="appName" id="appName" className="my-1" placeholder="New app name"/>
+  
+      <div class="is-flex is-flex-direction-row buttons my-2">
+          <button class="button" id="createApp">Create App</button>
+          <button class="button" id="runLocal">Local</button>
+          <button class="button" id="runRemote">Remote</button>
+      </div>
     </div>
 </div>
 `

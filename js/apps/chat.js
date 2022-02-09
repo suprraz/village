@@ -45,11 +45,9 @@ class _Chat {
 const chatHtml = `
 <div id="chatApp">
     <p class="title">Chat</p>
-    <div class="content" id="chatLog">
-    </div>
+    <div class="content" id="chatLog"></div>
 
-
-    <input type="text" id="chatBoxMessage">
+    <input class="input my-2" type="text" id="chatBoxMessage">
     <figure class="image is-4by3">
         <img src="https://bulma.io/images/placeholders/640x480.png">
     </figure>

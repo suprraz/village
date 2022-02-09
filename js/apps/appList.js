@@ -73,19 +73,22 @@ class _AppList {
 
   createInstalledAppDiv(app){
     const appDiv = document.createElement('div');
-    appDiv.className = "installedApp";
+    appDiv.className = "installedApp card my-1";
 
     const appNameDiv = document.createElement('div');
-    appNameDiv.className = "appName";
+    appNameDiv.className = "card-header-title title appName";
     appNameDiv.innerText = app.name;
 
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.className = "buttons card-content";
+
     const appRunBtn = document.createElement('button');
-    appRunBtn.className = "appRunButton";
+    appRunBtn.className = "button is-primary appRunButton";
     appRunBtn.innerText = "Run";
     appRunBtn.onclick = () => { AppStore.runApp(app)};
 
     const appEditBtn = document.createElement('button');
-    appEditBtn.className = "appEditButton";
+    appEditBtn.className = "button appEditButton";
     appEditBtn.innerText = "Edit";
     appEditBtn.onclick = () => {
       const editor = document.getElementById('editor');
@@ -96,7 +99,7 @@ class _AppList {
     };
 
     const appRemoveBtn = document.createElement('button');
-    appRemoveBtn.className = "appRemoveButton";
+    appRemoveBtn.className = "button appRemoveButton";
     appRemoveBtn.innerText = "Remove";
     appRemoveBtn.onclick = () => {
       AppStore.removeApp(app.name)
@@ -104,29 +107,33 @@ class _AppList {
       this.updateAppList();
     };
 
+    buttonsDiv.appendChild(appRunBtn);
+    buttonsDiv.appendChild(appEditBtn);
+    buttonsDiv.appendChild(appRemoveBtn);
     appDiv.appendChild(appNameDiv);
-    appDiv.appendChild(appRunBtn);
-    appDiv.appendChild(appEditBtn);
-    appDiv.appendChild(appRemoveBtn);
+    appDiv.appendChild(buttonsDiv);
 
     return appDiv;
   }
 
   createAvailableAppDiv(app){
     const appDiv = document.createElement('div');
-    appDiv.className = "availableApp";
+    appDiv.className = "availableApp card my-1";
 
     const appNameDiv = document.createElement('div');
-    appNameDiv.className = "appName";
+    appNameDiv.className = "card-header-title title appName";
     appNameDiv.innerText = app.name;
 
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.className = "buttons card-content";
+
     const appRunBtn = document.createElement('button');
-    appRunBtn.className = "appRunButton";
+    appRunBtn.className = "button is-primary appRunButton";
     appRunBtn.innerText = "Run";
     appRunBtn.onclick = () => { AppStore.runApp(app)};
 
     const appInstallBtn = document.createElement('button');
-    appInstallBtn.className = "appInstallButton";
+    appInstallBtn.className = "button appInstallButton";
     appInstallBtn.innerText = "Install";
     appInstallBtn.onclick = () => {
       try {
@@ -140,7 +147,7 @@ class _AppList {
     };
 
     const appEditBtn = document.createElement('button');
-    appEditBtn.className = "appEditButton";
+    appEditBtn.className = "button appEditButton";
     appEditBtn.innerText = "Edit";
     appEditBtn.onclick = () => {
       const editor = document.getElementById('editor');
@@ -150,10 +157,12 @@ class _AppList {
       appName.value = app.name;
     };
 
+    buttonsDiv.appendChild(appRunBtn);
+    buttonsDiv.appendChild(appInstallBtn);
+    buttonsDiv.appendChild(appEditBtn);
+
     appDiv.appendChild(appNameDiv);
-    appDiv.appendChild(appRunBtn);
-    appDiv.appendChild(appInstallBtn);
-    appDiv.appendChild(appEditBtn);
+    appDiv.appendChild(buttonsDiv);
 
     return appDiv;
   }
