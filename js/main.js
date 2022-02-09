@@ -1,14 +1,8 @@
 import AppStore from './appStore.js';
 import NodeStore from "./nodeStore.js";
 import { logMessage, logError } from './logger.js';
-import _Node from "./node.js";
-
-function hide(elementId) {
-  document.getElementById(elementId).classList.add('is-hidden');
-}
-function show(elementId) {
-  document.getElementById(elementId).classList.remove('is-hidden');
-}
+import _AddPeer from "./apps/addPeer.js";
+import {show, hide} from "./domUtils.js";
 
 class _Village {
   constructor() {
@@ -16,13 +10,18 @@ class _Village {
     this.availableApps = [];
     this.updateChat();
 
-    this.connectingNode = null;
+    this.apps = {
+      AddPeer: new _AddPeer(
+        () => this.onConnection(),
+        (e) => this.onMessage(e))
+    };
 
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('offerKey')) {
-      const offerKey = urlParams.get('offerKey');
-      this.offerRoute(offerKey);
+      this.startOS();
     }
+
+    this.apps.AddPeer.run();
 
     this.registerListeners();
   }
@@ -45,44 +44,10 @@ class _Village {
     if(NodeStore.getNodeCount() > 0) {
 
     } else {
-
-      const node = new _Node({
-        onConnection: () => this.onConnection(),
-        onMessage: (e) => this.onMessage(e),
-        onOfferUrl: (url) => this.onOfferUrl(url),
-      });
-      try {
-        node.createOffer();
-        NodeStore.addNode(node);
-        this.connectingNode = node;
-      } catch (e) {
-        logMessage(e);
-      }
-
+      this.apps.AddPeer.preparePeer();
     }
   }
 
-  offerRoute(offerKey) {
-    this.startOS();
-    hide('offerCard');
-    show('answerCard');
-
-    const node = new _Node({
-      onConnection: () => this.onConnection(),
-      onMessage: (e) => this.onMessage(e),
-      onOfferUrl: () => (url) => this.onOfferUrl(url),
-    });
-    try {
-      node.acceptOffer(offerKey);
-      NodeStore.addNode(node);
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  onOfferUrl(offerUrl) {
-    document.getElementById('offer').innerText = offerUrl;
-  }
 
   onMessage (e) {
     if(e.data) {
@@ -261,37 +226,6 @@ class _Village {
     return appDiv;
   }
 
-  peerKeyEntered() {
-    console.log('enabling');
-    document.getElementById('submitKey').disabled=false;
-  }
-
-  setRemote() {
-    logMessage("<b>Setting remote</b>");
-
-    let connectionString = document.getElementById('peerKey').value;
-
-    let connectionObj = {};
-
-    try{
-      connectionObj = JSON.parse(atob(connectionString));
-    } catch (e) {
-      logMessage("<span class=\"error\"> Bad connection string </span> ");
-      return;
-    }
-
-    this.connectingNode.setRemoteDescription(connectionObj);
-  }
-
-  chatKeyUp(event) {
-    if (event.keyCode === 13) {
-      // Cancel the default action, if needed
-      event.preventDefault();
-      // Trigger the button element with a click
-      document.getElementById("myBtn").click();
-    }
-  }
-
   sendApps() {
     const apps = AppStore.getInstalledApps();
 
@@ -339,24 +273,6 @@ class _Village {
     }
   }
 
-  offerClicked() {
-    if(navigator.clipboard) {
-      navigator.clipboard.writeText(document.getElementById('offer').innerText);
-      show('copiedOfferNotification');
-    }
-
-    show('peerKeyPrompt');
-  }
-
-  answerClicked() {
-    if(navigator.clipboard) {
-      navigator.clipboard.writeText(document.getElementById('answer').innerText);
-      show('copiedAnswerNotification');
-    }
-    show('waitToConnect');
-  }
-
-
   registerListeners() {
     document.getElementById("chatBoxMessage").addEventListener("keyup", (event) => {
       if (event.keyCode === 13) {
@@ -366,12 +282,6 @@ class _Village {
     });
 
     document.getElementById('btn_start').addEventListener('click', () => this.start());
-    document.getElementById('submitKey').addEventListener('click', () => this.setRemote());
-    document.getElementById('offer').addEventListener('mousedown', () => this.offerClicked());
-    document.getElementById('answer').addEventListener('mousedown', () => this.answerClicked());
-    document.getElementById('peerKey').addEventListener('paste', () => this.peerKeyEntered());
-
-
     document.getElementById('createApp').addEventListener('click', () => this.createApp());
     document.getElementById('runLocal').addEventListener('click', () => this.runLocal());
     document.getElementById('runRemote').addEventListener('click', () => this.runRemote());

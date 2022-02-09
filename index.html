@@ -67,76 +67,7 @@
     </section>
 </div>
 <div id="osView" class="is-hidden">
-
-    <div class="card" id="offerCard">
-        <div class="card-content">
-            <p class="title">
-                No Peers!
-            </p>
-
-            <p class="subtitle is-size-4">
-                Share this link to invite a peer:
-            </p>
-            <section class="section">
-                <div class="container">
-                    <div class="" id="offer">
-                        Generating link ...
-                    </div>
-                </div>
-
-                <br />
-                <div id="copiedOfferNotification" class="notification is-primary is-hidden">
-                    Copied to clipboard!
-                </div>
-            </section>
-
-            <div class="container is-hidden" id="peerKeyPrompt">
-                <p class="title is-size-4">
-                    Next, paste the peer's response key below:
-                </p>
-
-                <textarea class="textarea" id="peerKey" >
-
-                </textarea>
-            </div>
-        </div>
-        <footer class="card-footer">
-            <p class="card-footer-item">
-                <button class="button is-primary" id="submitKey" disabled>Submit Key</button>
-            </p>
-        </footer>
-    </div>
-
-    <div class="card is-hidden" id="answerCard">
-        <div class="card-content">
-            <p class="title">
-                Almost there!
-            </p>
-
-            <p class="subtitle is-size-4">
-                To accept, send this back to the person that invited you:
-            </p>
-            <section class="section">
-                <div class="container">
-                    <div class="is-clipped" id="answer">
-                        Generating a response ...
-                    </div>
-                </div>
-
-                <br />
-                <div id="copiedAnswerNotification" class="notification is-primary is-hidden">
-                    Copied to clipboard!
-                </div>
-
-                <div class="container is-hidden" id="waitToConnect">
-                    <p class="title is-size-4">
-                        Once the host accepts you will be connected.
-                    </p>
-                </div>
-            </section>
-
-        </div>
-    </div>
+    <div id="appContainer"></div>
 
     <div id="connectedView" class="is-hidden">
         <div class="tile is-ancestor">
@@ -174,10 +105,18 @@
                 </div>
                 <div class="tile is-parent">
                     <article class="tile is-child notification is-danger">
-                        <p class="title">Wide tile</p>
-                        <p class="subtitle">Aligned with the right tile</p>
-                        <div class="content">
-                            <!-- Content -->
+                        <p class="title">Invite peer</p>
+                        <div class="is-flex is-flex-direction-row">
+                            <section class="section is-medium">
+                                <p class="subtitle">Invite Peer</p>
+                                <div class="is-size-6" id="inviteLink"></div>
+                                <input type="text" id="acceptOfferInput" placeholder="offer">
+                            </section>
+                            <section class="section is-medium">
+                                <p class="subtitle">Accept Peer</p>
+                                <input type="text" id="acceptLinkInput">
+                                <div id="acceptOffer"></div>
+                            </section>
                         </div>
                     </article>
                 </div>
