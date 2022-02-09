@@ -15,7 +15,7 @@ class _AddPeer {
     const appContainer = document.getElementById('appContainer');
     appContainer.innerHTML = addPeerHtml;
 
-    this.addPeerEl = document.getElementById('addPeerEl');
+    this.addPeerEl = document.getElementById('addPeer');
 
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('offerKey')) {

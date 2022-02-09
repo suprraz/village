@@ -75,13 +75,7 @@
                 <div class="tile">
                     <div class="tile is-parent is-vertical">
                         <article class="tile is-child notification is-primary">
-                            <p class="title">Home</p>
-                            <p class="subtitle">Installed Apps</p>
-                            <div id="installedApps" class="is-flex is-flex-direction-column"></div>
-                            <br />
-                            <p class="subtitle">Available Apps</p>
-                            <div id="availableApps" class="is-flex is-flex-direction-column"></div>
-
+                            <div id="appListContainer"></div>
                         </article>
                         <article class="tile is-child notification is-warning">
                             <p class="title">Status</p>
@@ -91,15 +85,7 @@
                     </div>
                     <div class="tile is-parent">
                         <article class="tile is-child notification is-info">
-                            <p class="title">Chat</p>
-                            <div class="content" id="chatLog">
-                            </div>
-
-
-                            <input type="text" id="chatBoxMessage">
-                            <figure class="image is-4by3">
-                                <img src="https://bulma.io/images/placeholders/640x480.png">
-                            </figure>
+                            <div id="chatContainer"></div>
                         </article>
                     </div>
                 </div>
@@ -123,20 +109,7 @@
             </div>
             <div class="tile is-parent">
                 <article class="tile is-child notification is-success">
-                    <div class="content">
-                        <p class="title">Console</p>
-                        <div class="editorlog" id="editorlog"></div>
-
-                        <textarea id="editor" rows="20" cols="30"> </textarea>
-
-                        <input type="text" name="appName" id="appName" />
-
-                        <div class="is-flex is-flex-direction-row">
-                            <button id="runLocal">Local</button>
-                            <button id="runRemote">Remote</button>
-                            <button id="createApp">Create App</button>
-                        </div>
-                    </div>
+                    <div id="editorContainer"></div>
                 </article>
             </div>
         </div>
