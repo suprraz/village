@@ -1,7 +1,7 @@
 import _Node from "../node.js";
-import NodeStore from "../nodeStore.js";
-import {logMessage} from "../logger.js";
-import {show, hide} from "../domUtils.js";
+import NodeStore from "../store/nodeStore.js";
+import {logMessage} from "../utils/logger.js";
+import {show, hide} from "../utils/dom.js";
 
 
 class _AddPeer {
@@ -33,9 +33,14 @@ class _AddPeer {
     }
   }
 
+  onPeerEstablished() {
+    hide('offerCard');
+    hide('answerCard');
+    this.onConnection();
+  }
   preparePeer() {
     const node = new _Node({
-      onConnection: () => this.onConnection(),
+      onConnection: () => this.onPeerEstablished(),
       onMessage: (e) => this.onMessage(e),
       onOfferUrl: (url) => this.onOfferUrl(url),
     });
@@ -54,7 +59,7 @@ class _AddPeer {
     show('answerCard');
 
     const node = new _Node({
-      onConnection: () => this.onConnection(),
+      onConnection: () => this.onPeerEstablished(),
       onMessage: (e) => this.onMessage(e),
       onOfferUrl: () => (url) => this.onOfferUrl(url),
     });
