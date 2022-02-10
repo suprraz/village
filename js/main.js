@@ -1,7 +1,5 @@
-import NodeStore from "./nodeStore.js";
-import { logMessage, logError } from './logger.js';
 import _AddPeer from "./apps/addPeer.js";
-import {show, hide} from "./domUtils.js";
+import {show, hide} from "./utils/dom.js";
 import _AppList from "./apps/appList.js";
 import _Editor from "./apps/editor.js";
 import _Chat from "./apps/chat.js";
@@ -42,19 +40,8 @@ class _Village {
 
   start() {
     this.startOS();
-    /*
-    if( network has > 1 node) {
-      openNodeCreateOffer();
-    } else {
-      createOffer();
-    }
-     */
 
-    if(NodeStore.getNodeCount() > 0) {
-
-    } else {
-      this.coreApps.AddPeer.preparePeer();
-    }
+    this.coreApps.AddPeer.preparePeer();
   }
 
   onMessage (e) {
@@ -74,14 +61,8 @@ class _Village {
     }
   }
 
-
-
   onConnection() {
     show('connectedView');
-    hide('offerCard');
-    hide('answerCard');
-
-    logMessage("Updating apps");
 
     this.coreApps.AddPeer.stop();
     this.coreApps.AppListApp.updateAppList();

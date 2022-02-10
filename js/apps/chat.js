@@ -1,4 +1,4 @@
-import NodeStore from "../nodeStore.js";
+import NodeStore from "../store/nodeStore.js";
 
 
 class _Chat {

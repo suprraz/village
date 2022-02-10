@@ -1,4 +1,4 @@
-import { logMessage, logError } from './logger.js';
+import { logMessage, logError } from './utils/logger.js';
 
 const configRPC = {'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]};
 

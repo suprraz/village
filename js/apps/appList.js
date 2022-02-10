@@ -1,5 +1,5 @@
-import AppStore from "../appStore.js";
-import NodeStore from "../nodeStore.js";
+import AppStore from "../store/appStore.js";
+import NodeStore from "../store/nodeStore.js";
 
 
 class _AppList {

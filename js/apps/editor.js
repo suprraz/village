@@ -1,5 +1,5 @@
-import NodeStore from "../nodeStore.js";
-import AppStore from "../appStore.js";
+import NodeStore from "../store/nodeStore.js";
+import AppStore from "../store/appStore.js";
 
 class _Editor {
   constructor({AppListApp}) {
