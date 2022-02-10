@@ -15,6 +15,10 @@ class _NodeStore {
   addNode(node) {
     this.nodes.push(node);
   }
+
+  getNodes() {
+    return this.nodes;
+  }
 }
 
 const NodeStore = new _NodeStore();

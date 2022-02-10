@@ -11,8 +11,18 @@ class _Node {
 
     this.pc = null;
 
+    this.profile = {
+      nodeId: null,
+      neighborList: []
+    };
+
     const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
     this.pc = new RTCPeerConnection(configRPC);
+  }
+
+  updateProfile(profile) {
+    this.profile.nodeId = profile.nodeId;
+    this.profile.neighborList = profile.neighborList;
   }
 
   createOffer() {
@@ -28,7 +38,7 @@ class _Node {
     };
 
     this.dataChannel = this.pc.createDataChannel('offerChannel');
-    this.dataChannel.onmessage = (e) => this.onMessage(e);
+    this.dataChannel.onmessage = (e) => this.onMessage(e, this);
 
     this.pc.addEventListener("iceconnectionstatechange", ev => {
       let stateElem = document.getElementById("connstate");
@@ -39,7 +49,7 @@ class _Node {
     this.dataChannel.addEventListener("open", (event) => {
       logMessage('Data channel open');
 
-      this.onConnection();
+      this.onConnection(this);
     });
 
     this.pc.createOffer().then( (desc) => {
@@ -82,10 +92,10 @@ class _Node {
       this.dataChannel.addEventListener("open", (event) => {
         logMessage('Data channel open');
 
-        this.onConnection();
+        this.onConnection(this);
       });
 
-      this.dataChannel.onmessage = (e) => this.onMessage(e);
+      this.dataChannel.onmessage = (e) => this.onMessage(e, this);
     };
 
     this.pc.setRemoteDescription(connectionObj);

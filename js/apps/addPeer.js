@@ -2,12 +2,12 @@ import _Node from "../node.js";
 import NodeStore from "../store/nodeStore.js";
 import {logMessage} from "../utils/logger.js";
 import {show, hide} from "../utils/dom.js";
-
+import Profile from "../store/profile.js";
 
 class _AddPeer {
   constructor(onConnection, onMessage) {
-    this.onConnection = onConnection;
-    this.onMessage = onMessage;
+    this.parentOnConnection = onConnection;
+    this.parentOnMessage = onMessage;
     this.connectingNode = null;
   }
 
@@ -33,15 +33,60 @@ class _AddPeer {
     }
   }
 
-  onPeerEstablished() {
+  sendProfile(node) {
+    const shareableProfile = {profile: Profile.getShareable()};
+    node.send(JSON.stringify(shareableProfile));
+  }
+
+  onProfileReceived(profile, node) {
+    node.updateProfile(profile);
+
+    logMessage(node.profile);
+
+    const desiredNeighbors = node.profile.neighborList.filter(
+      (neighbor) => neighbor !== null && neighbor !== Profile.getNodeID()
+    );
+
+    logMessage(desiredNeighbors);
+
+    // for(const neighbor of desiredNeighbors) {
+    //   await requestNeighbor(neighbor);
+    // }
+    desiredNeighbors.map(this.requestMediation)
+
+  }
+
+  async requestMediation(desiredNeighbor) {
+    //this.preparePeer();
+  }
+
+  onMessage(e, node) {
+    if(e.data) {
+      try {
+        const data = JSON.parse(e.data);
+
+        if (data.profile) {
+          this.onProfileReceived(data.profile, node);
+        } else {
+          this.parentOnMessage(data, node);
+        }
+      } catch (e) {}
+    }
+  }
+
+  onConnection(node) {
     hide('offerCard');
     hide('answerCard');
-    this.onConnection();
+
+    this.sendProfile(node);
+
+    this.parentOnConnection(node);
   }
+
   preparePeer() {
     const node = new _Node({
-      onConnection: () => this.onPeerEstablished(),
-      onMessage: (e) => this.onMessage(e),
+      onConnection: (node) => this.onConnection(node),
+      onMessage: (data, node) => this.onMessage(data, node),
       onOfferUrl: (url) => this.onOfferUrl(url),
     });
     try {
@@ -59,8 +104,8 @@ class _AddPeer {
     show('answerCard');
 
     const node = new _Node({
-      onConnection: () => this.onPeerEstablished(),
-      onMessage: (e) => this.onMessage(e),
+      onConnection: (node) => this.onConnection(node),
+      onMessage: (data, node) => this.onMessage(data, node),
       onOfferUrl: () => (url) => this.onOfferUrl(url),
     });
     try {

@@ -6,7 +6,10 @@ import _Chat from "./apps/chat.js";
 
 class _Village {
   constructor() {
-    const AddPeer = new _AddPeer(() => this.onConnection(),(e) => this.onMessage(e));
+    const AddPeer = new _AddPeer(
+      (node) => this.onConnection(node),
+      (data, node) => this.onMessage(data, node)
+    );
     const AppListApp = new _AppList();
     const Editor = new _Editor({AppListApp});
     const Chat = new _Chat();
@@ -44,24 +47,18 @@ class _Village {
     this.coreApps.AddPeer.preparePeer();
   }
 
-  onMessage (e) {
-    if(e.data) {
-      try {
-        const data = JSON.parse(e.data);
-
-        if (data.msg) {
-          this.coreApps.Chat.messageReceived(data.msg);
-        } else if (data.code) {
-          this.coreApps.Editor.updateCode(data.code);
-          eval(data.code);
-        } else if (data.apps) {
-          this.coreApps.AppListApp.onAvailableApps(data.apps);
-        }
-      } catch (e) {}
+  onMessage (data, node) {
+    if (data.msg) {
+      this.coreApps.Chat.messageReceived(data.msg);
+    } else if (data.code) {
+      this.coreApps.Editor.updateCode(data.code);
+      eval(data.code);
+    } else if (data.apps) {
+      this.coreApps.AppListApp.onAvailableApps(data.apps);
     }
   }
 
-  onConnection() {
+  onConnection(node) {
     show('connectedView');
 
     this.coreApps.AddPeer.stop();
