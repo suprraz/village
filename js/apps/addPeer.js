@@ -74,15 +74,20 @@ class _AddPeer {
     document.getElementById('peerKey').innerText = '';
   }
 
-  peerKeyEntered() {
-    console.log('enabling');
+  peerKeyEntered(event) {
+    const pasteContent = (event.clipboardData || window.clipboardData).getData('text');
     document.getElementById('submitKey').disabled=false;
+    this.setRemote(pasteContent);
   }
 
-  setRemote() {
+  setRemote(pasteContent) {
     logMessage("<b>Setting remote</b>");
 
     let connectionString = document.getElementById('peerKey').value;
+
+    if(pasteContent) {
+      connectionString = pasteContent;
+    }
 
     let connectionObj = {};
 
@@ -116,10 +121,10 @@ class _AddPeer {
 
 
   registerListeners() {
-    document.getElementById('submitKey').addEventListener('click', () => this.setRemote());
     document.getElementById('offer').addEventListener('mousedown', () => this.offerClicked());
     document.getElementById('answer').addEventListener('mousedown', () => this.answerClicked());
-    document.getElementById('peerKey').addEventListener('paste', () => this.peerKeyEntered());
+    document.getElementById('peerKey').addEventListener('paste', (e) => this.peerKeyEntered(e));
+    document.getElementById('submitKey').addEventListener('click', () => this.setRemote());
   }
 }
 

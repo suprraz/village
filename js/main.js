@@ -31,6 +31,10 @@ class _Village {
     this.registerListeners();
   }
 
+  fullScreenApp(){
+
+  }
+
   startOS() {
     hide('landing');
     show('osView');
@@ -78,15 +82,21 @@ class _Village {
     hide('answerCard');
 
     logMessage("Updating apps");
+
+    this.coreApps.AddPeer.stop();
     this.coreApps.AppListApp.updateAppList();
     this.coreApps.AppListApp.sendApps();
   }
 
+  addMorePeers(){
+    this.coreApps.AddPeer.run();
+    this.coreApps.AddPeer.morePeers();
+  }
 
 
   registerListeners() {
     document.getElementById('btn_start').addEventListener('click', () => this.start());
-    document.getElementById('peerAppBtn').addEventListener('click', () => this.coreApps.AddPeer.morePeers());
+    document.getElementById('peerAppBtn').addEventListener('click', () => this.addMorePeers());
   }
 
 }
