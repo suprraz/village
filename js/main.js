@@ -1,4 +1,3 @@
-import AppStore from './appStore.js';
 import NodeStore from "./nodeStore.js";
 import { logMessage, logError } from './logger.js';
 import _AddPeer from "./apps/addPeer.js";
@@ -32,7 +31,8 @@ class _Village {
   }
 
   fullScreenApp(){
-
+    hide('connectedView');
+    show('appContainer');
   }
 
   startOS() {
@@ -90,7 +90,8 @@ class _Village {
 
   addMorePeers(){
     this.coreApps.AddPeer.run();
-    this.coreApps.AddPeer.morePeers();
+    this.coreApps.AddPeer.preparePeer();
+    this.fullScreenApp();
   }
 
 

@@ -27,13 +27,10 @@ class _AddPeer {
   }
 
   stop() {
+    window.history.pushState({}, null, window.location.origin + window.location.pathname);
     while (this.addPeerEl.firstChild) {
       this.addPeerEl.removeChild(this.addPeerEl.firstChild);
     }
-  }
-
-  morePeers() {
-    alert('more peers!');
   }
 
   preparePeer() {
@@ -134,7 +131,7 @@ const addPeerHtml = `
     <div class="card" id="offerCard">
         <div class="card-content">
             <p class="title">
-                No Peers!
+                Invite Peers!
             </p>
 
             <p class="subtitle is-size-4">
