@@ -49,7 +49,7 @@ class _Village {
 
   onMessage (data, node) {
     if (data.msg) {
-      this.coreApps.Chat.messageReceived(data.msg);
+      this.coreApps.Chat.messageReceived(data);
     } else if (data.code) {
       this.coreApps.Editor.updateCode(data.code);
       eval(data.code);

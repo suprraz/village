@@ -170,7 +170,7 @@ class _AppList {
   sendApps() {
     const apps = AppStore.getInstalledApps();
 
-    NodeStore.broadcast(JSON.stringify({apps}));
+    NodeStore.broadcast({apps});
   }
 }
 

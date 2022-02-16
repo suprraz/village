@@ -30,7 +30,7 @@ class _Editor {
 
     const code = document.getElementById('editor').value;
 
-    NodeStore.broadcast(JSON.stringify({code}));
+    NodeStore.broadcast({code});
   }
 
 

@@ -4,12 +4,12 @@ class _NodeStore {
     this.nodes = [];
   }
 
-  getNodeCount() {
-    return this.nodes.length;
+  getNodeById(nodeId) {
+    return this.nodes.find((node) => node.profile.nodeId === nodeId);
   }
 
-  broadcast(msg) {
-    this.nodes.map((node) => node.send(msg));
+  broadcast(msgObj) {
+    this.nodes.map((node) => node.send(msgObj));
   }
 
   addNode(node) {
@@ -18,6 +18,11 @@ class _NodeStore {
 
   getNodes() {
     return this.nodes;
+  }
+
+  getNextHopNode(destinationId) {
+    //todo: search node.profile.neighbors[] list also
+    return this.nodes.find((node) => node.profile.nodeId === destinationId);
   }
 }
 

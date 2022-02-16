@@ -1,13 +1,13 @@
 import { logMessage, logError } from './utils/logger.js';
+import Profile from "./store/profile.js";
 
 const configRPC = {'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]};
 
 class _Node {
-  constructor({onConnection, onMessage, onOfferUrl}) {
+  constructor({onConnection, onMessage}) {
 
     this.onConnection = onConnection;
     this.onMessage = onMessage;
-    this.onOfferUrl = onOfferUrl;
 
     this.pc = null;
 
@@ -25,94 +25,107 @@ class _Node {
     this.profile.neighborList = profile.neighborList;
   }
 
-  createOffer() {
-    this.pc.onicecandidate = e => {
-      if (e.candidate == null) {
-        logMessage("Connection string: <br />" + JSON.stringify(this.pc.localDescription));
-
-        const offerUrl = new URL(window.location.href);
-        offerUrl.searchParams.set('offerKey', btoa(JSON.stringify(this.pc.localDescription)));
-
-        this.onOfferUrl(offerUrl);
-      }
-    };
-
-    this.dataChannel = this.pc.createDataChannel('offerChannel');
-    this.dataChannel.onmessage = (e) => this.onMessage(e, this);
-
-    this.pc.addEventListener("iceconnectionstatechange", ev => {
-      let stateElem = document.getElementById("connstate");
-      stateElem.innerText = this.pc.iceConnectionState;
-      logMessage(`Connection state: ${this.pc.iceConnectionState}`);
-    }, false);
-
-    this.dataChannel.addEventListener("open", (event) => {
-      logMessage('Data channel open');
-
-      this.onConnection(this);
-    });
-
-    this.pc.createOffer().then( (desc) => {
-        this.pc.setLocalDescription(desc);
-        logMessage(`Local Description: \n${JSON.stringify(desc)}`);
-      },
-    );
+  onConnectionStateChange() {
+    let stateElem = document.getElementById("connstate");
+    stateElem.innerText = this.pc.iceConnectionState;
   }
 
-  acceptOffer(offerKey) {
-    logMessage("<b>Accepting Offer</b>");
+  createOffer() {
+    return new Promise((resolve, reject) => {
+      this.pc.onicecandidate = e => {
+        if (e.candidate == null) {
+          const offerKey = btoa(JSON.stringify(this.pc.localDescription));
+          resolve(offerKey);
+        }
+      };
 
-    this.pc.onicecandidate = e => {
-      if (e.candidate == null) {
-        logMessage("Connection string: <br />" + JSON.stringify(this.pc.localDescription));
-        document.getElementById('answer').innerText = btoa(JSON.stringify(this.pc.localDescription));
-      }
-    };
+      this.dataChannel = this.pc.createDataChannel('offerChannel');
+      this.dataChannel.onmessage = (e) => this.onMessage(e, this);
 
-    let connectionObj = {};
-
-    try{
-      connectionObj = JSON.parse(atob(offerKey));
-    } catch (e) {
-      logMessage("<span class=\"error\"> Bad connection string </span> ");
-      return;
-    }
-
-    this.pc.addEventListener("iceconnectionstatechange", ev => {
-      let stateElem = document.getElementById("connstate");
-      stateElem.innerText = this.pc.iceConnectionState;
-      logMessage(`Connection state: ${this.pc.iceConnectionState}`);
-    }, false);
-
-    this.pc.ondatachannel = (e) => {
-      logMessage("Got a data channel");
-
-      this.dataChannel = e.channel;
+      this.pc.addEventListener("iceconnectionstatechange", ev => {
+        this.onConnectionStateChange();
+      }, false);
 
       this.dataChannel.addEventListener("open", (event) => {
         logMessage('Data channel open');
-
         this.onConnection(this);
       });
 
-      this.dataChannel.onmessage = (e) => this.onMessage(e, this);
-    };
+      this.pc.createOffer().then( (desc) => {
+          this.pc.setLocalDescription(desc);
+        },
+      );
+    });
+  }
 
-    this.pc.setRemoteDescription(connectionObj);
-    this.pc.createAnswer().then((answerDesc) => {
-      this.pc.setLocalDescription(answerDesc);
-      logMessage(`Local Description: \n${JSON.stringify(answerDesc)}`);
-    })
+  acceptOffer(offerKey) {
+    return new Promise((resolve, reject) => {
+      logMessage("<b>Accepting Offer</b>");
+
+      this.pc.onicecandidate = e => {
+        if (e.candidate == null) {
+          const answerKey = btoa(JSON.stringify(this.pc.localDescription));
+          resolve(answerKey);
+        }
+      };
+
+      let connectionObj = {};
+
+      try{
+        connectionObj = JSON.parse(atob(offerKey));
+      } catch (e) {
+        logMessage(`Bad offerKey: ${offerKey}`);
+        return;
+      }
+
+      this.pc.addEventListener("iceconnectionstatechange", ev => {
+        let stateElem = document.getElementById("connstate");
+        stateElem.innerText = this.pc.iceConnectionState;
+        logMessage(`Connection state: ${this.pc.iceConnectionState}`);
+      }, false);
+
+      this.pc.ondatachannel = (e) => {
+        logMessage("Got a data channel");
+
+        this.dataChannel = e.channel;
+
+        this.dataChannel.addEventListener("open", (event) => {
+          logMessage('Data channel open');
+
+          this.onConnection(this);
+        });
+
+        this.dataChannel.onmessage = (e) => this.onMessage(e, this);
+      };
+
+      this.pc.setRemoteDescription(connectionObj);
+      this.pc.createAnswer().then((answerDesc) => {
+        this.pc.setLocalDescription(answerDesc);
+        logMessage(`Local Description: \n${JSON.stringify(answerDesc)}`);
+      })
+
+    });
   }
 
   setRemoteDescription(connectionObj) {
     this.pc.setRemoteDescription(connectionObj);
   }
 
-  send(msg) {
-    this.dataChannel.send(msg);
-  }
+  send(msgObj) {
+    try {
+      const msg = JSON.stringify({
+        destinationId: this.profile.nodeId,  //overridable
+        senderId: Profile.getNodeID(),
+        ...msgObj
+      });
 
+      logMessage(msg);
+      this.dataChannel.send(msg);
+
+    } catch (e) {
+      logError(e);
+    }
+  }
 }
 
 export default _Node;

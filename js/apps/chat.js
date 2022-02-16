@@ -13,14 +13,14 @@ class _Chat {
     this.registerListeners();
   }
 
-  messageReceived(msg) {
-    this.chatLog.push('Them: ' + msg);
+  messageReceived(data) {
+    this.chatLog.push(`Peer-${data.senderId.substr(0,3)}:` + data.msg);
     this.updateChat();
   }
 
-  sendMessage() {
+  sendChatMsg() {
     const msg = document.getElementById('chatBoxMessage').value;
-    NodeStore.broadcast(JSON.stringify({msg}));
+    NodeStore.broadcast({msg});
 
     this.chatLog.push('Me: ' + msg);
     this.updateChat();
@@ -35,7 +35,7 @@ class _Chat {
     document.getElementById("chatBoxMessage").addEventListener("keyup", (event) => {
       if (event.keyCode === 13) {
         event.preventDefault();
-        this.sendMessage();
+        this.sendChatMsg();
       }
     });
   }

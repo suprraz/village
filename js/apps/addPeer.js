@@ -1,6 +1,6 @@
 import _Node from "../node.js";
 import NodeStore from "../store/nodeStore.js";
-import {logMessage} from "../utils/logger.js";
+import {logError, logMessage} from "../utils/logger.js";
 import {show, hide} from "../utils/dom.js";
 import Profile from "../store/profile.js";
 
@@ -17,9 +17,9 @@ class _AddPeer {
 
     this.addPeerEl = document.getElementById('addPeer');
 
-    const urlParams = new URLSearchParams(window.location.search);
-    if(urlParams.has('offerKey')) {
-      const offerKey = urlParams.get('offerKey');
+    const offerKey = this.getOfferKey(window.location.href);
+
+    if(offerKey) {
       this.offerRoute(offerKey);
     }
 
@@ -33,9 +33,18 @@ class _AddPeer {
     }
   }
 
+  getOfferKey(url) {
+    const urlParams = new URLSearchParams((new URL(url)).search);
+    if(urlParams.has('offerKey')) {
+      const offerKey = urlParams.get('offerKey');
+      return offerKey;
+    }
+    return null;
+  }
+
   sendProfile(node) {
     const shareableProfile = {profile: Profile.getShareable()};
-    node.send(JSON.stringify(shareableProfile));
+    node.send(shareableProfile);
   }
 
   onProfileReceived(profile, node) {
@@ -43,32 +52,111 @@ class _AddPeer {
 
     logMessage(node.profile);
 
-    const desiredNeighbors = node.profile.neighborList.filter(
-      (neighbor) => neighbor !== null && neighbor !== Profile.getNodeID()
+    const desiredNeighborIds = node.profile.neighborList.filter(
+      (neighborId) => {
+        return neighborId !== null &&
+          neighborId !== Profile.getNodeID() &&
+          !NodeStore.getNodeById(neighborId)
+      }
     );
 
-    logMessage(desiredNeighbors);
+    logMessage(desiredNeighborIds);
 
-    // for(const neighbor of desiredNeighbors) {
-    //   await requestNeighbor(neighbor);
-    // }
-    desiredNeighbors.map(this.requestMediation)
+    desiredNeighborIds.map(neighborId => this.requestConnection(node, neighborId))
 
   }
 
-  async requestMediation(desiredNeighbor) {
-    //this.preparePeer();
+  sendOfferKey(nextHopNode, destinationId, offerKey) {
+    nextHopNode.send({
+      destinationId,
+      senderId: Profile.getNodeID(),
+      offer: {
+        offerKey,
+      }});
   }
 
-  onMessage(e, node) {
+  getOfferUrl(offerKey) {
+    const offerUrl = new URL(window.location.href);
+    offerUrl.searchParams.set('offerKey', offerKey);
+
+    return offerUrl;
+  }
+
+  async requestConnection(nextHopNode, destinationId) {
+    try {
+      this.connectingNode = new _Node({
+        onConnection: (node) => this.onConnection(node),
+        onMessage: (data, node) => this.onMessage(data, node),
+      });
+
+      const offerKey = await this.connectingNode.createOffer();
+
+      this.sendOfferKey(nextHopNode, destinationId, offerKey);
+
+      NodeStore.addNode(this.connectingNode);
+    } catch (e) {
+      logMessage(e);
+    }
+
+  }
+
+  async acceptOffer(offer, senderId, senderNode) {
+    const {offerKey} = offer;
+    try {
+      const node = new _Node({
+        onConnection: (node) => this.onConnection(node),
+        onMessage: (data, node) => this.onMessage(data, node),
+      });
+      NodeStore.addNode(node);
+
+      const answerKey = await node.acceptOffer(offerKey);
+
+      senderNode.send({answer: {
+          answerKey
+        },
+        destinationId: senderId
+      });
+
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  acceptAnswer(answer, senderId, senderNode) {
+    try {
+      const connectionObj = JSON.parse(atob(answer.answerKey));
+
+      this.connectingNode.setRemoteDescription(connectionObj);
+    } catch(e) {
+      logError(e);
+    }
+  }
+
+  onMessage(e, senderNode) {
     if(e.data) {
       try {
         const data = JSON.parse(e.data);
 
-        if (data.profile) {
-          this.onProfileReceived(data.profile, node);
+        const {destinationId, senderId, profile, offer, answer} = data;
+
+        if(destinationId !== null && destinationId !== Profile.getNodeID()) {
+          // forward message
+          const nextHopNode = NodeStore.getNextHopNode(destinationId)
+          if(nextHopNode) {
+            nextHopNode.send(data);
+          } else {
+            logMessage(`Route not found for ${destinationId}.`)
+          }
+        } else if (profile) {
+          this.onProfileReceived(profile, senderNode);
+        } else if (offer && senderId) {
+          logMessage('accepting automated offer')
+          this.acceptOffer(offer, senderId, senderNode);
+        } else if (answer && senderId) {
+          logMessage('accepting automated answer')
+          this.acceptAnswer(answer, senderId, senderNode);
         } else {
-          this.parentOnMessage(data, node);
+          this.parentOnMessage(data, senderNode);
         }
       } catch (e) {}
     }
@@ -83,34 +171,37 @@ class _AddPeer {
     this.parentOnConnection(node);
   }
 
-  preparePeer() {
-    const node = new _Node({
-      onConnection: (node) => this.onConnection(node),
-      onMessage: (data, node) => this.onMessage(data, node),
-      onOfferUrl: (url) => this.onOfferUrl(url),
-    });
+  async preparePeer() {
     try {
-      node.createOffer();
-      NodeStore.addNode(node);
-      this.connectingNode = node;
+      this.connectingNode = new _Node({
+        onConnection: (node) => this.onConnection(node),
+        onMessage: (data, node) => this.onMessage(data, node),
+      });
+      NodeStore.addNode(this.connectingNode);
+      const offerKey = await this.connectingNode.createOffer();
+      const offerUrl = this.getOfferUrl(offerKey);
+
+      this.onOfferUrl(offerUrl);
     } catch (e) {
       logMessage(e);
     }
   }
 
 
-  offerRoute(offerKey) {
+  async offerRoute(offerKey) {
     hide('offerCard');
     show('answerCard');
 
-    const node = new _Node({
-      onConnection: (node) => this.onConnection(node),
-      onMessage: (data, node) => this.onMessage(data, node),
-      onOfferUrl: () => (url) => this.onOfferUrl(url),
-    });
     try {
-      node.acceptOffer(offerKey);
+      const node = new _Node({
+        onConnection: (node) => this.onConnection(node),
+        onMessage: (data, node) => this.onMessage(data, node),
+      });
       NodeStore.addNode(node);
+      const answerKey = await node.acceptOffer(offerKey);
+
+      document.getElementById('answer').innerText = answerKey;
+
     } catch (e) {
       throw new Error(e);
     }

@@ -1,9 +1,15 @@
 
 function hide(elementId) {
-  document.getElementById(elementId).classList.add('is-hidden');
+  const target = el(elementId);
+  if(target) {
+    target.classList.add('is-hidden');
+  }
 }
 function show(elementId) {
-  document.getElementById(elementId).classList.remove('is-hidden');
+  const target = el(elementId);
+  if(target) {
+    target.classList.remove('is-hidden');
+  }
 }
 
 function el(elementId) {
