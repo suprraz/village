@@ -1,7 +1,7 @@
 import { logMessage, logError } from './utils/logger.js';
 import Profile from "./store/profile.js";
 
-const configRPC = new RTCPeerConnection({
+const configRPC = {
   iceServers: [
     {
       urls: "stun:openrelay.metered.ca:80"
@@ -22,7 +22,7 @@ const configRPC = new RTCPeerConnection({
       credential: "openrelayproject"
     }
   ]
-});
+};
 
 class _Node {
   constructor({onConnection, onMessage}) {
