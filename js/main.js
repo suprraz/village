@@ -3,6 +3,7 @@ import {show, hide} from "./utils/dom.js";
 import _AppList from "./apps/appList.js";
 import _Editor from "./apps/editor.js";
 import _Chat from "./apps/chat.js";
+import DiscoverPeer from "./apps/discoverPeer.js";
 
 class _Village {
   constructor() {
@@ -29,6 +30,7 @@ class _Village {
     this.coreApps.AddPeer.run();
 
     this.registerListeners();
+    DiscoverPeer.init();
   }
 
   fullScreenApp(){

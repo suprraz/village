@@ -14,7 +14,7 @@ class _Chat {
   }
 
   messageReceived(data) {
-    this.chatLog.push(`Peer-${data.senderId.substr(0,3)}:` + data.msg);
+    this.chatLog.push(`Peer-${data.senderId.substr(0,3)}: ` + data.msg);
     this.updateChat();
   }
 
