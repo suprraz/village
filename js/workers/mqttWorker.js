@@ -5,7 +5,7 @@ import _Node from "../node.js";
 import NodeStore from "../store/nodeStore.js";
 import MessageRouter from "../messageRouter.js";
 
-class _MqttStore {
+class _MqttWorker {
   constructor() {
     this.parentOnConnection = (node) => MessageRouter.onConnection(node);
     this.parentOnMessage = (data, node) => MessageRouter.onMessage(data, node);
@@ -198,6 +198,17 @@ class _MqttStore {
   }
 
   channelAvailable(toId) {
+    if(NodeStore.getNodes().length < config.maxConnectedNeighbors) {
+      this.sendMessage(toId, {
+        type: 'channel-available',
+        fromId: Profile.getNodeID(),
+        toId,
+        date: new Date(),
+      });
+    }
+  }
+
+  channelRequest(toId) {
     if(NodeStore.getNodes().length === 0) {
       this.sendMessage(toId, {
         type: 'channel-request',
@@ -219,6 +230,9 @@ class _MqttStore {
   parseMessage(message) {
     logMessage('Parsing message of type: '+ message.type);
     switch (message.type) {
+      case 'channel-available':
+        this.channelRequest(message.fromId);
+        break;
       case 'channel-request':
         this.sendOffer(message.fromId);
         break;
@@ -242,4 +256,4 @@ class _MqttStore {
   }
 }
 
-export default _MqttStore;
+export default _MqttWorker;

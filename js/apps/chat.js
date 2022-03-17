@@ -13,8 +13,8 @@ class _Chat {
     this.registerListeners();
   }
 
-  messageReceived(data) {
-    this.chatLog.push(`Peer-${data.senderId.substr(0,3)}: ` + data.msg);
+  messageReceived(senderId, msg) {
+    this.chatLog.push(`Peer-${senderId.substr(0,3)}: ` + msg);
     this.updateChat();
   }
 

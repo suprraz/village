@@ -3,23 +3,26 @@ import {show, hide} from "./utils/dom.js";
 import _AppList from "./apps/appList.js";
 import _Editor from "./apps/editor.js";
 import _Chat from "./apps/chat.js";
-import _MqttStore from "./workers/mqttStore.js";
+import _MqttWorker from "./workers/mqttWorker.js";
 import MessageRouter from "./messageRouter.js";
+import _NeighborsWorker from "./workers/neighborsWorker.js";
 
 class _Village {
   constructor() {
     const AddPeer = new _AddPeer();
-    const MqttStore = new _MqttStore();
+    const MqttWorker = new _MqttWorker();
     const AppListApp = new _AppList();
     const Editor = new _Editor({AppListApp});
     const Chat = new _Chat();
+    const NeighborsWorker = new _NeighborsWorker();
 
     this.coreApps = {
       AddPeer,
       AppListApp,
       Editor,
       Chat,
-      MqttStore
+      MqttWorker,
+      NeighborsWorker
     };
 
     MessageRouter.init(this.coreApps, (node) => this.onConnection(node));

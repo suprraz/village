@@ -1,11 +1,10 @@
-const NodeStore = require("../store/nodeStore.js");
-const {logMessage} = require("../utils/logger.js");
-const Profile = require("../store/profile.js");
-const _Node = require("../node.js");
-const MessageRouter = require("../messageRouter");
+import NodeStore from "../store/nodeStore.js";
+import Profile from "../store/profile.js";
+import MessageRouter from "../messageRouter.js";
+import {logError, logMessage} from "../utils/logger.js";
+import _Node from "../node.js";
 
-
-class _AddNeighbors {
+class _NeighborsWorker {
 
   onNode(node) {
     const desiredNeighborIds = node.profile.neighborList.filter(
@@ -46,4 +45,38 @@ class _AddNeighbors {
         offerKey,
       }});
   }
+
+  async acceptOffer(offer, senderId, senderNode) {
+    const {offerKey} = offer;
+    try {
+      const node = new _Node({
+        onConnection: (node) => MessageRouter.onConnection(node),
+        onMessage: (data, node) => MessageRouter.onMessage(data, node),
+      });
+      NodeStore.addNode(node);
+
+      const answerKey = await node.acceptOffer(offerKey);
+
+      senderNode.send({answer: {
+          answerKey
+        },
+        destinationId: senderId
+      });
+
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  acceptAnswer(answer, senderId, senderNode) {
+    try {
+      const connectionObj = JSON.parse(atob(answer.answerKey));
+
+      senderNode.setRemoteDescription(connectionObj);
+    } catch(e) {
+      logError(e);
+    }
+  }
 }
+
+export default _NeighborsWorker;
