@@ -47,6 +47,7 @@ class _MqttStore {
       clean: true,
       reconnectPeriod: 1000,
       connectTimeout: 30 * 1000,
+      useSSL: true,
       will: {
         topic: `${this.nodeTopic}/${Profile.getNodeID()}`,
         payload: JSON.stringify({
