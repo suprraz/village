@@ -3,7 +3,15 @@ import NodeStore from "./nodeStore.js";
 
 class _Profile {
   constructor() {
-    this.nodeId = uuidv4();
+    this.nodeId = null;
+    const storedNodeId = localStorage.getItem('nodeId');
+
+    if(!storedNodeId) {
+      this.nodeId = uuidv4();
+      localStorage.setItem('nodeId', this.nodeId);
+    } else {
+      this.nodeId = storedNodeId;
+    }
   }
 
   getNodeID() {

@@ -3,11 +3,12 @@ import NodeStore from "../store/nodeStore.js";
 import {logError, logMessage} from "../utils/logger.js";
 import {show, hide} from "../utils/dom.js";
 import Profile from "../store/profile.js";
+import MessageRouter from "../messageRouter.js";
 
 class _AddPeer {
-  constructor(onConnection, onMessage) {
-    this.parentOnConnection = onConnection;
-    this.parentOnMessage = onMessage;
+  constructor() {
+    this.parentOnConnection = (node) => MessageRouter.onConnection(node);
+    this.parentOnMessage = (data, node) => MessageRouter.onMessage(data, node);
     this.connectingNode = null;
   }
 
@@ -219,7 +220,7 @@ class _AddPeer {
   }
 
   setRemote(pasteContent) {
-    logMessage("<b>Setting remote</b>");
+    logMessage("Setting remote");
 
     let connectionString = document.getElementById('peerKey').value;
 

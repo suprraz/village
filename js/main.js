@@ -3,14 +3,13 @@ import {show, hide} from "./utils/dom.js";
 import _AppList from "./apps/appList.js";
 import _Editor from "./apps/editor.js";
 import _Chat from "./apps/chat.js";
-import DiscoverPeer from "./apps/discoverPeer.js";
+import _MqttStore from "./workers/mqttStore.js";
+import MessageRouter from "./messageRouter.js";
 
 class _Village {
   constructor() {
-    const AddPeer = new _AddPeer(
-      (node) => this.onConnection(node),
-      (data, node) => this.onMessage(data, node)
-    );
+    const AddPeer = new _AddPeer();
+    const MqttStore = new _MqttStore();
     const AppListApp = new _AppList();
     const Editor = new _Editor({AppListApp});
     const Chat = new _Chat();
@@ -19,8 +18,11 @@ class _Village {
       AddPeer,
       AppListApp,
       Editor,
-      Chat
+      Chat,
+      MqttStore
     };
+
+    MessageRouter.init(this.coreApps, (node) => this.onConnection(node));
 
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('offerKey')) {
@@ -30,7 +32,6 @@ class _Village {
     this.coreApps.AddPeer.run();
 
     this.registerListeners();
-    DiscoverPeer.init();
   }
 
   fullScreenApp(){
@@ -49,18 +50,8 @@ class _Village {
     this.coreApps.AddPeer.preparePeer();
   }
 
-  onMessage (data, node) {
-    if (data.msg) {
-      this.coreApps.Chat.messageReceived(data);
-    } else if (data.code) {
-      this.coreApps.Editor.updateCode(data.code);
-      eval(data.code);
-    } else if (data.apps) {
-      this.coreApps.AppListApp.onAvailableApps(data.apps);
-    }
-  }
-
   onConnection(node) {
+    this.startOS();
     show('connectedView');
 
     this.coreApps.AddPeer.stop();

@@ -81,7 +81,7 @@ class _Node {
 
   acceptOffer(offerKey) {
     return new Promise((resolve, reject) => {
-      logMessage("<b>Accepting Offer</b>");
+      logMessage("Accepting Offer");
 
       this.pc.onicecandidate = e => {
         if (e.candidate == null) {
