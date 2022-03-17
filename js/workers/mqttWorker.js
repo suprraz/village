@@ -209,7 +209,8 @@ class _MqttWorker {
   }
 
   channelRequest(toId) {
-    if(NodeStore.getNodes().length === 0) {
+    if(NodeStore.getNodes().length === 0 && this.connectingNode === null) {
+      this.connectingNode = {};
       this.sendMessage(toId, {
         type: 'channel-request',
         fromId: Profile.getNodeID(),

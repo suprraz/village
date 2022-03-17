@@ -32,12 +32,13 @@ class _MessageRouter {
       this.coreApps.AppListApp.onAvailableApps(apps);
     } else if (profile) {
       node.updateProfile(profile);
+      this.coreApps.NeighborsWorker.onNode(node);
     } else if (offer && senderId) {
       logMessage('accepting automated offer')
-      NeighborsWorker.acceptOffer(offer, senderId, senderNode);
+      this.coreApps.NeighborsWorker.acceptOffer(offer, senderId, node);
     } else if (answer && senderId) {
       logMessage('accepting automated answer')
-      NeighborsWorker.acceptAnswer(answer, senderId, node);
+      this.coreApps.NeighborsWorker.acceptAnswer(answer, senderId, node);
     } else {
       logError(`Unhandled message: ${data}`);
     }
@@ -45,7 +46,6 @@ class _MessageRouter {
 
   onConnection(node) {
     node.send({profile: Profile.getShareable()});
-    this.coreApps.NeighborsWorker.onNode(node);
 
     this.callerOnConnection(node);
   }

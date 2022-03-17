@@ -19,9 +19,14 @@ class _Profile {
   }
 
   getShareable() {
+    let neighborList =  NodeStore.getNodes()
+      .filter((node) => !!node.profile.nodeId)
+      .map(node => node.profile.nodeId);
+
+    neighborList = [...new Set(neighborList)];
     return {
       nodeId: this.nodeId,
-      neighborList: NodeStore.getNodes().map(node => node.profile.nodeId)
+      neighborList,
     }
   }
 
