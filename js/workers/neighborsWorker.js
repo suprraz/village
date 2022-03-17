@@ -20,11 +20,23 @@ class _NeighborsWorker {
     desiredNeighborIds.map(neighborId => this.requestConnection(node, neighborId))
   }
 
+  onMessage(e, node) {
+    if (e.data) {
+      try {
+        const data = JSON.parse(e.data);
+
+        MessageRouter.onMessage(data, node);
+      } catch (e) {
+        logError(e);
+      }
+    }
+  }
+
   async requestConnection(nextHopNode, destinationId) {
     try {
       this.connectingNode = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
-        onMessage: (data, node) => MessageRouter.onMessage(data, node),
+        onMessage: (data, node) => this.onMessage(data, node),
       });
 
       const offerKey = await this.connectingNode.createOffer();
@@ -51,7 +63,7 @@ class _NeighborsWorker {
     try {
       const node = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
-        onMessage: (data, node) => MessageRouter.onMessage(data, node),
+        onMessage: (data, node) => this.onMessage(data, node),
       });
       NodeStore.addNode(node);
 
@@ -72,7 +84,7 @@ class _NeighborsWorker {
     try {
       const connectionObj = JSON.parse(atob(answer.answerKey));
 
-      senderNode.setRemoteDescription(connectionObj);
+      this.connectingNode.setRemoteDescription(connectionObj);
     } catch(e) {
       logError(e);
     }
