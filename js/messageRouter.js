@@ -1,8 +1,6 @@
 import Profile from "./store/profile.js";
 import NodeStore from "./store/nodeStore.js";
 import {logError, logMessage} from "./utils/logger.js";
-import NeighborsWorker from "./workers/neighborsWorker.js";
-
 
 class _MessageRouter {
 
@@ -31,6 +29,7 @@ class _MessageRouter {
     } else if (apps) {
       this.coreApps.AppListApp.onAvailableApps(apps);
     } else if (profile) {
+      NodeStore.deleteNode(profile.nodeId);
       node.updateProfile(profile);
       this.onNetworkChange();
       this.coreApps.NeighborsWorker.onNode(node);
@@ -49,8 +48,6 @@ class _MessageRouter {
     node.send({profile: Profile.getShareable()});
 
     this.callerOnConnection(node);
-
-    this.onNetworkChange();
   }
 
   onNetworkChange() {

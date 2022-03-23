@@ -36,6 +36,8 @@ class _NeighborsWorker {
 
   async requestConnection(nextHopNode, destinationId) {
     try {
+      logMessage(`Requesting connection to ${destinationId}`);
+
       this.connectingNode = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
@@ -43,8 +45,8 @@ class _NeighborsWorker {
 
       const offerKey = await this.connectingNode.createOffer();
 
+      NodeStore.deleteNode(destinationId); // prune any lingering node with same id
       this.sendOfferKey(nextHopNode, destinationId, offerKey);
-
       NodeStore.addNode(this.connectingNode);
     } catch (e) {
       logMessage(e);
@@ -67,6 +69,8 @@ class _NeighborsWorker {
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
       });
+
+      NodeStore.deleteNode(senderId); // prune any lingering node with same id
       NodeStore.addNode(node);
 
       const answerKey = await node.acceptOffer(offerKey);

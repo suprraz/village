@@ -20,6 +20,10 @@ class _Node {
     this.pc = new RTCPeerConnection(config.RTC);
   }
 
+  terminate() {
+    this.pc.close();
+  }
+
   updateProfile(profile) {
     this.profile.nodeId = profile.nodeId;
     this.profile.neighborList = profile.neighborList;

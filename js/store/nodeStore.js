@@ -27,6 +27,14 @@ class _NodeStore {
     return this.nodes.find((node) => node.profile.nodeId === destinationId);
   }
 
+  deleteNode(nodeId) {
+    const node = this.getNodeById(nodeId);
+    if(node) {
+      node.terminate();
+    }
+    this.nodes = this.nodes.filter((node) => node.profile.nodeId !== nodeId);
+  }
+
   prune() {
     this.nodes = this.nodes.filter(
       (node) =>
