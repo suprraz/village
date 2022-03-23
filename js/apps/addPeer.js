@@ -49,7 +49,7 @@ class _AddPeer {
   }
 
   onProfileReceived(profile, node) {
-    node.updateProfile(profile);
+    node.setProfile(profile);
 
     logMessage(node.profile);
 

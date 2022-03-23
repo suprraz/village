@@ -134,7 +134,6 @@ class _MqttWorker {
         const connectionObj = JSON.parse(atob(message.answerKey));
 
         this.connectingNode.setRemoteDescription(connectionObj);
-        this.broadcastAvailable();
       } catch (e) {
         logError(e);
       }

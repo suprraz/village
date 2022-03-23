@@ -38,16 +38,19 @@ class _NeighborsWorker {
     try {
       logMessage(`Requesting connection to ${destinationId}`);
 
-      this.connectingNode = new _Node({
+     const offerNode = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
       });
 
-      const offerKey = await this.connectingNode.createOffer();
+      const offerKey = await offerNode.createOffer();
 
       NodeStore.deleteNode(destinationId); // prune any lingering node with same id
+
+      offerNode.setNodeId(destinationId);
+
       this.sendOfferKey(nextHopNode, destinationId, offerKey);
-      NodeStore.addNode(this.connectingNode);
+      NodeStore.addNode(offerNode);
     } catch (e) {
       logMessage(e);
     }
@@ -90,7 +93,10 @@ class _NeighborsWorker {
     try {
       const connectionObj = JSON.parse(atob(answer.answerKey));
 
-      this.connectingNode.setRemoteDescription(connectionObj);
+      const offerNode = NodeStore.getNodeById(senderId);
+      if(offerNode) {
+        offerNode.setRemoteDescription(connectionObj);
+      }
     } catch(e) {
       logError(e);
     }

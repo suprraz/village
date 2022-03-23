@@ -30,7 +30,7 @@ class _MessageRouter {
       this.coreApps.AppListApp.onAvailableApps(apps);
     } else if (profile) {
       NodeStore.deleteNode(profile.nodeId);
-      node.updateProfile(profile);
+      node.setProfile(profile);
       this.onNetworkChange();
       this.coreApps.NeighborsWorker.onNode(node);
     } else if (offer && senderId) {

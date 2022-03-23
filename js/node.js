@@ -16,6 +16,8 @@ class _Node {
       neighborList: []
     };
 
+    this.pending = true;
+
     const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
     this.pc = new RTCPeerConnection(config.RTC);
   }
@@ -24,9 +26,14 @@ class _Node {
     this.pc.close();
   }
 
-  updateProfile(profile) {
+  setProfile(profile) {
     this.profile.nodeId = profile.nodeId;
     this.profile.neighborList = profile.neighborList;
+    this.pending = false;
+  }
+
+  setNodeId(nodeId) {
+    this.profile.nodeId = nodeId;
   }
 
   onConnectionStateChange() {
@@ -94,8 +101,6 @@ class _Node {
       }, false);
 
       this.pc.ondatachannel = (e) => {
-        logMessage("Got a data channel");
-
         this.dataChannel = e.channel;
 
         this.dataChannel.addEventListener("open", (event) => {

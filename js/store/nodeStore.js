@@ -13,8 +13,6 @@ class _NodeStore {
   }
 
   addNode(node) {
-    //TODO: make sure the line below is a NOOP since we should never re-add the same node prior to destruction
-    this.nodes = this.nodes.filter( (n) => n.profile.nodeId !== node.id );
     this.nodes.push(node);
   }
 
@@ -29,10 +27,10 @@ class _NodeStore {
 
   deleteNode(nodeId) {
     const node = this.getNodeById(nodeId);
-    if(node) {
+    if(node && !node.pending) {
       node.terminate();
+      this.nodes = this.nodes.filter((n) => n !== node);
     }
-    this.nodes = this.nodes.filter((node) => node.profile.nodeId !== nodeId);
   }
 
   prune() {
