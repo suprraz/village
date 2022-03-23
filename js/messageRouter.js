@@ -32,6 +32,7 @@ class _MessageRouter {
       this.coreApps.AppListApp.onAvailableApps(apps);
     } else if (profile) {
       node.updateProfile(profile);
+      this.onNetworkChange();
       this.coreApps.NeighborsWorker.onNode(node);
     } else if (offer && senderId) {
       logMessage('accepting automated offer')
@@ -48,6 +49,13 @@ class _MessageRouter {
     node.send({profile: Profile.getShareable()});
 
     this.callerOnConnection(node);
+
+    this.onNetworkChange();
+  }
+
+  onNetworkChange() {
+    NodeStore.prune();
+    this.coreApps.VillageState.refresh();
   }
 
 }

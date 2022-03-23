@@ -26,6 +26,14 @@ class _NodeStore {
     //todo: search node.profile.neighbors[] list also
     return this.nodes.find((node) => node.profile.nodeId === destinationId);
   }
+
+  prune() {
+    this.nodes = this.nodes.filter(
+      (node) =>
+        node.pc.iceConnectionState !== 'failed' &&
+        node.pc.connectionState !== 'failed'
+    )
+  }
 }
 
 const NodeStore = new _NodeStore();

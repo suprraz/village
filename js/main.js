@@ -6,6 +6,7 @@ import _Chat from "./apps/chat.js";
 import _MqttWorker from "./workers/mqttWorker.js";
 import MessageRouter from "./messageRouter.js";
 import _NeighborsWorker from "./workers/neighborsWorker.js";
+import _VillageState from "./apps/villageState.js";
 
 class _Village {
   constructor() {
@@ -15,6 +16,7 @@ class _Village {
     const Editor = new _Editor({AppListApp});
     const Chat = new _Chat();
     const NeighborsWorker = new _NeighborsWorker();
+    const VillageState = new _VillageState();
 
     this.coreApps = {
       AddPeer,
@@ -22,7 +24,8 @@ class _Village {
       Editor,
       Chat,
       MqttWorker,
-      NeighborsWorker
+      NeighborsWorker,
+      VillageState
     };
 
     MessageRouter.init(this.coreApps, (node) => this.onConnection(node));

@@ -5,6 +5,8 @@ import {logError, logMessage} from "../utils/logger.js";
 import _Node from "../node.js";
 
 class _NeighborsWorker {
+  //todo: figure out what race condition is causing this process to fail intermittently
+  //when all 3 neighbors reload concurrently the fresh state has a higher success rate
 
   onNode(node) {
     const desiredNeighborIds = node.profile.neighborList.filter(

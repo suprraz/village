@@ -1,28 +1,7 @@
 import { logMessage, logError } from './utils/logger.js';
 import Profile from "./store/profile.js";
-
-const configRPC = {
-  iceServers: [
-    {
-      urls: "stun:openrelay.metered.ca:80"
-    },
-    {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject"
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject"
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443?transport=tcp",
-      username: "openrelayproject",
-      credential: "openrelayproject"
-    }
-  ]
-};
+import MessageRouter from "./messageRouter.js";
+import config from "./config.js";
 
 class _Node {
   constructor({onConnection, onMessage}) {
@@ -38,7 +17,7 @@ class _Node {
     };
 
     const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
-    this.pc = new RTCPeerConnection(configRPC);
+    this.pc = new RTCPeerConnection(config.RTC);
   }
 
   updateProfile(profile) {
@@ -47,8 +26,7 @@ class _Node {
   }
 
   onConnectionStateChange() {
-    let stateElem = document.getElementById("connstate");
-    stateElem.innerText = this.pc.iceConnectionState;
+    MessageRouter.onNetworkChange();
   }
 
   createOffer() {
@@ -64,6 +42,10 @@ class _Node {
       this.dataChannel.onmessage = (e) => this.onMessage(e, this);
 
       this.pc.addEventListener("iceconnectionstatechange", ev => {
+        this.onConnectionStateChange();
+      }, false);
+
+      this.pc.addEventListener("connectionstatechange", ev => {
         this.onConnectionStateChange();
       }, false);
 
@@ -100,9 +82,11 @@ class _Node {
       }
 
       this.pc.addEventListener("iceconnectionstatechange", ev => {
-        let stateElem = document.getElementById("connstate");
-        stateElem.innerText = this.pc.iceConnectionState;
-        logMessage(`Connection state: ${this.pc.iceConnectionState}`);
+        this.onConnectionStateChange();
+      }, false);
+
+      this.pc.addEventListener("connectionstatechange", ev => {
+        this.onConnectionStateChange();
       }, false);
 
       this.pc.ondatachannel = (e) => {
