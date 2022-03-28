@@ -7,6 +7,11 @@ import _MqttWorker from "./workers/mqttWorker.js";
 import MessageRouter from "./messageRouter.js";
 import _NeighborsWorker from "./workers/neighborsWorker.js";
 import _VillageState from "./apps/villageState.js";
+import Settings from "./settings.js";
+import AppStore from "./store/appStore.js";
+import LandingApp from "./apps/sandboxed/landingApp.js";
+import _Sandbox from "./sandbox.js";
+
 
 class _Village {
   constructor() {
@@ -17,6 +22,7 @@ class _Village {
     const Chat = new _Chat();
     const NeighborsWorker = new _NeighborsWorker();
     const VillageState = new _VillageState();
+    const Sandbox = new _Sandbox();
 
     this.coreApps = {
       AddPeer,
@@ -25,40 +31,35 @@ class _Village {
       Chat,
       MqttWorker,
       NeighborsWorker,
-      VillageState
+      VillageState,
+      Sandbox
     };
 
     MessageRouter.init(this.coreApps, (node) => this.onConnection(node));
 
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('offerKey')) {
-      this.startOS();
+      this.coreApps.AddPeer.run();
     }
 
-    this.coreApps.AddPeer.run();
+    const showLanding = Settings.get('showLanding');
+
+    if(showLanding) {
+      AppStore.runApp(LandingApp);
+    }
+
+    this.coreApps.AppListApp.updateAppList();
 
     this.registerListeners();
   }
 
   fullScreenApp(){
-    hide('connectedView');
+    hide('widgetsView');
     show('appContainer');
   }
 
-  startOS() {
-    hide('landing');
-    show('osView');
-  }
-
-  start() {
-    this.startOS();
-
-    this.coreApps.AddPeer.preparePeer();
-  }
-
   onConnection(node) {
-    this.startOS();
-    show('connectedView');
+    show('widgetsView');
 
     this.coreApps.AddPeer.stop();
     this.coreApps.AppListApp.updateAppList();
@@ -73,7 +74,6 @@ class _Village {
 
 
   registerListeners() {
-    document.getElementById('btn_start').addEventListener('click', () => this.start());
     document.getElementById('peerAppBtn').addEventListener('click', () => this.addMorePeers());
   }
 

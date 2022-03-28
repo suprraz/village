@@ -14,3 +14,14 @@
 .installedApp > * {
   margin-right: 5px;
 }
+
+#overlayContainer {
+  position: fixed;
+  background-color: rgba(10,10,10,.86);
+  z-index: 1;
+}
+
+#sandboxIframe {
+  height: 100%;
+  border-radius: 6px;
+}

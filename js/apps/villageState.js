@@ -7,6 +7,8 @@ class _VillageState {
 
     this.villageStateEl = document.getElementById('villageState');
     this.nodeStateList = document.getElementById('nodeStateList');
+
+    this.refresh();
   }
 
   refresh() {
@@ -25,7 +27,6 @@ class _VillageState {
       this.nodeStateList.appendChild(this.createNodeStateDiv(node));
     })
   }
-
 
   createNodeStateDiv(node){
     const nodeDiv = document.createElement('div');

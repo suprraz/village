@@ -7,6 +7,7 @@ class _MessageRouter {
   init (coreApps, onConnection) {
     this.coreApps = coreApps;
     this.callerOnConnection = (node) => onConnection(node);
+    this.registerListeners();
   }
 
   onMessage (data, node) {
@@ -55,6 +56,24 @@ class _MessageRouter {
     this.coreApps.VillageState.refresh();
   }
 
+  onRunApp(app) {
+    this.coreApps.Sandbox.run(app);
+  }
+
+  onCloseApp() {
+    this.coreApps.Sandbox.stop();
+  }
+
+  registerListeners() {
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if(data) {
+        if(!!data.closeApp) {
+          this.onCloseApp();
+        }
+      }
+    }, false);
+  }
 }
 
 const MessageRouter = new _MessageRouter();

@@ -1,3 +1,4 @@
+import MessageRouter from "../messageRouter.js";
 
 class _AppStore {
 
@@ -56,14 +57,7 @@ class _AppStore {
 
   runApp(app) {
     if(this.verifyApp(app)) {
-      const code = app.code;
-
-      try {
-        const iframe = document.getElementById("appIframe");
-        iframe.contentWindow.postMessage({run: code},'*');
-      } catch (e) {
-        console.error(e);
-      }
+      MessageRouter.onRunApp(app);
     } else {
       alert('Error: Invalid app')
     }
