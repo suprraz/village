@@ -81,6 +81,14 @@ class _MessageRouter {
         }
       }
     }, false);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        if(NodeStore.getNodes().length === 0) {
+          this.coreApps.MqttWorker.broadcastAvailable();
+        }
+      }
+    }, false);
   }
 }
 
