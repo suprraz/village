@@ -15,8 +15,6 @@ class _MqttWorker {
     this.msgTopic = `mqtt/${config.appNameConcat}/msg`;
 
     this.mqttBroker = config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
-
-    this.init();
   }
 
   disconnect() {

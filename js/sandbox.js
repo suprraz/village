@@ -1,3 +1,5 @@
+import MessageRouter from "./messageRouter.js";
+
 class _Sandbox {
   constructor() {
     this.sandboxContainer = document.getElementById('sandbox');
@@ -31,7 +33,7 @@ class _Sandbox {
   }
 
   registerListeners() {
-    this.overlayContainer.addEventListener('click', () => this.stop());
+    this.overlayContainer.addEventListener('click', () => MessageRouter.onCloseApp('LandingApp'));
   }
 }
 

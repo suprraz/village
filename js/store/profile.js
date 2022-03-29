@@ -20,7 +20,7 @@ class _Profile {
 
   getShareable() {
     let neighborList =  NodeStore.getNodes()
-      .filter((node) => !!node.profile.nodeId)
+      .filter((node) => !!node.profile.nodeId && node.pc.connectionState === 'connected')
       .map(node => node.profile.nodeId);
 
     neighborList = [...new Set(neighborList)];

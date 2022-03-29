@@ -54,6 +54,9 @@ class _MessageRouter {
 
   onNetworkChange() {
     NodeStore.prune();
+    if(NodeStore.getNodes().length === 0) {
+      this.coreApps.MqttWorker.broadcastAvailable();
+    }
     this.coreApps.VillageState.refresh();
   }
 
