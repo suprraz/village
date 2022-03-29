@@ -126,18 +126,20 @@ class _Node {
   }
 
   send(msgObj) {
-    try {
-      const msg = JSON.stringify({
-        destinationId: this.profile.nodeId,  //overridable
-        senderId: Profile.getNodeID(),
-        ...msgObj
-      });
+    if (this.pc.connectionState === 'connected') {
+      try {
+        const msg = JSON.stringify({
+          destinationId: this.profile.nodeId,  //overridable
+          senderId: Profile.getNodeID(),
+          ...msgObj
+        });
 
-      logMessage(msg);
-      this.dataChannel.send(msg);
+        logMessage(msg);
+        this.dataChannel.send(msg);
 
-    } catch (e) {
-      logError(e);
+      } catch (e) {
+        logError(e);
+      }
     }
   }
 }
