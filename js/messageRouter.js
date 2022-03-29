@@ -67,6 +67,7 @@ class _MessageRouter {
   onCloseApp(sourceAppName) {
     if(sourceAppName === 'LandingApp') {
       Settings.update('showLanding', false);
+      this.coreApps.MqttWorker.init();
     }
     this.coreApps.Sandbox.stop();
   }
