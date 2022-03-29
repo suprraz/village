@@ -87,7 +87,7 @@ class _Landing {
   }
   
   start() {
-   window.parent.postMessage({closeApp: true},'*');
+   window.parent.postMessage({closeApp: true, sourceApp: 'LandingApp'},'*');
   }
 
   registerListeners() {

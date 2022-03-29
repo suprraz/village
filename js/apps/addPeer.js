@@ -29,8 +29,10 @@ class _AddPeer {
 
   stop() {
     window.history.pushState({}, null, window.location.origin + window.location.pathname);
-    while (this.addPeerEl.firstChild) {
-      this.addPeerEl.removeChild(this.addPeerEl.firstChild);
+    if(!!this.addPeerEl) {
+      while (this.addPeerEl.firstChild) {
+        this.addPeerEl.removeChild(this.addPeerEl.firstChild);
+      }
     }
   }
 

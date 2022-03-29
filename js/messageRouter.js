@@ -1,6 +1,7 @@
 import Profile from "./store/profile.js";
 import NodeStore from "./store/nodeStore.js";
 import {logError, logMessage} from "./utils/logger.js";
+import Settings from "./settings.js";
 
 class _MessageRouter {
 
@@ -60,7 +61,10 @@ class _MessageRouter {
     this.coreApps.Sandbox.run(app);
   }
 
-  onCloseApp() {
+  onCloseApp(sourceAppName) {
+    if(sourceAppName === 'LandingApp') {
+      Settings.update('showLanding', false);
+    }
     this.coreApps.Sandbox.stop();
   }
 
@@ -69,7 +73,7 @@ class _MessageRouter {
       const data = event.data;
       if(data) {
         if(!!data.closeApp) {
-          this.onCloseApp();
+          this.onCloseApp(data.sourceApp);
         }
       }
     }, false);

@@ -7,6 +7,7 @@ class _VillageState {
 
     this.villageStateEl = document.getElementById('villageState');
     this.nodeStateList = document.getElementById('nodeStateList');
+    this.livePeersCount = document.getElementById('livePeersCount');
 
     this.refresh();
   }
@@ -26,6 +27,8 @@ class _VillageState {
     nodes.map((node) => {
       this.nodeStateList.appendChild(this.createNodeStateDiv(node));
     })
+
+    this.livePeersCount.innerText = `${nodes.filter((node) => node.pc.connectionState === 'connected').length} / ${nodes.length}`;
   }
 
   createNodeStateDiv(node){
@@ -57,10 +60,12 @@ class _VillageState {
 const villageStateHtml = `
 <div id="villageState">
     <p class="title">Village State</p>
-    <p class="subtitle">Connections</p>
+    <p class="subtitle">Connections: 
+        <span id="livePeersCount"></span>
+    </p>
     <div id="nodeStateList" class="is-flex is-flex-direction-column"></div>
     <br />
-</div>
+</divi>
 `
 
 export default _VillageState;
