@@ -42,12 +42,12 @@ class _NeighborsWorker {
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
       });
+      offerNode.setNodeId(destinationId);
 
       const offerKey = await offerNode.createOffer();
 
       NodeStore.deleteNode(destinationId); // prune any lingering node with same id
 
-      offerNode.setNodeId(destinationId);
 
       this.sendOfferKey(nextHopNode, destinationId, offerKey);
       NodeStore.addNode(offerNode);
@@ -68,12 +68,14 @@ class _NeighborsWorker {
   async acceptOffer(offer, senderId, senderNode) {
     const {offerKey} = offer;
     try {
+      NodeStore.deleteNode(senderId); // prune any lingering node with same id
+
       const node = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
       });
+      node.setNodeId(senderId);
 
-      NodeStore.deleteNode(senderId); // prune any lingering node with same id
       NodeStore.addNode(node);
 
       const answerKey = await node.acceptOffer(offerKey);

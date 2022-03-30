@@ -105,8 +105,8 @@ class _MqttWorker {
           onConnection: (node) => this.parentOnConnection(node),
           onMessage: (data, node) => this.onMessage(data, node),
         });
-        NodeStore.addNode(node);
         node.setNodeId(message.fromId);
+        NodeStore.addNode(node);
 
         answerKey = await node.acceptOffer(message.offerKey);
 
@@ -149,10 +149,10 @@ class _MqttWorker {
           onConnection: (node) => this.parentOnConnection(node),
           onMessage: (data, node) => this.onMessage(data, node),
         });
+        node.setNodeId(toId);
         NodeStore.addNode(node);
         const offerKey = await node.createOffer();
 
-        node.setNodeId(toId);
 
         const offerMsg = {
           type: 'offer-key',
