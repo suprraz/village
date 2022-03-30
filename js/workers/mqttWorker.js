@@ -103,7 +103,7 @@ class _MqttWorker {
   }
 
   async onOffer(message) {
-    if(message.fromId !== Profile.getNodeID()) {
+    if(message.fromId !== Profile.getNodeID() && !NodeStore.getNodeById(message.fromId)) {
       let answerKey = null;
       try {
         const node = new _Node({
@@ -113,6 +113,8 @@ class _MqttWorker {
         NodeStore.addNode(node);
 
         answerKey = await node.acceptOffer(message.offerKey);
+
+        node.setNodeId(message.fromId);
 
         const answerMsg = {
           fromId: Profile.getNodeID(),
@@ -143,6 +145,32 @@ class _MqttWorker {
     }
   }
 
+  async sendOffer(toId) {
+    if(toId !== Profile.getNodeID() && !NodeStore.getNodeById(toId)) {
+      try {
+        const node = new _Node({
+          onConnection: (node) => this.parentOnConnection(node),
+          onMessage: (data, node) => this.onMessage(data, node),
+        });
+        NodeStore.addNode(node);
+        const offerKey = await node.createOffer();
+
+        node.setNodeId(toId);
+
+        const offerMsg = {
+          type: 'offer-key',
+          fromId: Profile.getNodeID(),
+          toId,
+          date: new Date(),
+          offerKey,
+        };
+
+        this.sendMessage(toId, offerMsg);
+      } catch (e) {
+        logMessage(e);
+      }
+    }
+  }
 
   registerListeners() {
     logMessage('MQTT Client connected.')
@@ -172,33 +200,6 @@ class _MqttWorker {
     }
 
     this.broadcastMessage(message);
-  }
-
-  async sendOffer(toId) {
-    let offerKey = null;
-
-    try {
-      const node = new _Node({
-        onConnection: (node) => this.parentOnConnection(node),
-        onMessage: (data, node) => this.onMessage(data, node),
-      });
-      NodeStore.addNode(node);
-      offerKey = await node.createOffer();
-
-      node.setNodeId(toId);
-
-      const offerMsg = {
-        type: 'offer-key',
-        fromId: Profile.getNodeID(),
-        toId,
-        date: new Date(),
-        offerKey,
-      };
-
-      this.sendMessage(toId, offerMsg);
-    } catch (e) {
-      logMessage(e);
-    }
   }
 
   channelAvailable(toId) {
