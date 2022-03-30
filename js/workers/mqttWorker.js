@@ -200,7 +200,11 @@ class _MqttWorker {
   }
 
   channelAvailable(toId) {
-    if(NodeStore.getNodes().length < config.maxConnectedNeighbors && !NodeStore.getNodeById(toId)) {
+    if(NodeStore.getNodeById(toId)) {
+      // Stale connection, kill it
+      NodeStore.deleteNode(toId);
+    }
+    if(NodeStore.getNodes().length < config.maxConnectedNeighbors) {
       this.sendMessage(toId, {
         type: 'channel-available',
         fromId: Profile.getNodeID(),

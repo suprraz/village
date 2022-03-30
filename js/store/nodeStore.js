@@ -27,7 +27,7 @@ class _NodeStore {
 
   deleteNode(nodeId) {
     const node = this.getNodeById(nodeId);
-    if(node && !node.pending) {
+    if(node) {
       node.terminate();
       this.nodes = this.nodes.filter((n) => n !== node);
     }
