@@ -36,7 +36,7 @@ class _NodeStore {
   prune() {
     this.nodes = this.nodes.filter(
       (node) =>
-        node.pc.connectionState in ['failed', 'disconnected', 'closed']
+        !(node.pc.connectionState in ['failed', 'disconnected', 'closed'])
     )
   }
 }
