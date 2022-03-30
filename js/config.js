@@ -14,6 +14,7 @@ export default {
   },
   maxConnectedNeighbors: 100,
   RTC: {
+    handshakeTimeout: 5 * 1000,
     iceServers: [
       {
         urls: "stun:openrelay.metered.ca:80"

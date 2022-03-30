@@ -34,11 +34,16 @@ class _NodeStore {
   }
 
   prune() {
-    this.nodes = this.nodes.filter(
+    // failed nodes timed out while connecting or broke link after connection
+    const failedNodes = this.nodes.filter(
       (node) =>
-        !['failed', 'disconnected', 'closed']
-          .includes(node.pc.connectionState)
-    )
+        ['failed', 'disconnected', 'closed'].includes(node.pc.connectionState) ||
+        (!node.pending && (node.pc.connectionState !== 'connected'))
+    );
+
+    failedNodes.map((node) => node.terminate());
+
+    this.nodes = this.nodes.filter((node) => !failedNodes.includes(node));
   }
 }
 

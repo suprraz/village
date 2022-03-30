@@ -17,9 +17,18 @@ class _Node {
     };
 
     this.pending = true;
+    this.setHandshakeTimeout();
 
     const RTCPeerConnection = window.RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection;
     this.pc = new RTCPeerConnection(config.RTC);
+  }
+
+  setHandshakeTimeout() {
+    setTimeout(() => {
+      logMessage(`Connection attempt to ${this.profile.nodeId} timed out.  Closing.` );
+      this.pending = false;
+      MessageRouter.onNetworkChange();
+    }, config.RTC.handshakeTimeout);
   }
 
   terminate() {
