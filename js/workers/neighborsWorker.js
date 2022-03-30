@@ -37,8 +37,9 @@ class _NeighborsWorker {
   async requestConnection(nextHopNode, destinationId) {
     try {
       logMessage(`Requesting connection to ${destinationId}`);
+      NodeStore.deleteNode(destinationId); // prune any lingering node with same id
 
-     const offerNode = new _Node({
+      const offerNode = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
       });
@@ -46,7 +47,6 @@ class _NeighborsWorker {
 
       const offerKey = await offerNode.createOffer();
 
-      NodeStore.deleteNode(destinationId); // prune any lingering node with same id
 
 
       this.sendOfferKey(nextHopNode, destinationId, offerKey);
