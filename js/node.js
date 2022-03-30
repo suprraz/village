@@ -25,9 +25,11 @@ class _Node {
 
   setHandshakeTimeout() {
     setTimeout(() => {
-      logMessage(`Connection attempt to ${this.profile.nodeId} timed out.  Closing.` );
-      this.pending = false;
-      MessageRouter.onNetworkChange();
+      if(this.pending === true) {
+        logMessage(`Connection attempt to ${this.profile.nodeId} timed out.  Closing.`);
+        this.pending = false;
+        MessageRouter.onNetworkChange();
+      }
     }, config.RTC.handshakeTimeout);
   }
 

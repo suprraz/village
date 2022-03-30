@@ -27,6 +27,7 @@ class _MqttWorker {
     if(this.client && this.client.connected) {
       this.broadcastAvailable();
     } else {
+      logMessage('Initializing MQTT connection.')
       try {
         this.connect();
 
@@ -179,8 +180,6 @@ class _MqttWorker {
     this.client.on('error', (err) => {
       logMessage('MQTT Connection error: ', err);
       this.client.end();
-      // try to reconnect
-      setTimeout(this.seekNodes, 2000);
     });
 
     this.client.on('reconnect', () => {
