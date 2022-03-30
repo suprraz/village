@@ -9,7 +9,6 @@ class _MqttWorker {
   constructor() {
     this.parentOnConnection = (node) => MessageRouter.onConnection(node);
     this.parentOnMessage = (data, node) => MessageRouter.onMessage(data, node);
-    this.connectingNode = null;
     this.client = null;
     this.broadcastTopic = `mqtt/${config.appNameConcat}/bcast`;
     this.msgTopic = `mqtt/${config.appNameConcat}/msg`;
@@ -23,16 +22,20 @@ class _MqttWorker {
     }
   }
 
-  init() {
-    try {
-      this.connect();
+  seekNodes() {
+    if(this.client && this.client.connected) {
+      this.broadcastAvailable();
+    } else {
+      try {
+        this.connect();
 
-      this.client.on('connect', () => {
-        this.registerListeners();
-        this.broadcastAvailable();
-      });
-    } catch (e) {
-      throw e;
+        this.client.on('connect', () => {
+          this.registerListeners();
+          this.broadcastAvailable();
+        });
+      } catch (e) {
+        throw e;
+      }
     }
   }
 
@@ -131,7 +134,9 @@ class _MqttWorker {
       try {
         const connectionObj = JSON.parse(atob(message.answerKey));
 
-        this.connectingNode.setRemoteDescription(connectionObj);
+        const node = NodeStore.getNodeById(message.fromId);
+
+        node.setRemoteDescription(connectionObj);
       } catch (e) {
         logError(e);
       }
@@ -151,7 +156,7 @@ class _MqttWorker {
       logMessage('MQTT Connection error: ', err);
       this.client.end();
       // try to reconnect
-      setTimeout(this.init, 2000);
+      setTimeout(this.seekNodes, 2000);
     });
 
     this.client.on('reconnect', () => {
@@ -173,12 +178,14 @@ class _MqttWorker {
     let offerKey = null;
 
     try {
-      this.connectingNode = new _Node({
+      const node = new _Node({
         onConnection: (node) => this.parentOnConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
       });
-      NodeStore.addNode(this.connectingNode);
-      offerKey = await this.connectingNode.createOffer();
+      NodeStore.addNode(node);
+      offerKey = await node.createOffer();
+
+      node.setNodeId(toId);
 
       const offerMsg = {
         type: 'offer-key',
@@ -206,8 +213,7 @@ class _MqttWorker {
   }
 
   channelRequest(toId) {
-    if(NodeStore.getNodes().length === 0 && this.connectingNode === null) {
-      this.connectingNode = {};
+    if(NodeStore.getNodes().length === 0) {
       this.sendMessage(toId, {
         type: 'channel-request',
         fromId: Profile.getNodeID(),

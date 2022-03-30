@@ -47,7 +47,7 @@ class _Village {
     if(showLanding) {
       AppStore.runApp(LandingApp);
     } else {
-      this.coreApps.MqttWorker.init();
+      this.coreApps.MqttWorker.seekNodes();
     }
 
     this.coreApps.AppListApp.updateAppList();

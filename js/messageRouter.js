@@ -55,7 +55,7 @@ class _MessageRouter {
   onNetworkChange() {
     NodeStore.prune();
     if(NodeStore.getNodes().length === 0) {
-      this.coreApps.MqttWorker.broadcastAvailable();
+      this.coreApps.MqttWorker.seekNodes();
     }
     this.coreApps.VillageState.refresh();
   }
@@ -67,7 +67,7 @@ class _MessageRouter {
   onCloseApp(sourceAppName) {
     if(sourceAppName === 'LandingApp') {
       Settings.update('showLanding', false);
-      this.coreApps.MqttWorker.init();
+      this.coreApps.MqttWorker.seekNodes();
     }
     this.coreApps.Sandbox.stop();
   }
@@ -85,7 +85,7 @@ class _MessageRouter {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         if(NodeStore.getNodes().length === 0) {
-          this.coreApps.MqttWorker.broadcastAvailable();
+          this.coreApps.MqttWorker.seekNodes();
         }
       }
     }, false);
