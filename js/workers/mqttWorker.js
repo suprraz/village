@@ -13,18 +13,13 @@ class _MqttWorker {
     this.broadcastTopic = `mqtt/${config.appNameConcat}/bcast`;
     this.msgTopic = `mqtt/${config.appNameConcat}/msg`;
     this.targetNodeId = null;
+    this.initialized = false;
 
     this.mqttBroker = config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
   }
 
-  disconnect() {
-    if(this.client) {
-      this.client.end();
-    }
-  }
-
   seekNodes() {
-    if(this.client && this.client.connected) {
+    if(this.client) {
       this.broadcastAvailable();
     } else {
       logMessage('Initializing MQTT connection.')
@@ -32,8 +27,11 @@ class _MqttWorker {
         this.connect();
 
         this.client.on('connect', () => {
-          this.registerListeners();
-          this.broadcastAvailable();
+          if(!this.initialized) {
+            this.registerListeners();
+            this.broadcastAvailable();
+          }
+          this.initialized = true;
         });
       } catch (e) {
         throw e;
@@ -179,7 +177,6 @@ class _MqttWorker {
 
     this.client.on('error', (err) => {
       logMessage('MQTT Connection error: ', err);
-      this.client.end();
     });
 
     this.client.on('reconnect', () => {
