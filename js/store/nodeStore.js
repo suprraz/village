@@ -17,6 +17,7 @@ class _NodeStore {
   }
 
   getNodes() {
+    this.prune();
     return this.nodes;
   }
 
