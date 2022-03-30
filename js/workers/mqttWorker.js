@@ -153,7 +153,6 @@ class _MqttWorker {
         NodeStore.addNode(node);
         const offerKey = await node.createOffer();
 
-
         const offerMsg = {
           type: 'offer-key',
           fromId: Profile.getNodeID(),
