@@ -42,14 +42,8 @@ class _MqttWorker {
 
   connect() {
     const options = {
-      keepalive: 60,
+      ...config.mqttOptions,
       clientId: Profile.getNodeID(),
-      protocolId: 'MQTT',
-      protocolVersion: 4,
-      clean: true,
-      reconnectPeriod: 1000,
-      connectTimeout: 30 * 1000,
-      useSSL: true,
       will: {
         topic: `${this.nodeTopic}/${Profile.getNodeID()}`,
         payload: JSON.stringify({
@@ -112,10 +106,10 @@ class _MqttWorker {
           onMessage: (data, node) => this.onMessage(data, node),
         });
         NodeStore.addNode(node);
+        node.setNodeId(message.fromId);
 
         answerKey = await node.acceptOffer(message.offerKey);
 
-        node.setNodeId(message.fromId);
 
         const answerMsg = {
           fromId: Profile.getNodeID(),
