@@ -13,7 +13,7 @@ class _MessageRouter {
 
   onMessage (data, node) {
 
-    const {msg, code, apps, destinationId, senderId, profile, offer, answer} = data;
+    const {msg, apps, destinationId, senderId, profile, offer, answer} = data;
 
     if(destinationId !== null && destinationId !== Profile.getNodeID()) {
       // forward message
@@ -25,9 +25,6 @@ class _MessageRouter {
       }
     } else if (msg && senderId) {
       this.coreApps.Chat.messageReceived(senderId, msg);
-    } else if (code) {
-      this.coreApps.Editor.updateCode(code);
-      eval(code);
     } else if (apps) {
       this.coreApps.AppListApp.onAvailableApps(apps);
     } else if (profile) {

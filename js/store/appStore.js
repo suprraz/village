@@ -20,15 +20,16 @@ class _AppStore {
   }
 
   installApp(app) {
-    //install and register app
+    //install/replace
     if(this.verifyApp(app)) {
       const apps = this.getInstalledApps();
 
       app.installDate = new Date();
 
-      apps.push(app);
+      const updatedApps = apps.filter((a) => a.name !== app.name );
+      updatedApps.push(app);
 
-      localStorage.setItem('installedApps', JSON.stringify(apps));
+      localStorage.setItem('installedApps', JSON.stringify(updatedApps));
     } else {
       alert('Error: Invalid app');
 

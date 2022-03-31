@@ -1,5 +1,5 @@
-import NodeStore from "../store/nodeStore.js";
 import AppStore from "../store/appStore.js";
+import MessageRouter from "../messageRouter.js";
 
 class _Editor {
   constructor({AppListApp}) {
@@ -14,32 +14,22 @@ class _Editor {
     this.registerListeners();
   }
 
-  updateCode(code) {
-    document.getElementById('editor').value = code;
-  }
+  testApp() {
+    const name = document.getElementById('appName').value;
+    const code = document.getElementById('editor').value;
 
-  runLocal() {
     document.getElementById('editorlog').innerText = 'Running locally... ' + (new Date());
-    const code = document.getElementById('editor').value;
 
-    eval(code);
-  }
-
-  runRemote() {
-    document.getElementById('editorlog').innerText = 'Running remote... ' + (new Date());
-
-    const code = document.getElementById('editor').value;
-
-    NodeStore.broadcast({code});
+    MessageRouter.onRunApp({code, name});
   }
 
 
-  createApp() {
-    const appName = document.getElementById('appName').value;
+  saveApp() {
+    const name = document.getElementById('appName').value;
     const code = document.getElementById('editor').value;
 
     try {
-      AppStore.installApp({name: appName, code});
+      AppStore.installApp({name, code});
       this.AppListApp.updateAppList();
       this.AppListApp.sendApps();
     } catch (e) {
@@ -48,9 +38,8 @@ class _Editor {
   }
 
   registerListeners() {
-    document.getElementById('createApp').addEventListener('click', () => this.createApp());
-    document.getElementById('runLocal').addEventListener('click', () => this.runLocal());
-    document.getElementById('runRemote').addEventListener('click', () => this.runRemote());
+    document.getElementById('saveApp').addEventListener('click', () => this.saveApp());
+    document.getElementById('testApp').addEventListener('click', () => this.testApp());
   }
 }
 
@@ -65,9 +54,8 @@ const editorHtml = `
       <input type="text" class="input" name="appName" id="appName" className="my-1" placeholder="New app name"/>
   
       <div class="is-flex is-flex-direction-row buttons my-2">
-          <button class="button" id="createApp">Create App</button>
-          <button class="button" id="runLocal">Local</button>
-          <button class="button" id="runRemote">Remote</button>
+          <button class="button" id="saveApp">Save App</button>
+          <button class="button" id="testApp">Test App</button>
       </div>
     </div>
 </div>
