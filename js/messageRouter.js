@@ -56,8 +56,8 @@ class _MessageRouter {
     this.coreApps.VillageState.refresh();
   }
 
-  onRunApp(app) {
-    this.coreApps.Sandbox.run(app);
+  onRunApp(app, params) {
+    this.coreApps.Sandbox.run(app, params);
   }
 
   onCloseApp(sourceAppName) {
@@ -74,6 +74,8 @@ class _MessageRouter {
       if(data) {
         if(!!data.closeApp) {
           this.onCloseApp(data.sourceApp);
+        } else if (!!data.saveApp) {
+          this.coreApps.Editor.installApp(data.app);
         }
       }
     }, false);

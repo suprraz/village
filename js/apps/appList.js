@@ -1,5 +1,7 @@
 import AppStore from "../store/appStore.js";
 import NodeStore from "../store/nodeStore.js";
+import MessageRouter from "../messageRouter.js";
+import AceEditorApp from "./sandboxed/aceEditorApp.js";
 
 
 class _AppList {
@@ -96,6 +98,8 @@ class _AppList {
 
       editor.value = app.code;
       appName.value = app.name;
+
+      MessageRouter.onRunApp(AceEditorApp, app);
     };
 
     const appRemoveBtn = document.createElement('button');

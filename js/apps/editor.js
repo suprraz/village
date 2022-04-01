@@ -1,5 +1,7 @@
 import AppStore from "../store/appStore.js";
 import MessageRouter from "../messageRouter.js";
+import AceEditor from "./sandboxed/aceEditorApp.js";
+import {logError} from "../utils/logger.js";
 
 class _Editor {
   constructor({AppListApp}) {
@@ -20,21 +22,24 @@ class _Editor {
 
     document.getElementById('editorlog').innerText = 'Running locally... ' + (new Date());
 
-    MessageRouter.onRunApp({code, name});
+    MessageRouter.onRunApp( AceEditor, {code, name});
   }
 
+  installApp(app) {
+    try {
+      AppStore.installApp(app);
+      this.AppListApp.updateAppList();
+      this.AppListApp.sendApps();
+    } catch (e) {
+      logError(e);
+    }
+  }
 
   saveApp() {
     const name = document.getElementById('appName').value;
     const code = document.getElementById('editor').value;
 
-    try {
-      AppStore.installApp({name, code});
-      this.AppListApp.updateAppList();
-      this.AppListApp.sendApps();
-    } catch (e) {
-      console.log(e);
-    }
+    this.installApp({name, code});
   }
 
   registerListeners() {

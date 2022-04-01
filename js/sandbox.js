@@ -25,10 +25,16 @@ class _Sandbox {
     }
   }
 
-  run(app) {
+  run(app, params) {
     this.sanitize();
+
+    const run = `      
+      let params = ${JSON.stringify(params || {})};
+            
+      ${app.code};     
+    `;
     this.iframe.onload = () => {
-      this.iframe.contentWindow.postMessage({run: app.code}, '*');
+      this.iframe.contentWindow.postMessage({run}, '*');
     }
   }
 
@@ -42,25 +48,24 @@ const sandboxHtml = `
     <div class="hero-body">
       <button class="modal-close is-large" aria-label="close"></button>
       <iframe sandbox="allow-popups allow-scripts allow-popups-to-escape-sandbox allow-modals"
-              height="100" width="100%" src="about:blank" name="sandboxIframe"
-              id="sandboxIframe" srcdoc="
-                  <!DOCTYPE html>
-                  <html>
-                  <head>
-                      <script>
-                          window.addEventListener('message', (event) => {
-                              const data = event.data;
-                              if(data && data.run) {
-                                  eval(data.run);
-                              }
-                          }, false);
-                      </script>
-                  </head>
-                  <body>
-                    <div style='background-color: #0a0a0a; height: 100%'></div>
-                  </body>
-                  </html>">
-  
+        height="100" width="100%" src="about:blank" name="sandboxIframe"
+        id="sandboxIframe" srcdoc="
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <script>
+                  window.addEventListener('message', (event) => {
+                      const data = event.data;
+                      if(data && data.run) {
+                          eval(data.run);
+                      }
+                  }, false);
+              </script>
+          </head>
+          <body>
+            <div style='background-color: #0a0a0a; height: 100%'></div>
+          </body>
+          </html>">
       </iframe>
     </div>
 </div>`;
