@@ -1,4 +1,5 @@
 import NodeStore from "../store/nodeStore.js";
+import Profile from "../store/profile.js";
 
 class _VillageState {
   constructor() {
@@ -8,6 +9,7 @@ class _VillageState {
     this.villageStateEl = document.getElementById('villageState');
     this.nodeStateList = document.getElementById('nodeStateList');
     this.livePeersCount = document.getElementById('livePeersCount');
+    this.nodeId = document.getElementById('nodeId');
 
     this.refresh();
   }
@@ -29,6 +31,8 @@ class _VillageState {
     })
 
     this.livePeersCount.innerText = `${nodes.filter((node) => node.pc.connectionState === 'connected').length} / ${nodes.length}`;
+
+    this.nodeId.innerText = `${Profile.getNodeID()}`;
   }
 
   createNodeStateDiv(node){
@@ -60,9 +64,13 @@ class _VillageState {
 const villageStateHtml = `
 <div id="villageState">
     <p class="title">Village State</p>
-    <p class="subtitle">Connections: 
-        <span id="livePeersCount"></span>
-    </p>
+    <div class="subtitle" id="nodeId"></div>
+    <div class="subtitle"> 
+        Connections: <span id="livePeersCount"></span>
+    </div>
+    
+    
+
     <div id="nodeStateList" class="is-flex is-flex-direction-column"></div>
     <br />
 </divi>
