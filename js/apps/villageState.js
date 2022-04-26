@@ -60,7 +60,6 @@ class _VillageState {
 
 }
 
-
 const villageStateHtml = `
 <div id="villageState">
     <p class="title">Village State</p>
@@ -68,9 +67,7 @@ const villageStateHtml = `
     <div class="subtitle"> 
         Connections: <span id="livePeersCount"></span>
     </div>
-    
-    
-
+   
     <div id="nodeStateList" class="is-flex is-flex-direction-column"></div>
     <br />
 </divi>
