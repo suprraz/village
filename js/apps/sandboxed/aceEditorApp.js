@@ -80,13 +80,6 @@ class _AceEditor {
     
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.addEventListener('click', () => this.save());
-    
-    setTimeout(() => {
-      this.editor.resize();
-      this.editor.renderer.updateFull();
-      this.editor.setAutoScrollEditorIntoView(true);
-    }, 1000)
-
   }
   
   save() {
