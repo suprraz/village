@@ -21,9 +21,7 @@ export default {
         "urls": "stun:global.stun.twilio.com:3478?transport=udp"
       },
       {
-        urls: "turn:openrelay.metered.ca:443",
-        username: "openrelayproject",
-        credential: "openrelayproject"
+        "url": "stun:stun.l.google.com:19302"
       },
     ]
   }
