@@ -222,6 +222,7 @@ class _MqttWorker {
   }
 
   sendMessage(toId, message) {
+    logMessage(`Sending message: ${this.msgTopic}/${toId} Body: ${JSON.stringify(message)}`);
     this.client.publish(`${this.msgTopic}/${toId}`, JSON.stringify(message), {qos: 1, retain: false});
   }
 

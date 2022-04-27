@@ -4,14 +4,9 @@ import NodeStore from "./nodeStore.js";
 class _Profile {
   constructor() {
     this.nodeId = null;
-    const storedNodeId = localStorage.getItem('nodeId');
 
-    if(!storedNodeId) {
-      this.nodeId = uuidv4();
-      localStorage.setItem('nodeId', this.nodeId);
-    } else {
-      this.nodeId = storedNodeId;
-    }
+    // each browser instance gets a unique ID
+    this.nodeId = uuidv4();
   }
 
   getNodeID() {
