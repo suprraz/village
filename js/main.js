@@ -11,16 +11,26 @@ import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
 import LandingApp from "./apps/sandboxed/landingApp.js";
 import _Sandbox from "./sandbox.js";
+import _InvoiceStore from "./store/invoiceStore.js";
 
 
 class _Village {
   constructor() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has('encryptionKey')) {
+      document.getElementById('main').style = 'display: none;'
+      window.parent.postMessage({closeApp: true, sourceApp: 'PaymentApp'},'*');
+      window.parent.postMessage({decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appName: urlParams.get('appName')},'*');
+      return;
+    }
+
     const AddPeer = new _AddPeer();
     const MqttWorker = new _MqttWorker();
     const AppListApp = new _AppList();
     const Editor = new _Editor({AppListApp});
     const Chat = new _Chat();
     const NeighborsWorker = new _NeighborsWorker();
+    const InvoiceStore = new _InvoiceStore();
     const VillageState = new _VillageState();
     const Sandbox = new _Sandbox();
 
@@ -32,12 +42,12 @@ class _Village {
       MqttWorker,
       NeighborsWorker,
       VillageState,
-      Sandbox
+      Sandbox,
+      InvoiceStore
     };
 
     MessageRouter.init(this.coreApps, (node) => this.onConnection(node));
 
-    const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('offerKey')) {
       this.coreApps.AddPeer.run();
     }

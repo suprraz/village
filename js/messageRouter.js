@@ -60,6 +60,14 @@ class _MessageRouter {
     this.coreApps.Sandbox.run(app, params);
   }
 
+  onBuyApp(app) {
+    this.coreApps.InvoiceStore.purchaseApp(app);
+  }
+
+  onInstallApp(app) {
+    this.coreApps.AppListApp.installApp(app);
+  }
+
   onCloseApp(sourceAppName) {
     if(sourceAppName === 'LandingApp') {
       Settings.update('showLanding', false);
@@ -76,6 +84,8 @@ class _MessageRouter {
           this.onCloseApp(data.sourceApp);
         } else if (!!data.saveApp) {
           this.coreApps.Editor.installApp(data.app);
+        } else if(!!data.encryptionKey) {
+          this.coreApps.InvoiceStore.updateInvoice(data.appName, data.encryptionKey)
         }
       }
     }, false);

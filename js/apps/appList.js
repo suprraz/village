@@ -2,7 +2,7 @@ import AppStore from "../store/appStore.js";
 import NodeStore from "../store/nodeStore.js";
 import MessageRouter from "../messageRouter.js";
 import AceEditorApp from "./sandboxed/aceEditorApp.js";
-
+import {logError} from "../utils/logger.js";
 
 class _AppList {
   constructor() {
@@ -13,6 +13,17 @@ class _AppList {
 
     this.appListEl = document.getElementById('appList');
 
+  }
+
+  installApp(app) {
+    try {
+      AppStore.installApp(app)
+      this.availableApps = this.availableApps.filter((availableApp) => !availableApp.name === app.name);
+      this.updateAppList()
+      this.sendApps();
+    } catch (e) {
+      logError(e);
+    }
   }
 
   onAvailableApps(apps) {
@@ -131,24 +142,15 @@ class _AppList {
     const buttonsDiv = document.createElement('div');
     buttonsDiv.className = "buttons card-content";
 
-    const appRunBtn = document.createElement('button');
-    appRunBtn.className = "button is-primary appRunButton";
-    appRunBtn.innerText = "Run";
-    appRunBtn.onclick = () => { AppStore.runApp(app)};
+    const appBuyBtn = document.createElement('button');
+    appBuyBtn.className = "button is-primary appBuyButton";
+    appBuyBtn.innerText = "Buy";
+    appBuyBtn.onclick = () => MessageRouter.onBuyApp(app);;
 
     const appInstallBtn = document.createElement('button');
     appInstallBtn.className = "button appInstallButton";
     appInstallBtn.innerText = "Install";
-    appInstallBtn.onclick = () => {
-      try {
-        AppStore.installApp(app)
-        this.availableApps = this.availableApps.filter((availableApp) => !availableApp.name === app.name);
-        this.updateAppList()
-        this.sendApps();
-      } catch (e) {
-        console.error(e);
-      }
-    };
+    appInstallBtn.onclick = () => this.installApp(app);
 
     const appEditBtn = document.createElement('button');
     appEditBtn.className = "button appEditButton";
@@ -161,9 +163,9 @@ class _AppList {
       appName.value = app.name;
     };
 
-    buttonsDiv.appendChild(appRunBtn);
-    buttonsDiv.appendChild(appInstallBtn);
-    buttonsDiv.appendChild(appEditBtn);
+    buttonsDiv.appendChild(appBuyBtn);
+    // buttonsDiv.appendChild(appInstallBtn);
+    // buttonsDiv.appendChild(appEditBtn);
 
     appDiv.appendChild(appNameDiv);
     appDiv.appendChild(buttonsDiv);

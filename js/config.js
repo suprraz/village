@@ -9,10 +9,11 @@ export default {
     protocolVersion: 4,
     clean: true,
     reconnectPeriod: 1000,
-    connectTimeout: 30 * 1000,
+    connectTimeout: 30 * 1000,   // 30 sec
     useSSL: true,
   },
   maxConnectedNeighbors: 100,
+  invoiceExpiration: 5*60*1000,  // 5 min
   RTC: {
     handshakeTimeout: 15 * 1000,
     iceServers: [

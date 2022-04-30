@@ -25,7 +25,20 @@ class _Sandbox {
     }
   }
 
+  runUnrestricted(url) {
+    this.sanitize();
+
+    this.iframe.src = url;
+    this.iframe.removeAttribute('sandbox');
+    this.iframe.removeAttribute('srcdoc');
+  }
+
   run(app, params) {
+    if(params && params.url) {
+      this.runUnrestricted(params.url);
+      return;
+    }
+
     this.sanitize();
 
     const run = `      
