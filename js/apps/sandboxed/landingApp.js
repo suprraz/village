@@ -80,7 +80,7 @@ class _Landing {
        landing.removeAttribute('style');
        placeholder.remove();
     };
-    link.setAttribute("href", 'https://unpkg.com/bulma-prefers-dark@0.1.0-beta.1/css/bulma-prefers-dark.css');
+    link.setAttribute("href", 'https://unpkg.com/bulmaswatch/slate/bulmaswatch.min.css');
     document.getElementsByTagName("head")[0].appendChild(link);
 
     this.registerListeners();

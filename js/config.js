@@ -18,8 +18,11 @@ export default {
     handshakeTimeout: 15 * 1000,
     iceServers: [
       {
-        urls: "stun:openrelay.metered.ca:80",
+        "urls": "stun:global.stun.twilio.com:3478?transport=udp"
       },
+      // {
+      //   urls: "stun:openrelay.metered.ca:80",
+      // },
       {
         urls: "turn:openrelay.metered.ca:80",
         username: "openrelayproject",
