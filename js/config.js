@@ -16,28 +16,19 @@ export default {
   invoiceExpiration: 5*60*1000,  // 5 min
   RTC: {
     handshakeTimeout: 15 * 1000,
-    iceServers: [
-      {
-        "urls": "stun:global.stun.twilio.com:3478?transport=udp"
-      },
-      // {
-      //   urls: "stun:openrelay.metered.ca:80",
-      // },
-      // {
-      //   urls: "turn:openrelay.metered.ca:80",
-      //   username: "openrelayproject",
-      //   credential: "openrelayproject",
-      // },
-      // {
-      //   urls: "turn:openrelay.metered.ca:443",
-      //   username: "openrelayproject",
-      //   credential: "openrelayproject",
-      // },
-      {
-        urls: "turn:openrelay.metered.ca:443?transport=tcp",
-        username: "openrelayproject",
-        credential: "openrelayproject",
-      },
-    ]
+    iceServers: [{
+      urls: [ "stun:ws-turn1.xirsys.com" ]
+    }, {
+      username: "d46e0JMasUOXnul7UhpIdiwfN6CAZcHm2BRXQ79o8uiHDcKfVUljY2QjTKhq84B9AAAAAGJ-xm9zdXBycmF6",
+      credential: "6d7b1f32-d2ff-11ec-9699-0242ac140004",
+      urls: [
+        "turn:ws-turn1.xirsys.com:80?transport=udp",
+        "turn:ws-turn1.xirsys.com:3478?transport=udp",
+        "turn:ws-turn1.xirsys.com:80?transport=tcp",
+        "turn:ws-turn1.xirsys.com:3478?transport=tcp",
+        "turns:ws-turn1.xirsys.com:443?transport=tcp",
+        "turns:ws-turn1.xirsys.com:5349?transport=tcp"
+      ]
+    }]
   }
 }
