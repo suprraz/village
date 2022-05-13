@@ -5,7 +5,7 @@ const AceEditorHtml = \`
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Editor</title>
   <link rel="stylesheet" type="text/css"  href="https://unpkg.com/bulma@0.9.3/css/bulma.min.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/slate/bulmaswatch.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
   <style type="text/css" media="screen">
       #editor {
           position: absolute;
