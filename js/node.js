@@ -2,6 +2,7 @@ import { logMessage, logError } from './utils/logger.js';
 import Profile from "./store/profile.js";
 import MessageRouter from "./messageRouter.js";
 import config from "./config.js";
+import NodeStore from "./store/nodeStore.js";
 
 class _Node {
   constructor({onConnection, onMessage}) {
@@ -44,6 +45,10 @@ class _Node {
   }
 
   setNodeId(nodeId) {
+    if(NodeStore.getNodeById(nodeId)) {
+      logError(`Duplicate node with same id: ${nodeId}`);
+      throw new Error(`Duplicate node with same id: ${nodeId}`);
+    }
     this.profile.nodeId = nodeId;
   }
 
@@ -126,14 +131,17 @@ class _Node {
       this.pc.setRemoteDescription(connectionObj);
       this.pc.createAnswer().then((answerDesc) => {
         this.pc.setLocalDescription(answerDesc);
-        logMessage(`Local Description: \n${JSON.stringify(answerDesc)}`);
       })
 
     });
   }
 
   setRemoteDescription(connectionObj) {
-    this.pc.setRemoteDescription(connectionObj);
+    try {
+      this.pc.setRemoteDescription(connectionObj);
+    } catch (e) {
+      logError(e);
+    }
   }
 
   send(msgObj) {
@@ -145,7 +153,6 @@ class _Node {
           ...msgObj
         });
 
-        logMessage(msg);
         this.dataChannel.send(msg);
 
       } catch (e) {

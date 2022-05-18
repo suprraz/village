@@ -5,21 +5,43 @@ import {logError, logMessage} from "../utils/logger.js";
 import _Node from "../node.js";
 
 class _NeighborsWorker {
-  //todo: figure out what race condition is causing this process to fail intermittently
-  //when all 3 neighbors reload concurrently the fresh state has a higher success rate
+  constructor() {
+    this.waiting = [];
+    this.processing = [];
+  }
 
-  onNode(node) {
-    const desiredNeighborIds = node.profile.neighborList.filter(
-      (neighborId) => {
-        return neighborId !== null &&
-          neighborId !== Profile.getNodeID() &&
-          !NodeStore.getNodeById(neighborId)
-      }
+  enqueue(neighbors) {
+    logMessage(`Neighbor list received: ${neighbors}`);
+
+    const newNeighbors = neighbors.filter((nodeId) =>
+      !this.waiting.find((n) => n === nodeId) &&
+      !this.processing.find((n) => n === nodeId) &&
+      !NodeStore.getNodeById(nodeId) &&
+      nodeId !== Profile.getNodeID()
     );
 
-    logMessage(desiredNeighborIds);
+    logMessage(`Queueing neighbors: ${newNeighbors}`);
 
-    desiredNeighborIds.map(neighborId => this.requestConnection(node, neighborId))
+    if(newNeighbors.length) {
+      this.waiting.push(...newNeighbors);
+      this.process();
+    }
+  }
+
+  process() {
+    if(this.processing.length) {
+      return;
+    }
+
+    const candidateId = this.waiting.pop();
+    this.processing.push(candidateId);
+
+    this.requestConnection(candidateId)
+      .then(() => this.process());
+  }
+
+  onNode(node) {
+    this.enqueue(node.profile.neighborList);
   }
 
   onMessage(e, node) {
@@ -34,10 +56,27 @@ class _NeighborsWorker {
     }
   }
 
-  async requestConnection(nextHopNode, destinationId) {
+  complete(neighborId) {
+    this.processing = this.processing.filter( p => p !== neighborId);
+    this.process();
+  }
+
+  async requestConnection(destinationId) {
+    const nextHopNode = NodeStore.getNextHopNode(destinationId);
+    if(!nextHopNode) {
+      this.complete(destinationId);
+      return; // no route to destination
+    }
+
+    const existingNode = NodeStore.getNodeById(destinationId);
+    if( existingNode && !NodeStore.isDisconnected(existingNode) ) {
+      this.complete(destinationId);
+      return;
+    }
+
     try {
       logMessage(`Requesting connection to ${destinationId}`);
-      NodeStore.deleteNode(destinationId); // prune any lingering node with same id
+      NodeStore.deleteNodesById(destinationId); // prune any lingering node with same id
 
       const offerNode = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
@@ -46,12 +85,16 @@ class _NeighborsWorker {
       offerNode.setNodeId(destinationId);
 
       const offerKey = await offerNode.createOffer();
-
-
-
-      this.sendOfferKey(nextHopNode, destinationId, offerKey);
-      NodeStore.addNode(offerNode);
+      if(NodeStore.getNodeById(destinationId)) {
+        this.complete(destinationId);
+        logMessage(`Duplicate Node after create offer: ${destinationId}`);
+        offerNode.terminate();
+      } else {
+        this.sendOfferKey(nextHopNode, destinationId, offerKey);
+        NodeStore.addNode(offerNode);
+      }
     } catch (e) {
+      this.complete(destinationId);
       logMessage(e);
     }
   }
@@ -66,9 +109,16 @@ class _NeighborsWorker {
   }
 
   async acceptOffer(offer, senderId, senderNode) {
+    const existingNode = NodeStore.getNodeById(senderId);
+    if( existingNode && existingNode.pending ) {
+      this.complete(senderId);
+      logMessage("Connection already initiated by other side")
+      return;
+    }
+
     const {offerKey} = offer;
     try {
-      NodeStore.deleteNode(senderId); // prune any lingering node with same id
+      NodeStore.deleteNodesById(senderId); // prune any lingering node with same id
 
       const node = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
@@ -86,7 +136,9 @@ class _NeighborsWorker {
         destinationId: senderId
       });
 
+      this.complete(senderId);
     } catch (e) {
+      this.complete(senderId);
       throw new Error(e);
     }
   }
@@ -99,7 +151,9 @@ class _NeighborsWorker {
       if(offerNode) {
         offerNode.setRemoteDescription(connectionObj);
       }
+      this.complete(senderId);
     } catch(e) {
+      this.complete(senderId);
       logError(e);
     }
   }

@@ -76,7 +76,6 @@ class _MqttWorker {
   }
 
   onNotification(topic, payload) {
-    logMessage([topic, payload].join(": "));
     if(topic === `${this.msgTopic}/${Profile.getNodeID()}`) {
       try {
         const message = JSON.parse(payload);
@@ -162,7 +161,7 @@ class _MqttWorker {
 
         this.sendMessage(toId, offerMsg);
       } catch (e) {
-        logMessage(e);
+        logError(e);
       }
     }
   }
@@ -197,7 +196,7 @@ class _MqttWorker {
   channelAvailable(toId) {
     if(NodeStore.getNodeById(toId)) {
       // Stale connection, kill it
-      NodeStore.deleteNode(toId);
+      NodeStore.deleteNodesById(toId);
     }
     if(NodeStore.getNodes().length < config.maxConnectedNeighbors) {
       this.sendMessage(toId, {
@@ -222,11 +221,12 @@ class _MqttWorker {
   }
 
   sendMessage(toId, message) {
-    logMessage(`Sending message: ${this.msgTopic}/${toId} Body: ${JSON.stringify(message)}`);
+    logMessage(`Sending message: ${this.msgTopic}/${toId}`);
     this.client.publish(`${this.msgTopic}/${toId}`, JSON.stringify(message), {qos: 1, retain: false});
   }
 
   broadcastMessage(message) {
+    logMessage(`Broadcasting message: ${this.broadcastTopic}/${Profile.getNodeID()}`);
     this.client.publish(`${this.broadcastTopic}/${Profile.getNodeID()}`, JSON.stringify(message), {qos: 0, retain: false});
   }
 
