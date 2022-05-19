@@ -30,7 +30,7 @@ class _MessageRouter {
     } else if (profile) {
       node.setProfile(profile);
       this.onNetworkChange();
-      this.coreApps.NeighborsWorker.onNode(node);
+      this.coreApps.NeighborsWorker.enqueue(node.profile.neighborList);
     } else if (offer && senderId) {
       logMessage('accepting automated offer')
       this.coreApps.NeighborsWorker.acceptOffer(offer, senderId, node);

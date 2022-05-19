@@ -150,7 +150,8 @@ class _Node {
         const msg = JSON.stringify({
           destinationId: this.profile.nodeId,  //overridable
           senderId: Profile.getNodeID(),
-          ...msgObj
+          ...msgObj,
+          version: config.appVersion
         });
 
         this.dataChannel.send(msg);

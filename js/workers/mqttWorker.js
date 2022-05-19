@@ -10,8 +10,8 @@ class _MqttWorker {
     this.parentOnConnection = (node) => MessageRouter.onConnection(node);
     this.parentOnMessage = (data, node) => MessageRouter.onMessage(data, node);
     this.client = null;
-    this.broadcastTopic = `mqtt/${config.appNameConcat}/bcast`;
-    this.msgTopic = `mqtt/${config.appNameConcat}/msg`;
+    this.broadcastTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/bcast`;
+    this.msgTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/msg`;
     this.targetNodeId = null;
     this.initialized = false;
 
@@ -211,6 +211,8 @@ class _MqttWorker {
   channelRequest(toId) {
     if(NodeStore.getNodes().length === 0 && this.targetNodeId == null) {
       this.targetNodeId = toId;
+      logMessage(`Sending channel-request to: ${toId}`);
+
       this.sendMessage(toId, {
         type: 'channel-request',
         fromId: Profile.getNodeID(),

@@ -2,6 +2,7 @@
 export default {
   appName: 'Village OS',
   appNameConcat: 'VillageOS',
+  appVersion: '0.1',
   mqttBrokers: ['wss://broker.emqx.io:8084/mqtt'],
   mqttOptions: {
     keepalive: 60,

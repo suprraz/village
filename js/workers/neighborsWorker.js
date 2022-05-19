@@ -40,10 +40,6 @@ class _NeighborsWorker {
       .then(() => this.process());
   }
 
-  onNode(node) {
-    this.enqueue(node.profile.neighborList);
-  }
-
   onMessage(e, node) {
     if (e.data) {
       try {
