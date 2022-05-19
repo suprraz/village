@@ -18,7 +18,8 @@ export default {
   RTC: {
     handshakeTimeout: 15 * 1000,
     iceServers: [{
-      urls: [ "stun:ws-turn1.xirsys.com" ]
+      urls: ["stun:global.stun.twilio.com:3478?transport=udp"]
+      // urls: [ "stun:ws-turn1.xirsys.com" ]
     }, {
       username: "d46e0JMasUOXnul7UhpIdiwfN6CAZcHm2BRXQ79o8uiHDcKfVUljY2QjTKhq84B9AAAAAGJ-xm9zdXBycmF6",
       credential: "6d7b1f32-d2ff-11ec-9699-0242ac140004",
