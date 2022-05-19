@@ -54,6 +54,10 @@ class _NodeStore {
       (!node.pending && (node.pc.connectionState !== 'connected'));
   }
 
+  getNodesPending() {
+    return this.nodes.filter((n) => n.pending);
+  }
+
   prune() {
     // failed nodes timed out while connecting or broke link after connection
     const failedNodes = this.nodes.filter( node => this.isDisconnected(node) );

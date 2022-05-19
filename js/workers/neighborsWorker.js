@@ -7,7 +7,6 @@ import _Node from "../node.js";
 class _NeighborsWorker {
   constructor() {
     this.waiting = [];
-    this.processing = [];
   }
 
   enqueue(neighbors) {
@@ -16,7 +15,6 @@ class _NeighborsWorker {
     const newNeighbors = neighbors.filter((nodeId) =>
       !!nodeId &&
       !this.waiting.find((n) => n === nodeId) &&
-      !this.processing.find((n) => n === nodeId) &&
       !NodeStore.getNodeById(nodeId) &&
       nodeId !== Profile.getNodeID()
     );
@@ -30,14 +28,13 @@ class _NeighborsWorker {
   }
 
   process() {
-    if(this.processing.length) {
+    if(NodeStore.getNodesPending() > 0) {
       return;
     }
 
     const candidateId = this.waiting.pop();
     if(candidateId) {
       logMessage(`processing : ${candidateId}`);
-      this.processing.push(candidateId);
 
       this.requestConnection(candidateId);
     }
@@ -57,7 +54,6 @@ class _NeighborsWorker {
 
   complete(neighborId) {
     logMessage(`complete ${neighborId}`);
-    this.processing = this.processing.filter( p => p !== neighborId);
     this.waiting = this.waiting.filter( p => p !== neighborId);
     this.process();
   }
