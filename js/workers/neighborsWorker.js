@@ -14,6 +14,7 @@ class _NeighborsWorker {
     logMessage(`Neighbor list received: ${neighbors}`);
 
     const newNeighbors = neighbors.filter((nodeId) =>
+      !!nodeId &&
       !this.waiting.find((n) => n === nodeId) &&
       !this.processing.find((n) => n === nodeId) &&
       !NodeStore.getNodeById(nodeId) &&
@@ -34,10 +35,12 @@ class _NeighborsWorker {
     }
 
     const candidateId = this.waiting.pop();
-    this.processing.push(candidateId);
+    if(candidateId) {
+      logMessage(`processing : ${candidateId}`);
+      this.processing.push(candidateId);
 
-    this.requestConnection(candidateId)
-      .then(() => this.process());
+      this.requestConnection(candidateId);
+    }
   }
 
   onMessage(e, node) {
@@ -53,7 +56,9 @@ class _NeighborsWorker {
   }
 
   complete(neighborId) {
+    logMessage(`complete ${neighborId}`);
     this.processing = this.processing.filter( p => p !== neighborId);
+    this.waiting = this.waiting.filter( p => p !== neighborId);
     this.process();
   }
 
