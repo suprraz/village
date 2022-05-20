@@ -12,7 +12,6 @@ class _MqttWorker {
     this.client = null;
     this.broadcastTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/bcast`;
     this.msgTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/msg`;
-    this.targetNodeId = null;
     this.initialized = false;
 
     this.mqttBroker = config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
@@ -117,7 +116,6 @@ class _MqttWorker {
         };
 
         this.sendMessage(message.fromId, answerMsg);
-        this.targetNodeId = null;
       } catch (e) {
         throw new Error(e);
       }
@@ -133,7 +131,6 @@ class _MqttWorker {
         const node = NodeStore.getNodeById(message.fromId);
 
         node.setRemoteDescription(connectionObj);
-        this.targetNodeId = null;
       } catch (e) {
         logError(e);
       }
@@ -209,8 +206,8 @@ class _MqttWorker {
   }
 
   channelRequest(toId) {
-    if(NodeStore.getNodes().length === 0 && this.targetNodeId == null) {
-      this.targetNodeId = toId;
+    if(NodeStore.getNodes().length < config.mqttParallelReqs && !NodeStore.getNodeById(toId)) {
+
       logMessage(`Sending channel-request to: ${toId}`);
 
       this.sendMessage(toId, {

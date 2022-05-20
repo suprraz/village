@@ -13,10 +13,11 @@ export default {
     connectTimeout: 30 * 1000,   // 30 sec
     useSSL: true,
   },
+  mqttParallelReqs: 3,
   maxConnectedNeighbors: 100,
   invoiceExpiration: 5*60*1000,  // 5 min
   RTC: {
-    handshakeTimeout: 15 * 1000,
+    handshakeTimeout: 30 * 1000,
     iceServers: [{
       urls: ["stun:global.stun.twilio.com:3478?transport=udp"]
       // urls: [ "stun:ws-turn1.xirsys.com" ]
