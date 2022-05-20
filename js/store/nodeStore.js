@@ -22,6 +22,14 @@ class _NodeStore {
     return this.nodes;
   }
 
+  getNeighborList() {
+    const allNeighbors = NodeStore.getNodes()
+      .filter((node) => !!node.profile.nodeId && node.pc.connectionState === 'connected')
+      .map(node => node.profile.nodeId);
+
+    return [...new Set(allNeighbors)];
+  }
+
   getNextHopNode(destinationId) {
     const nextHopDirect = this.nodes.find((node) => node.profile.nodeId === destinationId);
     if( nextHopDirect ) {

@@ -10,12 +10,13 @@ export default {
     protocolVersion: 4,
     clean: true,
     reconnectPeriod: 1000,
-    connectTimeout: 30 * 1000,   // 30 sec
+    connectTimeout: 30 * 1000,             // 30 sec
     useSSL: true,
   },
   mqttParallelReqs: 3,
   maxConnectedNeighbors: 100,
-  invoiceExpiration: 5*60*1000,  // 5 min
+  routingTableUpdateFrequency: 30000,      // 30 sec
+  invoiceExpiration: 5*60*1000,            // 5 min
   RTC: {
     handshakeTimeout: 30 * 1000,
     iceServers: [{

@@ -7,6 +7,7 @@ class _Profile {
 
     // each browser instance gets a unique ID
     this.nodeId = uuidv4();
+    this.sessionStart = new Date();
   }
 
   getNodeID() {
@@ -14,14 +15,12 @@ class _Profile {
   }
 
   getShareable() {
-    let neighborList =  NodeStore.getNodes()
-      .filter((node) => !!node.profile.nodeId && node.pc.connectionState === 'connected')
-      .map(node => node.profile.nodeId);
+    const neighborList = NodeStore.getNeighborList();
 
-    neighborList = [...new Set(neighborList)];
     return {
       nodeId: this.nodeId,
       neighborList,
+      sessionStart: this.sessionStart,
     }
   }
 

@@ -13,7 +13,7 @@ class _MessageRouter {
 
   onMessage (data, node) {
 
-    const {msg, apps, destinationId, senderId, profile, offer, answer} = data;
+    const {msg, apps, destinationId, senderId, profile, offer, answer, routes} = data;
 
     if(destinationId !== null && destinationId !== Profile.getNodeID()) {
       // forward message
@@ -37,6 +37,12 @@ class _MessageRouter {
     } else if (answer && senderId) {
       logMessage('accepting automated answer')
       this.coreApps.NeighborsWorker.acceptAnswer(answer, senderId, node);
+    } else if (routes) {
+      const neighborList = routes.direct;
+      logMessage(`Received routing update: ${neighborList}`);
+      if(neighborList) {
+        this.coreApps.NeighborsWorker.enqueue(neighborList);
+      }
     } else {
       logError(`Unhandled message: ${data}`);
     }
