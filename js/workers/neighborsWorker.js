@@ -4,12 +4,11 @@ import MessageRouter from "../messageRouter.js";
 import {logError, logMessage} from "../utils/logger.js";
 import _Node from "../node.js";
 import config from "../config.js";
-import {sortNeighbors, idDistance} from "../utils/routing.js";
+import {getSwapCandidate} from "../utils/routing.js";
 
 class _NeighborsWorker {
   constructor() {
     this.waiting = [];
-    this.swapping = [];
 
     this.sendPeriodicUpdates();
   }
@@ -58,27 +57,25 @@ class _NeighborsWorker {
     if(NodeStore.getNeighborList().length < config.maxConnectedNeighbors) {
       const candidateId = this.waiting.pop();
       if(candidateId) {
-        this.waiting = this.waiting.filter(id => id !== replacement);
+        this.waiting = this.waiting.filter(id => id !== candidateId);
         logMessage(`processing : ${candidateId}`);
 
         this.requestConnection(candidateId);
       }
     } else {
-      //conditionally swap one out
-      const fromId = Profile.getNodeID();
-      const currentSorted = sortNeighbors(fromId, NodeStore.getNeighborList());
-      const availableSorted = sortNeighbors(fromId, this.waiting);
+      this.swapNeighbors();
+    }
+  }
 
-      const worstCurrent = currentSorted[currentSorted.length-1];
-      const candidateId = availableSorted[0];
+  swapNeighbors() {
+    const fromId = Profile.getNodeID();
+    const swapCandidate = getSwapCandidate(fromId, NodeStore.getNeighborList(), this.waiting);
 
-      if(idDistance(fromId, candidateId) < idDistance(fromId, worstCurrent)) {
-        logMessage(`Swapping ${worstCurrent} to ${candidateId}`);
+    if(swapCandidate) {
+      logMessage(`Swapping ${swapCandidate.oldId} to ${swapCandidate.toId}`);
 
-        this.waiting = this.waiting.filter(id => id !== candidateId);
-        this.swapping.push({oldId: worstCurrent, toId: candidateId});
-        this.requestConnection(candidateId);
-      }
+      this.waiting = this.waiting.filter(id => id !== swapCandidate.toId);
+      this.requestConnection(swapCandidate.toId);
     }
   }
 
@@ -97,13 +94,6 @@ class _NeighborsWorker {
   complete(neighborId) {
     logMessage(`complete ${neighborId}`);
     this.waiting = this.waiting.filter( p => p !== neighborId);
-
-    const activeSwap = this.swapping.find((swap) => swap.toId === neighborId);
-    if(activeSwap) {
-      logMessage(`Swap of ${activeSwap.oldId} to ${activeSwap.toId} completed`)
-      NodeStore.deleteNodesById(activeSwap.oldId);
-      this.swapping = this.swapping.filter((swap) => swap.oldId !== activeSwap.oldId);
-    }
 
     this.process();
   }

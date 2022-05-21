@@ -145,7 +145,7 @@ class _Node {
   }
 
   send(msgObj) {
-    if (this.pc.connectionState === 'connected') {
+    if (this.pc.connectionState === 'connected' && this.dataChannel && this.dataChannel.readyState === 'open') {
       try {
         const msg = JSON.stringify({
           destinationId: this.profile.nodeId,  //overridable

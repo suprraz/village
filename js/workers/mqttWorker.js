@@ -4,6 +4,7 @@ import {logError, logMessage} from "../utils/logger.js";
 import _Node from "../node.js";
 import NodeStore from "../store/nodeStore.js";
 import MessageRouter from "../messageRouter.js";
+import {getSwapCandidate} from "../utils/routing.js";
 
 class _MqttWorker {
   constructor() {
@@ -145,8 +146,16 @@ class _MqttWorker {
           onMessage: (data, node) => this.onMessage(data, node),
         });
         node.setNodeId(toId);
-        NodeStore.addNode(node);
+
         const offerKey = await node.createOffer();
+
+        if(NodeStore.getNodeById(toId))
+        {
+          node.terminate();
+          return;
+        }
+
+        NodeStore.addNode(node);
 
         const offerMsg = {
           type: 'offer-key',
@@ -195,7 +204,9 @@ class _MqttWorker {
       // Stale connection, kill it
       NodeStore.deleteNodesById(toId);
     }
-    if(NodeStore.getNodes().length < config.maxConnectedNeighbors) {
+    const swapCandidate = getSwapCandidate(Profile.getNodeID(), NodeStore.getNeighborList(), [toId]);
+
+    if((NodeStore.getNodes().length < config.maxConnectedNeighbors) || swapCandidate) {
       this.sendMessage(toId, {
         type: 'channel-available',
         fromId: Profile.getNodeID(),
@@ -229,6 +240,14 @@ class _MqttWorker {
     this.client.publish(`${this.broadcastTopic}/${Profile.getNodeID()}`, JSON.stringify(message), {qos: 0, retain: false});
   }
 
+  parseBroadcast(message) {
+    switch (message.type) {
+      case 'available':
+        this.channelAvailable(message.fromId);
+        break;
+    }
+  }
+
   parseMessage(message) {
     logMessage('Parsing message of type: '+ message.type);
     switch (message.type) {
@@ -245,14 +264,6 @@ class _MqttWorker {
         this.onAnswer(message);
         break;
       default:
-        break;
-    }
-  }
-
-  parseBroadcast(message) {
-    switch (message.type) {
-      case 'available':
-        this.channelAvailable(message.fromId);
         break;
     }
   }

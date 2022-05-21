@@ -1,4 +1,7 @@
 import {logMessage} from "../utils/logger.js";
+import config from "../config.js";
+import {idDistance, sortNeighbors} from "../utils/routing.js";
+import Profile from "./profile.js";
 
 class _NodeStore {
   constructor() {
@@ -73,6 +76,23 @@ class _NodeStore {
     failedNodes.map((node) => node.terminate());
 
     this.nodes = this.nodes.filter((node) => !failedNodes.includes(node));
+
+    this.pruneExtraNeighbors();
+  }
+
+  pruneExtraNeighbors() {
+    while(NodeStore.getNeighborList().length > config.maxConnectedNeighbors) {
+      const sortedNeighbors = sortNeighbors(Profile.getNodeID(), NodeStore.getNeighborList());
+      const trashNeighbor = sortedNeighbors[sortedNeighbors.length-1];
+      const rank = idDistance(Profile.getNodeID(), trashNeighbor);
+
+      logMessage(`Too many neighbors: dropping ${trashNeighbor} rank: ${rank}`);
+      sortedNeighbors.map(n => {
+        logMessage(`-- Neighbor ${n} rank: ${ idDistance(Profile.getNodeID(), n)}`);
+      })
+
+      this.deleteNodesById(trashNeighbor);
+    }
   }
 }
 

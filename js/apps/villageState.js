@@ -1,5 +1,6 @@
 import NodeStore from "../store/nodeStore.js";
 import Profile from "../store/profile.js";
+import {idDistance} from "../utils/routing.js";
 
 class _VillageState {
   constructor() {
@@ -27,7 +28,8 @@ class _VillageState {
     }
 
     nodes.map((node) => {
-      this.nodeStateList.appendChild(this.createNodeStateDiv(node));
+      const rank = idDistance(Profile.getNodeID(), node.profile.nodeId);
+      this.nodeStateList.appendChild(this.createNodeStateDiv(node, rank));
     })
 
     this.livePeersCount.innerText = `${nodes.filter((node) => node.pc.connectionState === 'connected').length} / ${nodes.length}`;
@@ -35,13 +37,17 @@ class _VillageState {
     this.nodeId.innerText = `${Profile.getNodeID()}`;
   }
 
-  createNodeStateDiv(node){
+  createNodeStateDiv(node, rank){
     const nodeDiv = document.createElement('div');
     nodeDiv.className = "card mb-1";
 
     const nodeNameDiv = document.createElement('div');
     nodeNameDiv.className = "card-header-title";
     nodeNameDiv.innerText = node.profile.nodeId;
+
+    const rankDiv = document.createElement('div');
+    rankDiv.className = "card-content py-0";
+    rankDiv.innerText = `Rank: ${rank}`;
 
     const iceDiv = document.createElement('div');
     iceDiv.className = "card-content py-0";
@@ -52,6 +58,7 @@ class _VillageState {
     connDiv.innerText =  `Connection state: ${node.pc.connectionState}`;
 
     nodeDiv.appendChild(nodeNameDiv);
+    nodeDiv.appendChild(rankDiv);
     nodeDiv.appendChild(iceDiv);
     nodeDiv.appendChild(connDiv);
 
