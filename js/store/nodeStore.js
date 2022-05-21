@@ -39,7 +39,23 @@ class _NodeStore {
       return nextHopDirect;
     }
 
-    return this.nodes.find( node =>  node.profile.neighborList.find(neighborId => neighborId === destinationId));
+    let neighbor = null;
+    let hops = 999999;
+
+    this.nodes.map(node => {
+      if(node?.profile?.routes) {
+        node.profile.routes.map((hop,i) => {
+          if(hop.includes(destinationId) && i < hops) {
+            neighbor = node;
+            hops = i;
+          }
+        })
+      }
+
+    })
+
+    // logMessage(`Best route: ${neighbor.profile.nodeId}  Hops: ${hops}`);
+    return neighbor;
   }
 
   deleteNodesById(nodeId) {
@@ -67,6 +83,40 @@ class _NodeStore {
 
   getNodesPending() {
     return this.nodes.filter((n) => n.pending);
+  }
+
+  getRoutes() {
+    const neighborsList = this.getNeighborList();
+
+    const routes = [];
+
+    routes[0] = neighborsList;
+
+    let i = 1;
+    while(i < config.maxHops && routes[i-1] && routes[i-1].length) {
+      routes[i] = getRoutesByHop(i);
+      i++;
+    }
+
+    function getRoutesByHop(i) {
+      return neighborsList.reduce((hop, nodeId) => {
+        const node = NodeStore.getNodeById(nodeId);
+        if(node?.profile?.routes) {
+          const coveredRoutes = routes.reduce((total, curr) => {
+            return [...total, ...curr];
+          }, []);
+          let newRoutes = node.profile.routes[i - 1] || [];
+          newRoutes = newRoutes.filter(id => !coveredRoutes.find(covered => covered === id));
+          newRoutes = [...new Set([...hop, ...newRoutes])];
+
+          hop = newRoutes;
+        }
+        return hop;
+      }, [])
+    }
+
+    routes.map((hop, i) => logMessage(`${i} hop routes: ${hop}`));
+    return routes;
   }
 
   prune() {

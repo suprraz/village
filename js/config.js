@@ -14,7 +14,8 @@ export default {
     useSSL: true,
   },
   mqttParallelReqs: 3,
-  maxConnectedNeighbors: 100,
+  maxConnectedNeighbors: 10,
+  maxHops: 5,
   routingTableUpdateFrequency: 30000,      // 30 sec
   invoiceExpiration: 5*60*1000,            // 5 min
   RTC: {

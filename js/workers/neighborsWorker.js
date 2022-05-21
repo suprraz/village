@@ -4,7 +4,7 @@ import MessageRouter from "../messageRouter.js";
 import {logError, logMessage} from "../utils/logger.js";
 import _Node from "../node.js";
 import config from "../config.js";
-import {getSwapCandidate} from "../utils/routing.js";
+import {getSwapCandidate, sortNeighbors} from "../utils/routing.js";
 
 class _NeighborsWorker {
   constructor() {
@@ -14,16 +14,12 @@ class _NeighborsWorker {
   }
 
   sendPeriodicUpdates() {
-
     const neighborList = NodeStore.getNeighborList();
-
-    logMessage(`Sending routing update: ${neighborList}`);
+    logMessage(`sending routing update`);
 
     neighborList.map((neighborId) => {
       const neighbor = NodeStore.getNodeById(neighborId);
-      neighbor.send({routes : {
-        direct: neighborList
-      }});
+      neighbor.send({routes : NodeStore.getRoutes()});
     })
 
     setTimeout(() => {
@@ -31,7 +27,10 @@ class _NeighborsWorker {
     }, config.routingTableUpdateFrequency)
   }
 
-  enqueue(neighbors) {
+  enqueue(routes) {
+    const neighbors = routes.reduce((total, curr) => {
+      return [... new Set([...total, ...curr])];
+    }, []);
     logMessage(`Neighbor list received: ${neighbors}`);
 
     const newNeighbors = neighbors.filter((nodeId) =>
@@ -44,7 +43,8 @@ class _NeighborsWorker {
     logMessage(`Queueing neighbors: ${newNeighbors}`);
 
     if(newNeighbors.length) {
-      this.waiting.push(...newNeighbors);
+      const newWaiting = [... new Set([...this.waiting, ...newNeighbors])]
+      this.waiting = sortNeighbors(Profile.getNodeID(),newWaiting);
       this.process();
     }
   }

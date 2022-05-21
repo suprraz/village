@@ -15,11 +15,11 @@ class _Profile {
   }
 
   getShareable() {
-    const neighborList = NodeStore.getNeighborList();
+    const routes = NodeStore.getRoutes();
 
     return {
       nodeId: this.nodeId,
-      neighborList,
+      routes,
       sessionStart: this.sessionStart,
     }
   }

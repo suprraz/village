@@ -30,7 +30,7 @@ class _MessageRouter {
     } else if (profile) {
       node.setProfile(profile);
       this.onNetworkChange();
-      this.coreApps.NeighborsWorker.enqueue(node.profile.neighborList);
+      this.coreApps.NeighborsWorker.enqueue(node.profile.routes);
     } else if (offer && senderId) {
       logMessage('accepting automated offer')
       this.coreApps.NeighborsWorker.acceptOffer(offer, senderId, node);
@@ -38,11 +38,8 @@ class _MessageRouter {
       logMessage('accepting automated answer')
       this.coreApps.NeighborsWorker.acceptAnswer(answer, senderId, node);
     } else if (routes) {
-      const neighborList = routes.direct;
-      logMessage(`Received routing update: ${neighborList}`);
-      if(neighborList) {
-        this.coreApps.NeighborsWorker.enqueue(neighborList);
-      }
+      logMessage(`received routing update`);
+      this.coreApps.NeighborsWorker.enqueue(routes);
     } else {
       logError(`Unhandled message: ${data}`);
     }

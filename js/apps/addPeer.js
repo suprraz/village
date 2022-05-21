@@ -55,7 +55,7 @@ class _AddPeer {
 
     logMessage(node.profile);
 
-    const desiredNeighborIds = node.profile.neighborList.filter(
+    const desiredNeighborIds = node.profile.routes[0].filter(
       (neighborId) => {
         return neighborId !== null &&
           neighborId !== Profile.getNodeID() &&

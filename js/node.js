@@ -40,7 +40,7 @@ class _Node {
 
   setProfile(profile) {
     this.profile.nodeId = profile.nodeId;
-    this.profile.neighborList = profile.neighborList;
+    this.profile.routes = profile.routes;
     this.pending = false;
   }
 
