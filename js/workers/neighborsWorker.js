@@ -132,7 +132,7 @@ class _NeighborsWorker {
       }
     } catch (e) {
       this.complete(destinationId);
-      logMessage(e);
+      logError(e);
     }
   }
 

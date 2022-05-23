@@ -1,4 +1,5 @@
 import MessageRouter from "../messageRouter.js";
+import {logError} from "../utils/logger.js";
 
 class _AppStore {
 
@@ -43,7 +44,9 @@ class _AppStore {
     let apps = [];
     try {
       apps = JSON.parse(installedApps) || [];
-    } catch (e) {}
+    } catch (e) {
+      logError(e)
+    }
 
     return apps;
   }

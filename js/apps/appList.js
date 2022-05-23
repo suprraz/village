@@ -43,7 +43,7 @@ class _AppList {
       this.availableApps.push(...newApps);
       this.updateAppList();
     } catch (e) {
-      console.error(e);
+      logError(e);
     }
   }
 

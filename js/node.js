@@ -56,83 +56,73 @@ class _Node {
     MessageRouter.onNetworkChange();
   }
 
+  registerDataChannelListeners() {
+    this.pc.ondatachannel = (e) => {
+      this.dataChannel = e.channel;
+
+      this.dataChannel.onopen = (e) => this.onConnection(this);
+      this.dataChannel.onmessage = (e) => this.onMessage(e, this);
+      this.dataChannel.onbufferedamountlow = (e) => logError(`Datachannel Buffered Amount Low: ${e}`);
+      this.dataChannel.onerror = (e) => logError(`Datachannel Error: ${e}`);
+    };
+  }
+
+  registerPCListeners() {
+    this.pc.oniceconnectionstatechange = e =>  this.onConnectionStateChange();
+    this.pc.onconnectionstatechange = e => this.onConnectionStateChange();
+    this.pc.onicecandidateerror = e => logError(`ICE Candidate error: ${e}`);
+    this.pc.onnegotiationneeded = e => logError(`ICE Negotiation needed: ${e}`);
+  }
+
   createOffer() {
     return new Promise((resolve, reject) => {
-      this.pc.onicecandidate = e => {
-        if (e.candidate == null) {
-          const offerKey = btoa(JSON.stringify(this.pc.localDescription));
-          resolve(offerKey);
-        }
-      };
+      try {
+        this.registerDataChannelListeners();
+        this.registerPCListeners();
 
-      this.dataChannel = this.pc.createDataChannel('offerChannel');
-      this.dataChannel.onmessage = (e) => this.onMessage(e, this);
+        this.pc.onicecandidate = e => {
+          if (e.candidate == null) {
+            const offerKey = btoa(JSON.stringify(this.pc.localDescription));
+            resolve(offerKey);
+          }
+        };
 
-      this.pc.addEventListener("iceconnectionstatechange", ev => {
-        this.onConnectionStateChange();
-      }, false);
+        this.pc.createDataChannel('offerChannel');
 
-      this.pc.addEventListener("connectionstatechange", ev => {
-        this.onConnectionStateChange();
-      }, false);
-
-      this.dataChannel.addEventListener("open", (event) => {
-        logMessage('Data channel open');
-        this.onConnection(this);
-      });
-
-      this.pc.createOffer().then( (desc) => {
-          this.pc.setLocalDescription(desc);
-        },
-      );
+        this.pc.createOffer().then((desc) => {
+            this.pc.setLocalDescription(desc);
+          },
+        )
+      } catch (e) {
+        logError(`Error while creatign offer: ${e}`);
+        reject(e);
+      }
     });
   }
 
   acceptOffer(offerKey) {
     return new Promise((resolve, reject) => {
-      logMessage("Accepting Offer");
+      try {
+        this.registerPCListeners();
+        this.registerDataChannelListeners();
 
-      this.pc.onicecandidate = e => {
-        if (e.candidate == null) {
-          const answerKey = btoa(JSON.stringify(this.pc.localDescription));
-          resolve(answerKey);
-        }
-      };
+        this.pc.onicecandidate = e => {
+          if (e.candidate == null) {
+            const answerKey = btoa(JSON.stringify(this.pc.localDescription));
+            resolve(answerKey);
+          }
+        };
 
-      let connectionObj = {};
+        const connectionObj = JSON.parse(atob(offerKey));
+        this.pc.setRemoteDescription(connectionObj);
 
-      try{
-        connectionObj = JSON.parse(atob(offerKey));
+        this.pc.createAnswer().then((answerDesc) => {
+          this.pc.setLocalDescription(answerDesc);
+        })
       } catch (e) {
-        logMessage(`Bad offerKey: ${offerKey}`);
-        return;
+        logError(`Error while accepting offer: ${e}`);
+        reject(e);
       }
-
-      this.pc.addEventListener("iceconnectionstatechange", ev => {
-        this.onConnectionStateChange();
-      }, false);
-
-      this.pc.addEventListener("connectionstatechange", ev => {
-        this.onConnectionStateChange();
-      }, false);
-
-      this.pc.ondatachannel = (e) => {
-        this.dataChannel = e.channel;
-
-        this.dataChannel.addEventListener("open", (event) => {
-          logMessage('Data channel open');
-
-          this.onConnection(this);
-        });
-
-        this.dataChannel.onmessage = (e) => this.onMessage(e, this);
-      };
-
-      this.pc.setRemoteDescription(connectionObj);
-      this.pc.createAnswer().then((answerDesc) => {
-        this.pc.setLocalDescription(answerDesc);
-      })
-
     });
   }
 
