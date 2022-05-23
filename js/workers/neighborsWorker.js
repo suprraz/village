@@ -15,7 +15,7 @@ class _NeighborsWorker {
 
   sendPeriodicUpdates() {
     const neighborList = NodeStore.getNeighborList();
-    logMessage(`sending routing update`);
+    logMessage(`NeighborsWorker Sending routing update`);
 
     neighborList.map((neighborId) => {
       const neighbor = NodeStore.getNodeById(neighborId);
@@ -31,7 +31,7 @@ class _NeighborsWorker {
     const neighbors = routes.reduce((total, curr) => {
       return [... new Set([...total, ...curr])];
     }, []);
-    logMessage(`Neighbor list received: ${neighbors}`);
+    logMessage(`NeighborsWorker Neighbor list received: ${neighbors}`);
 
     const newNeighbors = neighbors.filter((nodeId) =>
       !!nodeId &&
@@ -40,7 +40,7 @@ class _NeighborsWorker {
       nodeId !== Profile.getNodeID()
     );
 
-    logMessage(`Queueing neighbors: ${newNeighbors}`);
+    logMessage(`NeighborsWorker Queueing neighbors: ${newNeighbors}`);
 
     if(newNeighbors.length) {
       const newWaiting = [... new Set([...this.waiting, ...newNeighbors])]
@@ -58,7 +58,7 @@ class _NeighborsWorker {
       const candidateId = this.waiting.pop();
       if(candidateId) {
         this.waiting = this.waiting.filter(id => id !== candidateId);
-        logMessage(`processing : ${candidateId}`);
+        logMessage(`NeighborsWorker Processing candidate: ${candidateId}`);
 
         this.requestConnection(candidateId);
       }
@@ -72,7 +72,7 @@ class _NeighborsWorker {
     const swapCandidate = getSwapCandidate(fromId, NodeStore.getNeighborList(), this.waiting);
 
     if(swapCandidate) {
-      logMessage(`Swapping ${swapCandidate.oldId} to ${swapCandidate.toId}`);
+      logMessage(`NeighborsWorker Swapping ${swapCandidate.oldId} to ${swapCandidate.toId}`);
 
       this.waiting = this.waiting.filter(id => id !== swapCandidate.toId);
       this.requestConnection(swapCandidate.toId);
@@ -92,7 +92,7 @@ class _NeighborsWorker {
   }
 
   complete(neighborId) {
-    logMessage(`complete ${neighborId}`);
+    logMessage(`NeighborsWorker Neighboring attempt complete ${neighborId}`);
     this.waiting = this.waiting.filter( p => p !== neighborId);
 
     this.process();
@@ -112,7 +112,7 @@ class _NeighborsWorker {
     }
 
     try {
-      logMessage(`Requesting connection to ${destinationId}`);
+      logMessage(`NeighborsWorker Requesting connection to ${destinationId}`);
 
       const offerNode = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
@@ -124,7 +124,7 @@ class _NeighborsWorker {
 
       if(NodeStore.getNodeById(destinationId)) {
         this.complete(destinationId);
-        logMessage(`Duplicate Node after create offer: ${destinationId}`);
+        logMessage(`NeighborsWorker Duplicate Node after create offer: ${destinationId}`);
         offerNode.terminate();
       } else {
         this.sendOfferKey(nextHopNode, destinationId, offerKey);
@@ -149,7 +149,7 @@ class _NeighborsWorker {
     const existingNode = NodeStore.getNodeById(senderId);
     if( existingNode ) {
       this.complete(senderId);
-      logMessage("Connection already initiated by other side")
+      logMessage("NeighborsWorker Connection already initiated by other side")
       return;
     }
 
@@ -170,7 +170,7 @@ class _NeighborsWorker {
       if(NodeStore.getNodeById(senderId)) {
         node.terminate();
         this.complete(senderId);
-        logMessage("Connection already initiated by other side")
+        logMessage("NeighborsWorker Connection already initiated by other side")
         return;
       }
 

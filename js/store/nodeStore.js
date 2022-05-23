@@ -18,7 +18,7 @@ class _NodeStore {
 
   addNode(node) {
     this.nodes.push(node);
-    logMessage(`Added node: ${node.profile.nodeId}`);
+    logMessage(`NodeStore Added node: ${node.profile.nodeId}`);
   }
 
   getNodes() {
@@ -66,7 +66,7 @@ class _NodeStore {
     const trashNodes = this.nodes.filter((node) => node.profile.nodeId === nodeId);
 
     if(trashNodes.length) {
-      logMessage(`Deleting ${trashNodes.length} nodes.`);
+      logMessage(`NodeStore Deleting ${trashNodes.length} nodes.`);
     }
 
     trashNodes.map(node => {
@@ -115,7 +115,7 @@ class _NodeStore {
       }, [])
     }
 
-    routes.map((hop, i) => logMessage(`${i} hop routes: ${hop}`));
+    routes.map((hop, i) => logMessage(`NodeStore ${i} hop routes: ${hop}`));
     return routes;
   }
 
@@ -136,9 +136,9 @@ class _NodeStore {
       const trashNeighbor = sortedNeighbors[sortedNeighbors.length-1];
       const rank = idDistance(Profile.getNodeID(), trashNeighbor);
 
-      logMessage(`Too many neighbors: dropping ${trashNeighbor} rank: ${rank}`);
+      logMessage(`NodeStore Too many neighbors: dropping ${trashNeighbor} rank: ${rank}`);
       sortedNeighbors.map(n => {
-        logMessage(`-- Neighbor ${n} rank: ${ idDistance(Profile.getNodeID(), n)}`);
+        logMessage(`NodeStore -- Neighbor ${n} rank: ${ idDistance(Profile.getNodeID(), n)}`);
       })
 
       this.deleteNodesById(trashNeighbor);

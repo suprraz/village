@@ -21,32 +21,36 @@ class _MessageRouter {
       if(nextHopNode) {
         nextHopNode.send(data);
       } else {
-        logMessage(`Route not found for ${destinationId}.`)
+        logMessage(`MessageRouter Route not found for ${destinationId}.`)
       }
     } else if (msg && senderId) {
       this.coreApps.Chat.messageReceived(senderId, msg);
     } else if (apps) {
       this.coreApps.AppListApp.onAvailableApps(apps);
     } else if (profile) {
+      logMessage(`MessageRouter Received profile for ${profile.nodeId}`);
       node.setProfile(profile);
       this.onNetworkChange();
       this.coreApps.NeighborsWorker.enqueue(node.profile.routes);
     } else if (offer && senderId) {
-      logMessage('accepting automated offer')
+      logMessage('MessageRouter Accepting automated offer')
       this.coreApps.NeighborsWorker.acceptOffer(offer, senderId, node);
     } else if (answer && senderId) {
-      logMessage('accepting automated answer')
+      logMessage('MessageRouter Accepting automated answer')
       this.coreApps.NeighborsWorker.acceptAnswer(answer, senderId, node);
     } else if (routes) {
-      logMessage(`received routing update`);
+      logMessage(`MessageRouter Received routing update`);
+      node.setRoutes(routes);
       this.coreApps.NeighborsWorker.enqueue(routes);
     } else {
-      logError(`Unhandled message: ${data}`);
+      logError(`MessageRouter Unhandled message: ${data}`);
     }
   }
 
   onConnection(node) {
-    node.send({profile: Profile.getShareable()});
+    const profile =  Profile.getShareable();
+    logMessage(`MessageRouter Sending profile for ${profile.nodeId}`);
+    node.send({profile});
 
     this.callerOnConnection(node);
   }

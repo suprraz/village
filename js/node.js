@@ -14,7 +14,7 @@ class _Node {
 
     this.profile = {
       nodeId: null,
-      neighborList: []
+      routes: [],
     };
 
     this.pending = true;
@@ -43,6 +43,10 @@ class _Node {
     this.profile.nodeId = profile.nodeId;
     this.profile.routes = profile.routes;
     this.pending = false;
+  }
+
+  setRoutes(routes) {
+    this.profile.routes = routes;
   }
 
   setNodeId(nodeId) {
