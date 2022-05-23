@@ -113,7 +113,6 @@ class _NeighborsWorker {
 
     try {
       logMessage(`Requesting connection to ${destinationId}`);
-      NodeStore.deleteNodesById(destinationId); // prune any lingering node with same id
 
       const offerNode = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
@@ -122,6 +121,7 @@ class _NeighborsWorker {
       offerNode.setNodeId(destinationId);
 
       const offerKey = await offerNode.createOffer();
+
       if(NodeStore.getNodeById(destinationId)) {
         this.complete(destinationId);
         logMessage(`Duplicate Node after create offer: ${destinationId}`);
@@ -147,7 +147,7 @@ class _NeighborsWorker {
 
   async acceptOffer(offer, senderId, senderNode) {
     const existingNode = NodeStore.getNodeById(senderId);
-    if( existingNode && existingNode.pending ) {
+    if( existingNode ) {
       this.complete(senderId);
       logMessage("Connection already initiated by other side")
       return;
@@ -159,17 +159,22 @@ class _NeighborsWorker {
 
     const {offerKey} = offer;
     try {
-      NodeStore.deleteNodesById(senderId); // prune any lingering node with same id
-
       const node = new _Node({
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
       });
       node.setNodeId(senderId);
 
-      NodeStore.addNode(node);
-
       const answerKey = await node.acceptOffer(offerKey);
+
+      if(NodeStore.getNodeById(senderId)) {
+        node.terminate();
+        this.complete(senderId);
+        logMessage("Connection already initiated by other side")
+        return;
+      }
+
+      NodeStore.addNode(node);
 
       senderNode.send({answer: {
           answerKey

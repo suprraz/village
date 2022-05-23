@@ -36,6 +36,7 @@ class _Node {
 
   terminate() {
     this.pc.close();
+    this.pending = false;
   }
 
   setProfile(profile) {
@@ -64,6 +65,8 @@ class _Node {
       this.dataChannel.onmessage = (e) => this.onMessage(e, this);
       this.dataChannel.onbufferedamountlow = (e) => logError(`Datachannel Buffered Amount Low: ${e}`);
       this.dataChannel.onerror = (e) => logError(`Datachannel Error: ${e}`);
+
+      this.pending = false;
     };
   }
 
