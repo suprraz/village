@@ -27,7 +27,7 @@ class _Node {
   setHandshakeTimeout() {
     setTimeout(() => {
       if(this.pending === true) {
-        logMessage(`Connection attempt to ${this.profile.nodeId} timed out.  Closing.`);
+        logMessage(`Node Connection attempt to ${this.profile.nodeId} timed out.  Closing.`);
         this.pending = false;
         MessageRouter.onNetworkChange();
       }
@@ -51,8 +51,8 @@ class _Node {
 
   setNodeId(nodeId) {
     if(NodeStore.getNodeById(nodeId)) {
-      logError(`Duplicate node with same id: ${nodeId}`);
-      throw new Error(`Duplicate node with same id: ${nodeId}`);
+      logError(`Node Duplicate node with same id: ${nodeId}`);
+      throw new Error(`Node Duplicate node with same id: ${nodeId}`);
     }
     this.profile.nodeId = nodeId;
   }
@@ -62,29 +62,23 @@ class _Node {
   }
 
   registerDataChannelListeners() {
-    this.pc.ondatachannel = (e) => {
-      this.dataChannel = e.channel;
-
-      this.dataChannel.onopen = (e) => this.onConnection(this);
-      this.dataChannel.onmessage = (e) => this.onMessage(e, this);
-      this.dataChannel.onbufferedamountlow = (e) => logError(`Datachannel Buffered Amount Low: ${e}`);
-      this.dataChannel.onerror = (e) => logError(`Datachannel Error: ${e}`);
-
-      this.pending = false;
-    };
+    this.dataChannel.onopen = (e) => this.onConnection(this);
+    this.dataChannel.onmessage = (e) => this.onMessage(e, this);
+    this.dataChannel.onbufferedamountlow = (e) => logError(`Node Datachannel Buffered Amount Low: ${e}`);
+    this.dataChannel.onerror = (e) => logError(`Node Datachannel Error: ${e}`);
   }
 
   registerPCListeners() {
     this.pc.oniceconnectionstatechange = e =>  this.onConnectionStateChange();
     this.pc.onconnectionstatechange = e => this.onConnectionStateChange();
-    this.pc.onicecandidateerror = e => logError(`ICE Candidate error: ${e}`);
-    this.pc.onnegotiationneeded = e => logError(`ICE Negotiation needed: ${e}`);
+    this.pc.onicecandidateerror = e => logError(`Node ICE Candidate error: ${e}`);
+    this.pc.onnegotiationneeded = e => logError(`Node ICE Negotiation needed: ${e}`);
   }
 
   createOffer() {
     return new Promise((resolve, reject) => {
       try {
-        this.registerDataChannelListeners();
+        logMessage('Node Creating Offer');
         this.registerPCListeners();
 
         this.pc.onicecandidate = e => {
@@ -94,14 +88,15 @@ class _Node {
           }
         };
 
-        this.pc.createDataChannel('offerChannel');
+        this.dataChannel = this.pc.createDataChannel('offerChannel');
+        this.registerDataChannelListeners();
 
-        this.pc.createOffer().then((desc) => {
+        this.pc.createOffer().then( (desc) => {
             this.pc.setLocalDescription(desc);
           },
-        )
+        );
       } catch (e) {
-        logError(`Error while creatign offer: ${e}`);
+        logError(`Node Error while creating offer: ${e}`);
         reject(e);
       }
     });
@@ -110,8 +105,13 @@ class _Node {
   acceptOffer(offerKey) {
     return new Promise((resolve, reject) => {
       try {
+        logMessage('Node Accept Offer');
         this.registerPCListeners();
-        this.registerDataChannelListeners();
+
+        this.pc.ondatachannel = (e) => {
+          this.dataChannel = e.channel;
+          this.registerDataChannelListeners();
+        };
 
         this.pc.onicecandidate = e => {
           if (e.candidate == null) {
