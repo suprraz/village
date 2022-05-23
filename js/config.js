@@ -13,8 +13,8 @@ export default {
     connectTimeout: 30 * 1000,             // 30 sec
     useSSL: true,
   },
-  mqttParallelReqs: 20,
-  maxConnectedNeighbors: 21,
+  mqttParallelReqs: 3,
+  maxConnectedNeighbors: 100,
   maxHops: 5,
   routingTableUpdateFrequency: 30000,      // 30 sec
   invoiceExpiration: 5*60*1000,            // 5 min
