@@ -99,9 +99,7 @@ class _MessageRouter {
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        if(NodeStore.getNodes().length === 0) {
-          this.coreApps.MqttWorker.seekNodes();
-        }
+        this.onNetworkChange();
       }
     }, false);
   }
