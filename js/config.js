@@ -22,6 +22,17 @@ export default {
     handshakeTimeout: 30 * 1000,
     iceServers: [{
       urls: [ "stun:ws-turn2.xirsys.com" ]
+    }, {
+      username: "S9xK4lf35CfR8NxQlo0kQBbkEJcQvAXLVd7a0IDvkOQ5rJsmvxrp_sbBtJHmZgvfAAAAAGKMMPRzdXBycmF6",
+      credential: "8fab7834-dafe-11ec-94b5-0242ac140004",
+      urls: [
+        "turn:ws-turn2.xirsys.com:80?transport=udp",
+        "turn:ws-turn2.xirsys.com:3478?transport=udp",
+        "turn:ws-turn2.xirsys.com:80?transport=tcp",
+        "turn:ws-turn2.xirsys.com:3478?transport=tcp",
+        "turns:ws-turn2.xirsys.com:443?transport=tcp",
+        "turns:ws-turn2.xirsys.com:5349?transport=tcp"
+      ]
     }]
   }
 }
