@@ -27,8 +27,11 @@ class _VillageState {
       }
     }
 
-    nodes.map((node) => {
+    nodes.map(async (node) => {
       const rank = idDistance(Profile.getNodeID(), node.profile.nodeId);
+      if(node.candidateType === null) {
+        await node.setCandidateType();
+      }
       this.nodeStateList.appendChild(this.createNodeStateDiv(node, rank));
     })
 
@@ -54,19 +57,18 @@ class _VillageState {
     iceDiv.innerText = `ICE state: ${node.pc.iceConnectionState}`;
 
     const connDiv = document.createElement('div');
-    connDiv.className = "card-content pt-0";
+    connDiv.className = "card-content py-0";
     connDiv.innerText =  `Connection state: ${node.pc.connectionState}`;
 
-    const isTurnDiv = document.createElement('div');
-    isTurnDiv.className = "card-content pt-0";
-    isTurnDiv.innerText =  `Connection type: ${
-      node.isTurn === true ? 'Turn' : (node.isTurn === false ? 'Direct' : 'Unknown')}`;
+    const candidateTypeDiv = document.createElement('div');
+    candidateTypeDiv.className = "card-content pt-0";
+    candidateTypeDiv.innerText =  `Connection type: ${node.candidateType === null ? 'Unknown' : node.candidateType}`;
 
     nodeDiv.appendChild(nodeNameDiv);
     nodeDiv.appendChild(rankDiv);
     nodeDiv.appendChild(iceDiv);
     nodeDiv.appendChild(connDiv);
-    nodeDiv.appendChild(isTurnDiv);
+    nodeDiv.appendChild(candidateTypeDiv);
 
     return nodeDiv;
   }

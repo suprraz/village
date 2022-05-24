@@ -17,7 +17,7 @@ class _Node {
       routes: [],
     };
 
-    this.isTurn = null;
+    this.candidateType = null;
     this.pending = true;
     this.setHandshakeTimeout();
 
@@ -44,7 +44,6 @@ class _Node {
     this.profile.nodeId = profile.nodeId;
     this.profile.routes = profile.routes;
     this.pending = false;
-    this.setIsTurn();
   }
 
   setRoutes(routes) {
@@ -65,6 +64,7 @@ class _Node {
 
   registerDataChannelListeners() {
     this.dataChannel.onopen = (e) => this.onConnection(this);
+
     this.dataChannel.onmessage = (e) => this.onMessage(e, this);
     this.dataChannel.onbufferedamountlow = (e) => logError(`Node Datachannel Buffered Amount Low: ${e}`);
     this.dataChannel.onerror = (e) => logError(`Node Datachannel Error: ${e}`);
@@ -161,7 +161,7 @@ class _Node {
     }
   }
 
-  async setIsTurn() {
+  async setCandidateType() {
     const stats = await this.pc.getStats();
     let selectedLocalCandidate;
     for (const {type, state, localCandidateId} of stats.values())
@@ -170,7 +170,11 @@ class _Node {
         break;
       }
 
-    this.isTurn = !!selectedLocalCandidate && stats.get(selectedLocalCandidate)?.candidateType === 'relay';
+    if(selectedLocalCandidate) {
+      this.candidateType = stats.get(selectedLocalCandidate)?.candidateType;
+    } else {
+      this.candidateType = null;
+    }
   }
 }
 
