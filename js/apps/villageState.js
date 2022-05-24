@@ -57,10 +57,16 @@ class _VillageState {
     connDiv.className = "card-content pt-0";
     connDiv.innerText =  `Connection state: ${node.pc.connectionState}`;
 
+    const isTurnDiv = document.createElement('div');
+    isTurnDiv.className = "card-content pt-0";
+    isTurnDiv.innerText =  `Connection type: ${
+      node.isTurn === true ? 'Turn' : (node.isTurn === false ? 'Direct' : 'Unknown')}`;
+
     nodeDiv.appendChild(nodeNameDiv);
     nodeDiv.appendChild(rankDiv);
     nodeDiv.appendChild(iceDiv);
     nodeDiv.appendChild(connDiv);
+    nodeDiv.appendChild(isTurnDiv);
 
     return nodeDiv;
   }

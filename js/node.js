@@ -17,6 +17,7 @@ class _Node {
       routes: [],
     };
 
+    this.isTurn = null;
     this.pending = true;
     this.setHandshakeTimeout();
 
@@ -43,6 +44,7 @@ class _Node {
     this.profile.nodeId = profile.nodeId;
     this.profile.routes = profile.routes;
     this.pending = false;
+    this.setIsTurn();
   }
 
   setRoutes(routes) {
@@ -157,6 +159,18 @@ class _Node {
         logError(e);
       }
     }
+  }
+
+  async setIsTurn() {
+    const stats = await this.pc.getStats();
+    let selectedLocalCandidate;
+    for (const {type, state, localCandidateId} of stats.values())
+      if (type === 'candidate-pair' && state === 'succeeded' && localCandidateId) {
+        selectedLocalCandidate = localCandidateId;
+        break;
+      }
+
+    this.isTurn = !!selectedLocalCandidate && stats.get(selectedLocalCandidate)?.candidateType === 'relay';
   }
 }
 
