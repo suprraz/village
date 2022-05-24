@@ -20,16 +20,19 @@ export default {
   invoiceExpiration: 5*60*1000,            // 5 min
   RTC: {
     handshakeTimeout: 30 * 1000,
-    iceServers: [
-      {
-        "url": "stun:global.stun.twilio.com:3478?transport=udp",
-        "urls": "stun:global.stun.twilio.com:3478?transport=udp"
-      },
-      {
-        urls: "turn:openrelay.metered.ca:80",
-        username: "openrelayproject",
-        credential: "openrelayproject",
-      },
-    ]
+    iceServers: [{
+      urls: [ "stun:ws-turn2.xirsys.com" ]
+    }, {
+      username: "S9xK4lf35CfR8NxQlo0kQBbkEJcQvAXLVd7a0IDvkOQ5rJsmvxrp_sbBtJHmZgvfAAAAAGKMMPRzdXBycmF6",
+      credential: "8fab7834-dafe-11ec-94b5-0242ac140004",
+      urls: [
+        "turn:ws-turn2.xirsys.com:80?transport=udp",
+        "turn:ws-turn2.xirsys.com:3478?transport=udp",
+        "turn:ws-turn2.xirsys.com:80?transport=tcp",
+        "turn:ws-turn2.xirsys.com:3478?transport=tcp",
+        "turns:ws-turn2.xirsys.com:443?transport=tcp",
+        "turns:ws-turn2.xirsys.com:5349?transport=tcp"
+      ]
+    }]
   }
 }
