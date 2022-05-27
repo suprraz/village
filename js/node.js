@@ -2,7 +2,6 @@ import { logMessage, logError } from './utils/logger.js';
 import Profile from "./store/profile.js";
 import MessageRouter from "./messageRouter.js";
 import config from "./config.js";
-import NodeStore from "./store/nodeStore.js";
 
 class _Node {
   constructor({nodeId, onConnection, onMessage, sendCandidate}) {

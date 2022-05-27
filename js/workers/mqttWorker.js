@@ -166,7 +166,8 @@ class _MqttWorker {
 
   sendCandidate(toId, candidate) {
     const candidateMsg = {
-      type: 'candidate',
+      type: 'routing',
+      subtype: 'ice-candidate',
       fromId: Profile.getNodeID(),
       toId,
       date: new Date(),

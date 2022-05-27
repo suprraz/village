@@ -46,7 +46,11 @@ class _AddPeerCard {
   }
 
   sendProfile(node) {
-    const shareableProfile = {profile: Profile.getShareable()};
+    const shareableProfile = {
+      type: 'routing',
+      subtype: 'profile-update',
+      profile: Profile.getShareable()
+    };
     node.send(shareableProfile);
   }
 

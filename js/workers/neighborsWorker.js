@@ -24,7 +24,11 @@ class _NeighborsWorker {
 
       neighborList.map((neighborId) => {
         const neighbor = NodeStore.getNodeById(neighborId);
-        neighbor.send({routes : NodeStore.getRoutes()});
+        neighbor.send({
+          type: 'routing',
+          subtype: 'route-list',
+          routes : NodeStore.getRoutes()}
+        );
       })
 
       this.enqueue(routes); // check for lost connections
@@ -119,6 +123,8 @@ class _NeighborsWorker {
     const node = NodeStore.getNextHopNode(toId);
     if(node) {
       node.send({
+        type: 'routing',
+        subtype: 'ice-candidate',
         candidate,
         destinationId: toId
       });
@@ -188,6 +194,8 @@ class _NeighborsWorker {
   sendOfferKey(nextHopNode, destinationId, offerKey) {
     logMessage(`NeighborsWorker Sending offer to: ${destinationId} via ${nextHopNode?.profile?.nodeId}`);
     nextHopNode.send({
+      type: 'routing',
+      subtype: 'offer',
       destinationId,
       senderId: Profile.getNodeID(),
       offer: {
@@ -232,7 +240,10 @@ class _NeighborsWorker {
       NodeStore.addNode(node);
 
       logMessage(`NeighborsWorker Sending answer to: ${senderId} via ${senderNode?.profile?.nodeId}`);
-      senderNode.send({answer: {
+      senderNode.send({
+        type: 'routing',
+        subtype: 'answer',
+        answer: {
           answerKey
         },
         destinationId: senderId

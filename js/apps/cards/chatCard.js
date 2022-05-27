@@ -20,7 +20,11 @@ class _ChatCard {
 
   sendChatMsg() {
     const msg = document.getElementById('chatBoxMessage').value;
-    NodeStore.broadcast({msg});
+    NodeStore.broadcast({
+      type: 'app',
+      app: 'chat',
+      msg
+    });
 
     this.chatLog.push('Me: ' + msg);
     this.updateChat();

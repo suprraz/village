@@ -6,7 +6,6 @@ import config from "./config.js";
 import AppStore from "./store/appStore.js";
 
 class _MessageRouter {
-
   init (coreApps, onConnection) {
     this.coreApps = coreApps;
     this.callerOnConnection = (node) => onConnection(node);
@@ -14,8 +13,7 @@ class _MessageRouter {
   }
 
   onMessage (data, node) {
-
-    const {msg, apps, destinationId, senderId, profile, offer, answer, routes, candidate} = data;
+    const { apps, destinationId, type } = data;
 
     if(destinationId !== null && destinationId !== Profile.getNodeID()) {
       // forward message
@@ -25,37 +23,89 @@ class _MessageRouter {
       } else {
         logMessage(`MessageRouter Route not found for ${destinationId}.`)
       }
-    } else if (senderId && candidate) {
-      logMessage(`MessageRouter Received ice candidate for ${senderId}`);
-      this.coreApps.NeighborsWorker.onCandidate(senderId, candidate);
-    } else if (msg && senderId) {
-      this.coreApps.ChatCard.messageReceived(senderId, msg);
-    } else if (apps) {
-      this.coreApps.AppListCard.onAvailableApps(apps);
-    } else if (profile) {
-      logMessage(`MessageRouter Received profile for ${profile.nodeId}`);
-      node.setProfile(profile);
-      this.onNetworkChange();
-      this.coreApps.NeighborsWorker.enqueue(node.profile.routes);
-    } else if (offer && senderId) {
-      logMessage('MessageRouter Accepting automated offer')
-      this.coreApps.NeighborsWorker.acceptOffer(offer, senderId, node);
-    } else if (answer && senderId) {
-      logMessage('MessageRouter Accepting automated answer')
-      this.coreApps.NeighborsWorker.acceptAnswer(answer, senderId, node);
-    } else if (routes) {
-      logMessage(`MessageRouter Received routing update`);
-      node.setRoutes(routes);
-      this.coreApps.NeighborsWorker.enqueue(routes);
-    } else {
-      logError(`MessageRouter Unhandled message: ${data}`);
+      return;
+    }
+
+    switch (type) {
+      case 'app':
+        this.onAppMessage(data, node);
+        break;
+      case 'app-list':
+        if (apps) {
+          this.coreApps.AppListCard.onAvailableApps(apps);
+        }
+        break;
+      case 'routing':
+        this.onRoutingMessage(data, node)
+        break;
+      default:
+        logError(`MessageRouter Unhandled message: ${data}`);
+    }
+  }
+
+  onAppMessage(data, node) {
+    const {msg, senderId, app, } = data;
+
+    switch (app) {
+      case 'chat':
+        if (msg && senderId) {
+          this.coreApps.ChatCard.messageReceived(senderId, msg);
+        }
+        break;
+      default:
+        logError(`MessageRouter Unhandled message: ${data}`);
+    }
+  }
+
+  onRoutingMessage(data, node) {
+    const {senderId, offer, answer, routes, candidate, subtype, profile} = data;
+    switch (subtype) {
+      case 'offer':
+        if (offer && senderId) {
+          logMessage('MessageRouter Accepting automated offer')
+          this.coreApps.NeighborsWorker.acceptOffer(offer, senderId, node);
+        }
+        break;
+      case 'answer':
+        if (answer && senderId) {
+          logMessage('MessageRouter Accepting automated answer')
+          this.coreApps.NeighborsWorker.acceptAnswer(answer, senderId, node);
+        }
+        break;
+      case 'ice-candidate':
+        if(senderId && candidate ) {
+          logMessage(`MessageRouter Received ice candidate for ${senderId}`);
+          this.coreApps.NeighborsWorker.onCandidate(senderId, candidate);
+        }
+        break;
+      case 'route-list':
+        if (routes) {
+          logMessage(`MessageRouter Received routing update`);
+          node.setRoutes(routes);
+          this.coreApps.NeighborsWorker.enqueue(routes);
+        }
+        break;
+      case 'profile-update':
+        if (profile) {
+          logMessage(`MessageRouter Received profile for ${profile.nodeId}`);
+          node.setProfile(profile);
+          this.onNetworkChange();
+          this.coreApps.NeighborsWorker.enqueue(node.profile.routes);
+        }
+        break;
+      default:
+        logError(`MessageRouter Unhandled message: ${data}`);
     }
   }
 
   onConnection(node) {
     const profile =  Profile.getShareable();
     logMessage(`MessageRouter Sending profile for ${profile.nodeId}`);
-    node.send({profile});
+    node.send({
+      type: 'routing',
+      subtype: 'profile-update',
+      profile
+    });
 
     this.callerOnConnection(node);
   }

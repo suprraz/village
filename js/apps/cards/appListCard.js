@@ -176,7 +176,10 @@ class _AppListCard {
   sendApps() {
     const apps = AppStore.getInstalledApps();
 
-    NodeStore.broadcast({apps});
+    NodeStore.broadcast({
+      type: 'app-list',
+      apps
+    });
   }
 }
 
