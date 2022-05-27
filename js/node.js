@@ -30,7 +30,7 @@ class _Node {
   }
 
   isConnected() {
-    return this.dataChannel?.readyState === 'open';
+    return !['failed','closed','disconnected'].includes(this.pc.iceConnectionState) && this.dataChannel?.readyState === 'open';
   }
 
   terminate() {
