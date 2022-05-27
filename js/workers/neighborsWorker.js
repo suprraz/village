@@ -10,17 +10,27 @@ class _NeighborsWorker {
   constructor() {
     this.waiting = [];
 
+    this.prevRoutes = [];
     this.sendPeriodicUpdates();
   }
 
   sendPeriodicUpdates() {
-    const neighborList = NodeStore.getConnectedNodeIds();
-    logMessage(`NeighborsWorker Sending routing update`);
+    const routes = NodeStore.getRoutes();
 
-    neighborList.map((neighborId) => {
-      const neighbor = NodeStore.getNodeById(neighborId);
-      neighbor.send({routes : NodeStore.getRoutes()});
-    })
+    if(JSON.stringify(routes) !== JSON.stringify(this.prevRoutes)) {
+      logMessage(`NeighborsWorker Routes changed, sending routing update`);
+      this.prevRoutes = routes;
+      const neighborList = NodeStore.getConnectedNodeIds();
+
+      neighborList.map((neighborId) => {
+        const neighbor = NodeStore.getNodeById(neighborId);
+        neighbor.send({routes : NodeStore.getRoutes()});
+      })
+
+      this.enqueue(routes); // check for lost connections
+    } else {
+      logMessage(`NeighborsWorker Routes unchanged, skipping update`);
+    }
 
     setTimeout(() => {
       this.sendPeriodicUpdates();

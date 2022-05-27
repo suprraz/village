@@ -17,7 +17,7 @@ class _Logger {
 const Logger = new _Logger();
 
 function logMessage(msg) {
-  console.error(msg);
+  console.log(msg);
   Logger.onMsg(msg);
 }
 function logError(msg) {
