@@ -18,20 +18,17 @@ class _VillageState {
   refresh() {
     const nodes = NodeStore.getNodes();
 
+    while (this.nodeStateList.firstChild) {
+      this.nodeStateList.removeChild(this.nodeStateList.firstChild);
+    }
+
     if(!nodes.length) {
       this.nodeStateList.innerText = "No nodes connected.";
-    } else {
-      // remove all children and listeners
-      while (this.nodeStateList.firstChild) {
-        this.nodeStateList.removeChild(this.nodeStateList.firstChild);
-      }
     }
 
     nodes.map(async (node) => {
       const rank = idDistance(Profile.getNodeID(), node.profile.nodeId);
-      if(node.candidateType === null) {
-        await node.setCandidateType();
-      }
+
       this.nodeStateList.appendChild(this.createNodeStateDiv(node, rank));
     })
 

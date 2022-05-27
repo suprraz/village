@@ -2,6 +2,7 @@ import Profile from "./store/profile.js";
 import NodeStore from "./store/nodeStore.js";
 import {logError, logMessage} from "./utils/logger.js";
 import Settings from "./settings.js";
+import config from "./config.js";
 
 class _MessageRouter {
 
@@ -13,7 +14,7 @@ class _MessageRouter {
 
   onMessage (data, node) {
 
-    const {msg, apps, destinationId, senderId, profile, offer, answer, routes} = data;
+    const {msg, apps, destinationId, senderId, profile, offer, answer, routes, candidate} = data;
 
     if(destinationId !== null && destinationId !== Profile.getNodeID()) {
       // forward message
@@ -23,6 +24,9 @@ class _MessageRouter {
       } else {
         logMessage(`MessageRouter Route not found for ${destinationId}.`)
       }
+    } else if (senderId && candidate) {
+      logMessage(`MessageRouter Received ice candidate for ${senderId}`);
+      this.coreApps.NeighborsWorker.onCandidate(senderId, candidate);
     } else if (msg && senderId) {
       this.coreApps.Chat.messageReceived(senderId, msg);
     } else if (apps) {
@@ -57,7 +61,7 @@ class _MessageRouter {
 
   onNetworkChange() {
     NodeStore.prune();
-    if(NodeStore.getNodes().length === 0) {
+    if(NodeStore.getNodes().length < config.mqttParallelReqs) {
       this.coreApps.MqttWorker.seekNodes();
     }
     this.coreApps.VillageState.refresh();

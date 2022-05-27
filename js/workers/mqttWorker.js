@@ -17,6 +17,8 @@ class _MqttWorker {
 
     this.mqttBroker = config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
     this.seeking = false;
+
+    this.connectingNodes = [];
   }
 
   seekNodes() {
@@ -80,7 +82,7 @@ class _MqttWorker {
 
         this.parentOnMessage(data, senderNode);
       } catch (e) {
-        logError(e);
+        logError(`MQTT message receive error: ${e}`);
       }
     }
   }
@@ -92,7 +94,7 @@ class _MqttWorker {
 
         this.parseMessage(message);
       } catch (e) {
-        logError(e);
+        logError(`MQTT notification error: ${e}`);
       }
     } else if(topic.startsWith(this.broadcastTopic) && !topic.endsWith(Profile.getNodeID())) {
       try {
@@ -100,30 +102,38 @@ class _MqttWorker {
 
         this.parseBroadcast(message);
       } catch (e) {
-        logError(e);
+        logError(`MQTT broadcast receive error: ${e}`);
       }
     }
   }
 
-  async onOffer(message) {
+  async acceptOffer(message) {
     if(message.fromId !== Profile.getNodeID() && !NodeStore.getNodeById(message.fromId)) {
       let answerKey = null;
       try {
         const node = new _Node({
+          nodeId: message.fromId,
           onConnection: (node) => this.parentOnConnection(node),
           onMessage: (data, node) => this.onMessage(data, node),
+          sendCandidate: (candidate) => {
+            if(node === NodeStore.getNodeById(message.fromId)) {
+              this.sendCandidate(message.fromId, candidate)
+            }
+          }
         });
-        node.setNodeId(message.fromId);
 
         answerKey = await node.acceptOffer(message.offerKey);
 
+        this.connectingNodes = this.connectingNodes.filter( nId => nId !== message.fromId);
         if(NodeStore.getNodeById(message.fromId))
         {
+          logMessage(`MQTT terminating node duplicate ${message.fromId}`);
           node.terminate();
           return;
         }
 
         NodeStore.addNode(node);
+
         this.seeking = false;
 
         const answerMsg = {
@@ -139,7 +149,6 @@ class _MqttWorker {
         throw new Error(e);
       }
     }
-
   }
 
   async onAnswer(message) {
@@ -149,26 +158,67 @@ class _MqttWorker {
 
         const node = NodeStore.getNodeById(message.fromId);
 
-        node.setRemoteDescription(connectionObj);
+        if(node) {
+          node.setRemoteDescription(connectionObj);
+        }
+
       } catch (e) {
         logError(e);
       }
     }
   }
 
+  sendCandidate(toId, candidate) {
+    const candidateMsg = {
+      type: 'candidate',
+      fromId: Profile.getNodeID(),
+      toId,
+      date: new Date(),
+      candidate,
+    };
+
+    logMessage(`MQTT Sending ICE candidate to ${toId}`);
+    this.sendMessage(toId, candidateMsg);
+  }
+
+  onCandidate(message) {
+    try {
+      const node = NodeStore.getNodeById(message.fromId);
+      if(node) {
+        logMessage(`MQTT Adding Ice candidate to ${node?.profile?.nodeId}`);
+        node.addIceCandidate(message.candidate);
+      }
+    } catch (e) {
+      logError(e);
+    }
+  }
+
   async sendOffer(toId) {
-    if(toId !== Profile.getNodeID() && !NodeStore.getNodeById(toId)) {
+    if(toId !== Profile.getNodeID() && !NodeStore.getNodeById(toId) && !this.connectingNodes.includes(toId)) {
+      this.connectingNodes.push(toId);
+
+      setTimeout(() => {
+        this.connectingNodes = this.connectingNodes.filter( nId => nId !== toId);
+      }, config.RTC.handshakeTimeout);
+
       try {
         const node = new _Node({
+          nodeId: toId,
           onConnection: (node) => this.parentOnConnection(node),
           onMessage: (data, node) => this.onMessage(data, node),
+          sendCandidate: (candidate) => {
+              if(node === NodeStore.getNodeById(toId)) {
+                this.sendCandidate(toId, candidate)
+              }
+            }
         });
-        node.setNodeId(toId);
 
         const offerKey = await node.createOffer();
 
+        this.connectingNodes = this.connectingNodes.filter( nId => nId !== toId);
         if(NodeStore.getNodeById(toId))
         {
+          logMessage(`MQTT terminating node duplicate ${toId}`);
           node.terminate();
           return;
         }
@@ -184,7 +234,7 @@ class _MqttWorker {
           offerKey,
         };
 
-        logMessage(`MQTT sending offer to ${toId}`);
+        logMessage(`MQTT Sending offer to ${toId}`);
         this.sendMessage(toId, offerMsg);
       } catch (e) {
         logError(e);
@@ -224,7 +274,7 @@ class _MqttWorker {
     if(NodeStore.getNodeById(toId)) {
       return;
     }
-    const swapCandidate = getSwapCandidate(Profile.getNodeID(), NodeStore.getNeighborList(), [toId]);
+    const swapCandidate = getSwapCandidate(Profile.getNodeID(), NodeStore.getConnectedNodeIds(), [toId]);
 
     if((NodeStore.getNodes().length < config.maxConnectedNeighbors) || swapCandidate) {
       logMessage(`MQTT sending channel-available to ${toId}`);
@@ -238,7 +288,13 @@ class _MqttWorker {
   }
 
   channelRequest(toId) {
-    if(NodeStore.getNodes().length < config.mqttParallelReqs && !NodeStore.getNodeById(toId)) {
+    if(this.connectingNodes.length < config.mqttParallelReqs && !NodeStore.getNodeById(toId) && !this.connectingNodes.includes(toId)) {
+
+      this.connectingNodes.push(toId);
+
+      setTimeout(() => {
+        this.connectingNodes = this.connectingNodes.filter( nId => nId !== toId);
+      }, config.RTC.handshakeTimeout);
 
       logMessage(`MQTT Sending channel-request to: ${toId}`);
 
@@ -278,10 +334,13 @@ class _MqttWorker {
         this.sendOffer(message.fromId);
         break;
       case 'offer-key':
-        this.onOffer(message);
+        this.acceptOffer(message);
         break;
       case 'answer-key':
         this.onAnswer(message);
+        break;
+      case 'candidate':
+        this.onCandidate(message);
         break;
       default:
         break;

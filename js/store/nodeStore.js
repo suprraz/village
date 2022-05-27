@@ -25,16 +25,16 @@ class _NodeStore {
     return this.nodes;
   }
 
-  getNeighborList() {
-    const allNeighbors = NodeStore.getNodes()
-      .filter((node) => !!node.profile.nodeId && node.pc.connectionState === 'connected')
+  getConnectedNodeIds() {
+    const connectedNeighborIds = NodeStore.getNodes()
+      .filter((node) => !!node.profile?.nodeId && node.isConnected())
       .map(node => node.profile.nodeId);
 
-    return [...new Set(allNeighbors)];
+    return [...new Set(connectedNeighborIds)];
   }
 
   getNextHopNode(destinationId) {
-    const nextHopDirect = this.nodes.find((node) => node.profile.nodeId === destinationId);
+    const nextHopDirect = this.nodes.find((node) => node.profile.nodeId === destinationId && node.isConnected());
     if( nextHopDirect ) {
       return nextHopDirect;
     }
@@ -43,7 +43,7 @@ class _NodeStore {
     let hops = 999999;
 
     this.nodes.map(node => {
-      if(node?.profile?.routes) {
+      if(node.profile?.routes) {
         node.profile.routes.map((hop,i) => {
           if(hop.includes(destinationId) && i < hops) {
             neighbor = node;
@@ -51,10 +51,9 @@ class _NodeStore {
           }
         })
       }
-
     })
 
-    // logMessage(`Best route: ${neighbor.profile.nodeId}  Hops: ${hops}`);
+    //logMessage(`NodeStore Best route: ${neighbor?.profile?.nodeId}  Hops: ${hops}`);
     return neighbor;
   }
 
@@ -76,17 +75,12 @@ class _NodeStore {
     this.nodes = this.nodes.filter((n) => n.profile.id !== nodeId);
   }
 
-  isDisconnected(node) {
-    return ['failed', 'disconnected', 'closed'].includes(node.pc.connectionState) ||
-      (!node.pending && (node.pc.connectionState !== 'connected'));
-  }
-
   getNodesPending() {
     return this.nodes.filter((n) => n.pending);
   }
 
   getRoutes() {
-    const neighborsList = this.getNeighborList();
+    const neighborsList = this.getConnectedNodeIds();
 
     const routes = [];
 
@@ -104,7 +98,7 @@ class _NodeStore {
         if(node?.profile?.routes) {
           const coveredRoutes = routes.reduce((total, curr) => {
             return [...total, ...curr];
-          }, []);
+          }, [Profile.getNodeID()]);
           let newRoutes = node.profile.routes[i - 1] || [];
           newRoutes = newRoutes.filter(id => !coveredRoutes.find(covered => covered === id));
           newRoutes = [...new Set([...hop, ...newRoutes])];
@@ -121,7 +115,7 @@ class _NodeStore {
 
   prune() {
     // failed nodes timed out while connecting or broke link after connection
-    const failedNodes = this.nodes.filter( node => this.isDisconnected(node) );
+    const failedNodes = this.nodes.filter( node => !node.pending && !node.isConnected() );
 
     failedNodes.map((node) => node.terminate());
 
@@ -131,8 +125,8 @@ class _NodeStore {
   }
 
   pruneExtraNeighbors() {
-    while(NodeStore.getNeighborList().length > config.maxConnectedNeighbors) {
-      const sortedNeighbors = sortNeighbors(Profile.getNodeID(), NodeStore.getNeighborList());
+    while(NodeStore.getConnectedNodeIds().length > config.maxConnectedNeighbors) {
+      const sortedNeighbors = sortNeighbors(Profile.getNodeID(), NodeStore.getConnectedNodeIds());
       const trashNeighbor = sortedNeighbors[sortedNeighbors.length-1];
       const rank = idDistance(Profile.getNodeID(), trashNeighbor);
 

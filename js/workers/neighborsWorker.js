@@ -14,7 +14,7 @@ class _NeighborsWorker {
   }
 
   sendPeriodicUpdates() {
-    const neighborList = NodeStore.getNeighborList();
+    const neighborList = NodeStore.getConnectedNodeIds();
     logMessage(`NeighborsWorker Sending routing update`);
 
     neighborList.map((neighborId) => {
@@ -54,7 +54,7 @@ class _NeighborsWorker {
       return;
     }
 
-    if(NodeStore.getNeighborList().length < config.maxConnectedNeighbors) {
+    if(NodeStore.getConnectedNodeIds().length < config.maxConnectedNeighbors) {
       const candidateId = this.waiting.pop();
       if(candidateId) {
         this.waiting = this.waiting.filter(id => id !== candidateId);
@@ -69,7 +69,7 @@ class _NeighborsWorker {
 
   swapNeighbors() {
     const fromId = Profile.getNodeID();
-    const swapCandidate = getSwapCandidate(fromId, NodeStore.getNeighborList(), this.waiting);
+    const swapCandidate = getSwapCandidate(fromId, NodeStore.getConnectedNodeIds(), this.waiting);
 
     if(swapCandidate) {
       logMessage(`NeighborsWorker Swapping ${swapCandidate.oldId} to ${swapCandidate.toId}`);
@@ -98,15 +98,44 @@ class _NeighborsWorker {
     this.process();
   }
 
+  sendCandidate(toId, candidate) {
+    logMessage(`NeighborsWorker Sending ice candidate to ${toId}`);
+
+    const node = NodeStore.getNextHopNode(toId);
+    if(node) {
+      node.send({
+        candidate,
+        destinationId: toId
+      });
+    }
+  }
+
+  onCandidate(fromId, candidate) {
+    logMessage(`NeighborsWorker Ice candidate received from ${fromId}`);
+    try {
+      const node = NodeStore.getNodeById(fromId);
+      if(node) {
+        logMessage(`NeighborsWorker adding ice candidate`);
+        node.addIceCandidate(candidate);
+      } else {
+        logError(`NeighborsWorker Error adding ice candidate: Node not found ${fromId}`);
+      }
+    } catch (e) {
+      logError(`NeighborsWorker Error adding ice candidate ${e}`);
+    }
+  }
+
   async requestConnection(destinationId) {
     const nextHopNode = NodeStore.getNextHopNode(destinationId);
     if(!nextHopNode) {
+      logMessage(`NeighborsWorker No route available to: ${destinationId}`);
       this.complete(destinationId);
       return; // no route to destination
     }
 
     const existingNode = NodeStore.getNodeById(destinationId);
-    if( existingNode && !NodeStore.isDisconnected(existingNode) ) {
+    if( existingNode && (existingNode.isConnected() || existingNode.pending)) {
+      logMessage(`NeighborsWorker Duplicate node on request conneciton: ${destinationId}`);
       this.complete(destinationId);
       return;
     }
@@ -115,16 +144,21 @@ class _NeighborsWorker {
       logMessage(`NeighborsWorker Requesting connection to ${destinationId}`);
 
       const offerNode = new _Node({
+        nodeId: destinationId,
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
+        sendCandidate: (candidate) => {
+          if(NodeStore.getNodeById(destinationId) === offerNode) {
+            this.sendCandidate(destinationId, candidate)
+          }
+        }
       });
-      offerNode.setNodeId(destinationId);
 
       const offerKey = await offerNode.createOffer();
 
       if(NodeStore.getNodeById(destinationId)) {
-        this.complete(destinationId);
         logMessage(`NeighborsWorker Duplicate Node after create offer: ${destinationId}`);
+        this.complete(destinationId);
         offerNode.terminate();
       } else {
         this.sendOfferKey(nextHopNode, destinationId, offerKey);
@@ -137,6 +171,7 @@ class _NeighborsWorker {
   }
 
   sendOfferKey(nextHopNode, destinationId, offerKey) {
+    logMessage(`NeighborsWorker Sending offer to: ${destinationId} via ${nextHopNode?.profile?.nodeId}`);
     nextHopNode.send({
       destinationId,
       senderId: Profile.getNodeID(),
@@ -160,10 +195,15 @@ class _NeighborsWorker {
     const {offerKey} = offer;
     try {
       const node = new _Node({
+        nodeId: senderId,
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
+        sendCandidate: (candidate) => {
+            if(NodeStore.getNodeById(senderId) === node) {
+              this.sendCandidate(senderId, candidate);
+            }
+          }
       });
-      node.setNodeId(senderId);
 
       const answerKey = await node.acceptOffer(offerKey);
 
@@ -176,6 +216,7 @@ class _NeighborsWorker {
 
       NodeStore.addNode(node);
 
+      logMessage(`NeighborsWorker Sending answer to: ${senderId} via ${senderNode?.profile?.nodeId}`);
       senderNode.send({answer: {
           answerKey
         },
@@ -191,6 +232,7 @@ class _NeighborsWorker {
 
   acceptAnswer(answer, senderId, senderNode) {
     try {
+      logMessage(`NeighborsWorker Accepting answer from: ${senderId} via ${senderNode?.profile?.nodeId}`);
       const connectionObj = JSON.parse(atob(answer.answerKey));
 
       const offerNode = NodeStore.getNodeById(senderId);
