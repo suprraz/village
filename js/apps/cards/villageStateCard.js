@@ -1,8 +1,8 @@
-import NodeStore from "../store/nodeStore.js";
-import Profile from "../store/profile.js";
-import {idDistance} from "../utils/routing.js";
+import NodeStore from "../../store/nodeStore.js";
+import Profile from "../../store/profile.js";
+import {idDistance} from "../../utils/routing.js";
 
-class _VillageState {
+class _VillageStateCard {
   constructor() {
     const villageStateContainer = document.getElementById('villageStateContainer');
     villageStateContainer.innerHTML = villageStateHtml;
@@ -85,4 +85,4 @@ const villageStateHtml = `
 </divi>
 `
 
-export default _VillageState;
+export default _VillageStateCard;

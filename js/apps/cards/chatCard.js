@@ -1,7 +1,7 @@
-import NodeStore from "../store/nodeStore.js";
+import NodeStore from "../../store/nodeStore.js";
 
 
-class _Chat {
+class _ChatCard {
   constructor() {
     this.chatLog = [];
 
@@ -54,4 +54,4 @@ const chatHtml = `
 </div>
 `
 
-export default _Chat;
+export default _ChatCard;

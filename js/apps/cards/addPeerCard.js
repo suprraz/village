@@ -1,11 +1,11 @@
-import _Node from "../node.js";
-import NodeStore from "../store/nodeStore.js";
-import {logError, logMessage} from "../utils/logger.js";
-import {show, hide} from "../utils/dom.js";
-import Profile from "../store/profile.js";
-import MessageRouter from "../messageRouter.js";
+import _Node from "../../node.js";
+import NodeStore from "../../store/nodeStore.js";
+import {logError, logMessage} from "../../utils/logger.js";
+import {show, hide} from "../../utils/dom.js";
+import Profile from "../../store/profile.js";
+import MessageRouter from "../../messageRouter.js";
 
-class _AddPeer {
+class _AddPeerCard {
   constructor() {
     this.parentOnConnection = (node) => MessageRouter.onConnection(node);
     this.parentOnMessage = (data, node) => MessageRouter.onMessage(data, node);
@@ -344,4 +344,4 @@ const addPeerHtml = `
 </div>
 `;
 
-export default _AddPeer;
+export default _AddPeerCard;

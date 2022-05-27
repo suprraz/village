@@ -29,9 +29,9 @@ class _MessageRouter {
       logMessage(`MessageRouter Received ice candidate for ${senderId}`);
       this.coreApps.NeighborsWorker.onCandidate(senderId, candidate);
     } else if (msg && senderId) {
-      this.coreApps.Chat.messageReceived(senderId, msg);
+      this.coreApps.ChatCard.messageReceived(senderId, msg);
     } else if (apps) {
-      this.coreApps.AppListApp.onAvailableApps(apps);
+      this.coreApps.AppListCard.onAvailableApps(apps);
     } else if (profile) {
       logMessage(`MessageRouter Received profile for ${profile.nodeId}`);
       node.setProfile(profile);
@@ -71,7 +71,7 @@ class _MessageRouter {
       this.coreApps.NeighborsWorker.rebuildRoutes();
     }
 
-    this.coreApps.VillageState.refresh();
+    this.coreApps.VillageStateCard.refresh();
   }
 
   onRunApp(app, params) {
@@ -83,7 +83,7 @@ class _MessageRouter {
   }
 
   onInstallApp(app) {
-    this.coreApps.AppListApp.installApp(app);
+    this.coreApps.AppListCard.installApp(app);
   }
 
   onCloseApp(sourceAppName) {
@@ -102,8 +102,8 @@ class _MessageRouter {
           this.onCloseApp(data.sourceApp);
         } else if (!!data.saveApp) {
           AppStore.installApp(data.app);
-          this.coreApps.AppListApp.updateAppList();
-          this.coreApps.AppListApp.sendApps();
+          this.coreApps.AppListCard.updateAppList();
+          this.coreApps.AppListCard.sendApps();
         } else if(!!data.encryptionKey) {
           this.coreApps.InvoiceStore.updateInvoice(data.appName, data.encryptionKey)
         }

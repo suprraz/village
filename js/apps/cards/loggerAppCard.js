@@ -1,6 +1,6 @@
-import { Logger } from "../utils/logger.js";
-import config from "../config.js";
-import Settings from "../settings.js";
+import { Logger } from "../../utils/logger.js";
+import config from "../../config.js";
+import Settings from "../../settings.js";
 
 class _LoggerCardApp {
   constructor(el) {
@@ -63,7 +63,7 @@ const loggerCardAppHtml = `
   <div>
     <label class="checkbox">
       <input id="loggerEnabled" type="checkbox" value="checked" />
-      Enable logs
+      Logging enabled
     </label>
     
     <textarea id="logger" class="textarea my-2" style="white-space: pre" rows="20" cols="30"> </textarea>

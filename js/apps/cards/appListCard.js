@@ -1,10 +1,10 @@
-import AppStore from "../store/appStore.js";
-import NodeStore from "../store/nodeStore.js";
-import MessageRouter from "../messageRouter.js";
-import AceEditorApp from "./sandboxed/aceEditorApp.js";
-import {logError} from "../utils/logger.js";
+import AppStore from "../../store/appStore.js";
+import NodeStore from "../../store/nodeStore.js";
+import MessageRouter from "../../messageRouter.js";
+import AceEditorApp from "../sandboxed/aceEditorApp.js";
+import {logError} from "../../utils/logger.js";
 
-class _AppList {
+class _AppListCard {
   constructor() {
     this.availableApps = [];
 
@@ -192,4 +192,4 @@ const appListHtml = `
 </div>
 `
 
-export default _AppList;
+export default _AppListCard;

@@ -1,17 +1,17 @@
-import _AddPeer from "./apps/addPeer.js";
 import {show, hide} from "./utils/dom.js";
-import _AppList from "./apps/appList.js";
-import _Chat from "./apps/chat.js";
 import _MqttWorker from "./workers/mqttWorker.js";
 import MessageRouter from "./messageRouter.js";
 import _NeighborsWorker from "./workers/neighborsWorker.js";
-import _VillageState from "./apps/villageState.js";
 import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
 import LandingApp from "./apps/sandboxed/landingApp.js";
-import _LoggerAppCard from "./apps/LoggerAppCard.js";
 import _Sandbox from "./sandbox.js";
 import _InvoiceStore from "./store/invoiceStore.js";
+import _AddPeerCard from "./apps/cards/addPeerCard.js";
+import _VillageStateCard from "./apps/cards/villageStateCard.js";
+import _ChatCard from "./apps/cards/chatCard.js";
+import _AppListCard from "./apps/cards/appListCard.js";
+import _LoggerAppCard from "./apps/cards/loggerAppCard.js";
 
 
 class _Village {
@@ -24,24 +24,24 @@ class _Village {
       return;
     }
 
-    const AddPeer = new _AddPeer();
+    const AddPeerCard = new _AddPeerCard();
     const MqttWorker = new _MqttWorker();
-    const AppListApp = new _AppList();
+    const AppListCard = new _AppListCard();
     const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
-    const Chat = new _Chat();
+    const ChatCard = new _ChatCard();
     const NeighborsWorker = new _NeighborsWorker();
     const InvoiceStore = new _InvoiceStore();
-    const VillageState = new _VillageState();
+    const VillageStateCard = new _VillageStateCard();
     const Sandbox = new _Sandbox();
 
     this.coreApps = {
-      AddPeer,
-      AppListApp,
+      AddPeerCard,
+      AppListCard,
       LoggerAppCard,
-      Chat,
+      ChatCard,
       MqttWorker,
       NeighborsWorker,
-      VillageState,
+      VillageStateCard,
       Sandbox,
       InvoiceStore
     };
@@ -49,7 +49,7 @@ class _Village {
     MessageRouter.init(this.coreApps, (node) => this.onConnection(node));
 
     if(urlParams.has('offerKey')) {
-      this.coreApps.AddPeer.run();
+      this.coreApps.AddPeerCard.run();
     }
 
     const showLanding = Settings.get('showLanding');
@@ -60,7 +60,7 @@ class _Village {
       this.coreApps.MqttWorker.seekNodes();
     }
 
-    this.coreApps.AppListApp.updateAppList();
+    this.coreApps.AppListCard.updateAppList();
 
     this.registerListeners();
   }
@@ -73,14 +73,14 @@ class _Village {
   onConnection(node) {
     show('widgetsView');
 
-    this.coreApps.AddPeer.stop();
-    this.coreApps.AppListApp.updateAppList();
-    this.coreApps.AppListApp.sendApps();
+    this.coreApps.AddPeerCard.stop();
+    this.coreApps.AppListCard.updateAppList();
+    this.coreApps.AppListCard.sendApps();
   }
 
   addMorePeers(){
     this.coreApps.AddPeer.run();
-    this.coreApps.AddPeer.preparePeer();
+    this.coreApps.AddPeerCard.preparePeer();
     this.fullScreenApp();
   }
 
