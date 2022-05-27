@@ -13,7 +13,6 @@ class _MqttWorker {
     this.client = null;
     this.broadcastTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/bcast`;
     this.msgTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/msg`;
-    this.initialized = false;
 
     this.mqttBroker = config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
     this.seeking = false;
@@ -36,14 +35,11 @@ class _MqttWorker {
       try {
         this.connect();
 
-        this.client.on('connect', () => {
-          if(!this.initialized) {
-            logMessage('MQTT Connected.')
+        this.client.once('connect', () => {
+          logMessage('MQTT Connected.')
 
-            this.registerListeners();
-            this.broadcastAvailable();
-          }
-          this.initialized = true;
+          this.registerListeners();
+          this.broadcastAvailable();
         });
       } catch (e) {
         throw e;

@@ -70,7 +70,6 @@ class _Node {
   registerDataChannelListeners() {
     this.dataChannel.onopen = (e) => this.onConnection(this);
     this.dataChannel.onmessage = (e) => this.onMessage(e, this);
-    this.dataChannel.onbufferedamountlow = (e) => logError(`Node Datachannel Buffered Amount Low: ${e}`);
     this.dataChannel.onerror = (e) => logError(`Node Datachannel Error: ${e}`);
   }
 
@@ -88,7 +87,7 @@ class _Node {
   }
 
   addIceCandidate(candidate) {
-    logMessage('Node Addeding Ice candidate')
+    logMessage('Node Adding Ice candidate')
     this.pc.addIceCandidate(candidate)
       .catch((e) => logError(`Node Error adding ice candidate: ${e}`));
   }
