@@ -251,7 +251,8 @@ class _MqttWorker {
     });
 
     this.client.on('reconnect', () => {
-      logMessage('MQTT Reconnecting...');
+      logMessage('MQTT Reconnected');
+      MessageRouter.onNetworkChange();
     });
   }
 
