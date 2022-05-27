@@ -2,6 +2,7 @@ import DataStore from "./store/dataStore.js";
 
 const defaultSettings = {
   showLanding: true,
+  enableLogging: false,
 }
 
 class _Settings {

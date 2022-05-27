@@ -27,6 +27,11 @@ class _NeighborsWorker {
     }, config.routingTableUpdateFrequency)
   }
 
+  rebuildRoutes() {
+    const allRoutes = NodeStore.getRoutes();
+    this.enqueue(allRoutes);
+  }
+
   enqueue(routes) {
     const neighbors = routes.reduce((total, curr) => {
       return [... new Set([...total, ...curr])];

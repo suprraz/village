@@ -3,6 +3,7 @@ import NodeStore from "./store/nodeStore.js";
 import {logError, logMessage} from "./utils/logger.js";
 import Settings from "./settings.js";
 import config from "./config.js";
+import AppStore from "./store/appStore.js";
 
 class _MessageRouter {
 
@@ -60,10 +61,16 @@ class _MessageRouter {
   }
 
   onNetworkChange() {
+    const nodeCountStart = NodeStore.getNodes().length;
     NodeStore.prune();
-    if(NodeStore.getNodes().length < config.mqttParallelReqs) {
+    const nodeCountEnd = NodeStore.getNodes().length;
+
+    if(nodeCountEnd < config.mqttParallelReqs) {
       this.coreApps.MqttWorker.seekNodes();
+    } else if (nodeCountEnd < nodeCountStart) {
+      this.coreApps.NeighborsWorker.rebuildRoutes();
     }
+
     this.coreApps.VillageState.refresh();
   }
 
@@ -94,7 +101,9 @@ class _MessageRouter {
         if(!!data.closeApp) {
           this.onCloseApp(data.sourceApp);
         } else if (!!data.saveApp) {
-          this.coreApps.Editor.installApp(data.app);
+          AppStore.installApp(data.app);
+          this.coreApps.AppListApp.updateAppList();
+          this.coreApps.AppListApp.sendApps();
         } else if(!!data.encryptionKey) {
           this.coreApps.InvoiceStore.updateInvoice(data.appName, data.encryptionKey)
         }
@@ -103,6 +112,7 @@ class _MessageRouter {
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
+        logMessage('MessageRouter Visibility change: visible');
         this.onNetworkChange();
       }
     }, false);
