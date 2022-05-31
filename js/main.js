@@ -1,7 +1,8 @@
 import {show, hide} from "./utils/dom.js";
 import _MqttWorker from "./workers/mqttWorker.js";
 import MessageRouter from "./messageRouter.js";
-import _NeighborsWorker from "./workers/neighborsWorker.js";
+import _VillageSignaler from "./workers/villageSignaler.js";
+import _RouteBalancer from "./workers/routeBalancer.js";
 import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
 import LandingApp from "./apps/sandboxed/landingApp.js";
@@ -29,7 +30,8 @@ class _Village {
     const AppListCard = new _AppListCard();
     const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
     const ChatCard = new _ChatCard();
-    const NeighborsWorker = new _NeighborsWorker();
+    const VillageSignaler = new _VillageSignaler();
+    const RouteBalancer = new _RouteBalancer();
     const InvoiceStore = new _InvoiceStore();
     const VillageStateCard = new _VillageStateCard();
     const Sandbox = new _Sandbox();
@@ -40,7 +42,8 @@ class _Village {
       LoggerAppCard,
       ChatCard,
       MqttWorker,
-      NeighborsWorker,
+      VillageSignaler,
+      RouteBalancer,
       VillageStateCard,
       Sandbox,
       InvoiceStore

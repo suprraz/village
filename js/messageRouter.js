@@ -63,26 +63,26 @@ class _MessageRouter {
       case 'offer':
         if (offer && senderId) {
           logMessage('MessageRouter Accepting automated offer')
-          this.coreApps.NeighborsWorker.acceptOffer(offer, senderId, node);
+          this.coreApps.VillageSignaler.acceptOffer(offer, senderId, node);
         }
         break;
       case 'answer':
         if (answer && senderId) {
           logMessage('MessageRouter Accepting automated answer')
-          this.coreApps.NeighborsWorker.acceptAnswer(answer, senderId, node);
+          this.coreApps.VillageSignaler.acceptAnswer(answer, senderId, node);
         }
         break;
       case 'ice-candidate':
         if(senderId && candidate ) {
           logMessage(`MessageRouter Received ice candidate for ${senderId}`);
-          this.coreApps.NeighborsWorker.onCandidate(senderId, candidate);
+          this.coreApps.VillageSignaler.onCandidate(senderId, candidate);
         }
         break;
       case 'route-list':
         if (routes) {
           logMessage(`MessageRouter Received routing update`);
           node.setRoutes(routes);
-          this.coreApps.NeighborsWorker.enqueue(routes);
+          this.coreApps.RouteBalancer.enqueue(routes);
         }
         break;
       case 'profile-update':
@@ -90,7 +90,7 @@ class _MessageRouter {
           logMessage(`MessageRouter Received profile for ${profile.nodeId}`);
           node.setProfile(profile);
           this.onNetworkChange();
-          this.coreApps.NeighborsWorker.enqueue(node.profile.routes);
+          this.coreApps.RouteBalancer.enqueue(node.profile.routes);
         }
         break;
       default:
@@ -118,7 +118,7 @@ class _MessageRouter {
     if(nodeCountEnd < config.mqttParallelReqs) {
       this.coreApps.MqttWorker.seekNodes();
     } else if (nodeCountEnd < nodeCountStart) {
-      this.coreApps.NeighborsWorker.rebuildRoutes();
+      this.coreApps.RouteBalancer.rebuildRoutes();
     }
 
     this.coreApps.VillageStateCard.refresh();
