@@ -30,7 +30,13 @@ class _LoggerCardApp {
   }
 
   updateLog() {
+    const shouldScroll = this.loggerTextArea.scrollTop >= this.loggerTextArea.scrollHeight - this.loggerTextArea.offsetHeight;
+
     this.loggerTextArea.value = this.log.join('\n');
+
+    if(shouldScroll) {
+      this.loggerTextArea.scrollTop = this.loggerTextArea.scrollHeight;
+    }
   }
 
   printMsg(msg){

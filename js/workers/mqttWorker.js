@@ -110,11 +110,6 @@ class _MqttWorker {
           nodeId: message.fromId,
           onConnection: (node) => this.parentOnConnection(node),
           onMessage: (data, node) => this.onMessage(data, node),
-          sendCandidate: (candidate) => {
-            if(node === NodeStore.getNodeById(message.fromId)) {
-              this.sendCandidate(message.fromId, candidate)
-            }
-          },
           signalProtocol: 'mqtt'
         });
 
@@ -203,11 +198,6 @@ class _MqttWorker {
           nodeId: toId,
           onConnection: (node) => this.parentOnConnection(node),
           onMessage: (data, node) => this.onMessage(data, node),
-          sendCandidate: (candidate) => {
-              if(node === NodeStore.getNodeById(toId)) {
-                this.sendCandidate(toId, candidate)
-              }
-            },
           signalProtocol: 'mqtt'
         });
 
