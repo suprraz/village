@@ -14,16 +14,14 @@ class _MqttWorker {
     this.msgTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/msg`;
 
     this.mqttBroker = config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
-    this.seeking = false;
 
     this.connectingNodes = [];
   }
 
   seekNodes() {
-    if(this.seeking) {
+    if(this.connectingNodes.length >= config.mqttParallelReqs) {
       return;
     }
-    this.seeking = true;
 
     logMessage('MQTT Seeking nodes')
     if(this.client) {
@@ -125,8 +123,6 @@ class _MqttWorker {
 
         NodeStore.addNode(node);
 
-        this.seeking = false;
-
         const answerMsg = {
           fromId: Profile.getNodeID(),
           type: 'answer-key',
@@ -212,7 +208,6 @@ class _MqttWorker {
         }
 
         NodeStore.addNode(node);
-        this.seeking = false;
 
         const offerMsg = {
           type: 'offer-key',
