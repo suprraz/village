@@ -26,9 +26,9 @@ class _RouteBalancer {
         const neighbor = NodeStore.getNodeById(neighborId);
         neighbor.send({
           type: 'routing',
-          subtype: 'route-list',
-          routes : NodeStore.getRoutes()}
-        );
+          subtype: 'profile-update',
+          profile: Profile.getShareable()
+        });
       })
 
       this.enqueue(routes); // check for lost connections
@@ -61,7 +61,6 @@ class _RouteBalancer {
       MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
     } else if (!!swapCandidate ) {
       logMessage(`RouteBalancer Dropping connection to: ${swapCandidate.oldId} to swap with ${swapCandidate.toId}`);
-      NodeStore.deleteNodesById(swapCandidate.oldId);
 
       MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
     } else {

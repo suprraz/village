@@ -270,7 +270,7 @@ class _MqttWorker {
   }
 
   channelAvailable(toId) {
-    if(NodeStore.getNodeById(toId)) {
+    if(NodeStore.getNodeById(toId) || toId === Profile.getNodeID() || this.connectingNodes.includes(toId)) {
       return;
     }
 

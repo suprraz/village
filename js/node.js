@@ -48,10 +48,6 @@ class _Node {
     }
   }
 
-  setRoutes(routes) {
-    this.profile.routes = routes;
-  }
-
   setHandshakeTimeout() {
     setTimeout(() => {
       if(this.pending === true) {

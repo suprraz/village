@@ -190,7 +190,7 @@ class _VillageSignaler {
       if(NodeStore.getNodeById(senderId)) {
         node.terminate();
         this.onComplete(senderId);
-        logMessage("VillageSignaler Connection already initiated by other side")
+        logMessage("VillageSignaler Connection already initiated by other side while accepting offer")
         return;
       }
 

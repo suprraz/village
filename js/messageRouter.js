@@ -58,7 +58,7 @@ class _MessageRouter {
   }
 
   onRoutingMessage(data, node) {
-    const {senderId, offer, answer, routes, candidate, subtype, profile} = data;
+    const {senderId, offer, answer, candidate, subtype, profile} = data;
     switch (subtype) {
       case 'request-connection':
         if (senderId) {
@@ -94,13 +94,6 @@ class _MessageRouter {
         if(senderId && candidate ) {
           logMessage(`MessageRouter Received ice candidate for ${senderId}`);
           this.coreApps.VillageSignaler.onCandidate(senderId, candidate);
-        }
-        break;
-      case 'route-list':
-        if (routes) {
-          logMessage(`MessageRouter Received routing update`);
-          node.setRoutes(routes);
-          this.coreApps.RouteBalancer.enqueue(routes);
         }
         break;
       case 'profile-update':

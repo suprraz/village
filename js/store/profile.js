@@ -21,6 +21,7 @@ class _Profile {
       nodeId: this.nodeId,
       routes,
       sessionStart: this.sessionStart,
+      updated: Date.now()
     }
   }
 
