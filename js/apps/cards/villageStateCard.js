@@ -74,7 +74,7 @@ class _VillageStateCard {
 
 const villageStateHtml = `
 <div id="villageState">
-    <p class="title">Village State</p>
+    <p class="title">Neighbors</p>
     <div class="subtitle" id="nodeId"></div>
     <div class="subtitle"> 
         Connections: <span id="livePeersCount"></span>

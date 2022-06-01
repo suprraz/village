@@ -1,38 +1,66 @@
 import NodeStore from "../../store/nodeStore.js";
-
+import {logMessage} from "../../utils/logger.js";
 
 class _ChatCard {
   constructor() {
-    this.chatLog = [];
+    this.chatLog = [`${this.timeStamp()} Connected`];
 
     const chatContainer = document.getElementById('chatContainer');
     chatContainer.innerHTML = chatHtml;
 
-    this.chatAppEl = document.getElementById('chatApp');
+    this.chatLogEl = document.getElementById('chatLog');
 
     this.registerListeners();
+    this.updateChat();
+  }
+
+  timeStamp() {
+    return new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'});
   }
 
   messageReceived(senderId, msg) {
-    this.chatLog.push(`Peer-${senderId.substr(0,3)}: ` + msg);
+    logMessage(`Chat Message received: ${msg}`);
+    this.chatLog.push(`${this.timeStamp()}  Peer-${senderId.substr(0,3)}: ` + msg);
     this.updateChat();
+  }
+
+  broadcast(msg) {
+    const allNodeIds = NodeStore.getAllAccessibleNodeIds();
+    logMessage(`Chat Sending message to: ${allNodeIds}`);
+
+
+    allNodeIds.map((nodeId) => {
+      const nextHopNode = NodeStore.getNextHopNode(nodeId);
+      if(!nextHopNode) {
+        logMessage(`Chat No route available to: ${nodeId}`);
+        return; // no route to destination
+      }
+
+      nextHopNode.send({
+        destinationId: nodeId,
+        type: 'app',
+        app: 'chat',
+        msg
+      });
+    })
   }
 
   sendChatMsg() {
     const msg = document.getElementById('chatBoxMessage').value;
-    NodeStore.broadcast({
-      type: 'app',
-      app: 'chat',
-      msg
-    });
+    this.broadcast(msg);
 
-    this.chatLog.push('Me: ' + msg);
+    this.chatLog.push(`${this.timeStamp()}  Me: ${msg}`);
     this.updateChat();
     document.getElementById('chatBoxMessage').value = '';
   }
 
   updateChat() {
-    document.getElementById('chatLog').innerText = this.chatLog.join('\n');
+    const shouldScroll = this.chatLogEl.scrollTop >= this.chatLogEl.scrollHeight - this.chatLogEl.offsetHeight;
+    this.chatLogEl.innerText = this.chatLog.join('\n');
+
+    if(shouldScroll) {
+      this.chatLogEl.scrollTop = this.chatLogEl.scrollHeight;
+    }
   }
 
   registerListeners() {
@@ -43,17 +71,16 @@ class _ChatCard {
       }
     });
   }
-
 }
 
 const chatHtml = `
 <div id="chatApp">
-    <p class="title">Chat</p>
-    <div class="content" id="chatLog"></div>
+    <p class="title">Village chat</p>
+    <div class="box chatBox" id="chatLog"></div>
 
     <input class="input my-2" type="text" id="chatBoxMessage">
-    <figure class="image is-4by3">
-        <img src="https://bulma.io/images/placeholders/640x480.png">
+    <figure class="image is-16by9 mt-5">
+        <img src="https://www.omnihotels.com/-/media/images/hotels/sandtn/destinations/sandtn-seaport-village.jpg?h=663&la=en&w=1170">
     </figure>
 </div>
 `

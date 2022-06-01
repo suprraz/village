@@ -15,7 +15,7 @@ class _MessageRouter {
   onMessage (data, node) {
     const { apps, destinationId, type } = data;
 
-    if(destinationId !== null && destinationId !== Profile.getNodeID()) {
+    if(!!destinationId && destinationId !== Profile.getNodeID()) {
       // forward message
       const nextHopNode = NodeStore.getNextHopNode(destinationId);
       if(nextHopNode) {

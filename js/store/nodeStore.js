@@ -116,6 +116,12 @@ class _NodeStore {
     return routes;
   }
 
+  getAllAccessibleNodeIds() {
+    return this.getRoutes().reduce((total, curr) => {
+      return [... new Set([...total, ...curr])];
+    }, []);
+  }
+
   prune() {
     // failed nodes timed out while connecting or broke link after connection
     const failedNodes = this.nodes.filter( node => !node.pending && !node.isConnected() );
