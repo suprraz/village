@@ -58,14 +58,19 @@ class _VillageStateCard {
     connDiv.innerText =  `Connection state: ${node.pc.connectionState}`;
 
     const candidateTypeDiv = document.createElement('div');
-    candidateTypeDiv.className = "card-content pt-0";
+    candidateTypeDiv.className = "card-content py-0";
     candidateTypeDiv.innerText =  `Connection type: ${node.candidateType === null ? 'Unknown' : node.candidateType}`;
+
+    const signalProtocolDiv = document.createElement('div');
+    signalProtocolDiv.className = "card-content pt-0";
+    signalProtocolDiv.innerText =  `Signaling Protocol: ${node.signalProtocol}`;
 
     nodeDiv.appendChild(nodeNameDiv);
     nodeDiv.appendChild(rankDiv);
     nodeDiv.appendChild(iceDiv);
     nodeDiv.appendChild(connDiv);
     nodeDiv.appendChild(candidateTypeDiv);
+    nodeDiv.appendChild(signalProtocolDiv);
 
     return nodeDiv;
   }

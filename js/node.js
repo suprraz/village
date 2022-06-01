@@ -4,11 +4,12 @@ import MessageRouter from "./messageRouter.js";
 import config from "./config.js";
 
 class _Node {
-  constructor({nodeId, onConnection, onMessage, sendCandidate}) {
+  constructor({nodeId, onConnection, onMessage, sendCandidate, signalProtocol}) {
 
     this.onConnection = onConnection;
     this.onMessage = onMessage;
     this.sendCandidate = sendCandidate;
+    this.signalProtocol = signalProtocol;
 
     this.pc = null;
 

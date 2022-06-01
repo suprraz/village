@@ -114,7 +114,8 @@ class _MqttWorker {
             if(node === NodeStore.getNodeById(message.fromId)) {
               this.sendCandidate(message.fromId, candidate)
             }
-          }
+          },
+          signalProtocol: 'mqtt'
         });
 
         answerKey = await node.acceptOffer(message.offerKey);
@@ -206,7 +207,8 @@ class _MqttWorker {
               if(node === NodeStore.getNodeById(toId)) {
                 this.sendCandidate(toId, candidate)
               }
-            }
+            },
+          signalProtocol: 'mqtt'
         });
 
         const offerKey = await node.createOffer();

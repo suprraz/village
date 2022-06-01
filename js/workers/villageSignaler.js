@@ -127,7 +127,8 @@ class _VillageSignaler {
           if(NodeStore.getNodeById(destinationId) === offerNode) {
             this.sendCandidate(destinationId, candidate)
           }
-        }
+        },
+        signalProtocol: 'Village'
       });
 
       const offerKey = await offerNode.createOffer();
@@ -180,7 +181,8 @@ class _VillageSignaler {
           if(NodeStore.getNodeById(senderId) === node) {
             this.sendCandidate(senderId, candidate);
           }
-        }
+        },
+        signalProtocol: 'Village'
       });
 
       const answerKey = await node.acceptOffer(offerKey);
