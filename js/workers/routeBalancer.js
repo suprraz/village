@@ -56,11 +56,13 @@ class _RouteBalancer {
 
   onRouteRequest(fromId) {
     const swapCandidate = getSwapCandidate(Profile.getNodeID(), NodeStore.getConnectedNodeIds(), [fromId]);
-    if(this.hasCapacity() || !!swapCandidate ) {
-      if(!!swapCandidate) {
-        logMessage(`RouteBalancer Dropping connection to: ${swapCandidate.toId} to swap with ${fromId}`);
-        NodeStore.deleteNodesById(swapCandidate.toId);
-      }
+
+    if(this.hasCapacity()) {
+      MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
+    } else if (!!swapCandidate ) {
+      logMessage(`RouteBalancer Dropping connection to: ${swapCandidate.oldId} to swap with ${swapCandidate.toId}`);
+      NodeStore.deleteNodesById(swapCandidate.oldId);
+
       MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
     } else {
       MessageRouter.coreApps.VillageSignaler.rejectConnection(fromId);

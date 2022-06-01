@@ -4,7 +4,6 @@ import {logError, logMessage} from "../utils/logger.js";
 import _Node from "../node.js";
 import NodeStore from "../store/nodeStore.js";
 import MessageRouter from "../messageRouter.js";
-import {getSwapCandidate} from "../utils/routing.js";
 
 class _MqttWorker {
   constructor() {
@@ -272,9 +271,8 @@ class _MqttWorker {
     if(NodeStore.getNodeById(toId)) {
       return;
     }
-    const swapCandidate = getSwapCandidate(Profile.getNodeID(), NodeStore.getConnectedNodeIds(), [toId]);
 
-    if((NodeStore.getNodes().length < config.maxConnectedNeighbors) || swapCandidate) {
+    if((NodeStore.getNodes().length < config.maxConnectedNeighbors)) {
       logMessage(`MQTT sending channel-available to ${toId}`);
       this.sendMessage(toId, {
         type: 'channel-available',
