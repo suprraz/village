@@ -39,7 +39,7 @@ class _MessageRouter {
         this.onRoutingMessage(data, node)
         break;
       default:
-        logError(`MessageRouter Unhandled message: ${data}`);
+        logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
     }
   }
 
@@ -53,7 +53,7 @@ class _MessageRouter {
         }
         break;
       default:
-        logError(`MessageRouter Unhandled message: ${data}`);
+        logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
     }
   }
 
@@ -105,7 +105,7 @@ class _MessageRouter {
         }
         break;
       default:
-        logError(`MessageRouter Unhandled message: ${data}`);
+        logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
     }
   }
 
