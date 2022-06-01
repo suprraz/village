@@ -50,10 +50,17 @@ class _RouteBalancer {
     MessageRouter.coreApps.VillageSignaler.requestConnection(destinationId);
   }
 
-  onRouteRequest(fromId) {
-    const hasCapacity = NodeStore.getConnectedNodeIds().length + NodeStore.getNodesPending().length < config.maxConnectedNeighbors;
+  hasCapacity() {
+    return NodeStore.getConnectedNodeIds().length + NodeStore.getNodesPending().length < config.maxConnectedNeighbors;
+  }
 
-    if(hasCapacity) {
+  onRouteRequest(fromId) {
+    const swapCandidate = getSwapCandidate(Profile.getNodeID(), NodeStore.getConnectedNodeIds(), [fromId]);
+    if(this.hasCapacity() || !!swapCandidate ) {
+      if(!!swapCandidate) {
+        logMessage(`RouteBalancer Dropping connection to: ${swapCandidate.toId} to swap with ${fromId}`);
+        NodeStore.deleteNodesById(swapCandidate.toId);
+      }
       MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
     } else {
       MessageRouter.coreApps.VillageSignaler.rejectConnection(fromId);
