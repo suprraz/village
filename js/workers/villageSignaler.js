@@ -52,7 +52,56 @@ class _VillageSignaler {
     }
   }
 
-  async requestConnection(destinationId) {
+  requestConnection(destinationId) {
+    const nextHopNode = NodeStore.getNextHopNode(destinationId);
+    if(!nextHopNode) {
+      logMessage(`VillageSignaler No route available to: ${destinationId}`);
+      this.onComplete(destinationId);
+      return; // no route to destination
+    }
+
+    logMessage(`VillageSignaler Sending connection request to: ${destinationId} via ${nextHopNode?.profile?.nodeId}`);
+    nextHopNode.send({
+      type: 'routing',
+      subtype: 'request-connection',
+      destinationId,
+      senderId: Profile.getNodeID()
+    });
+  }
+
+  acceptConnection(fromId) {
+    const nextHopNode = NodeStore.getNextHopNode(fromId);
+    if(!nextHopNode) {
+      logMessage(`VillageSignaler No route available to: ${fromId}`);
+      this.onComplete(fromId);
+      return; // no route to destination
+    }
+
+    nextHopNode.send({
+      type: 'routing',
+      subtype: 'accept-connection',
+      destinationId: fromId,
+      senderId: Profile.getNodeID()
+    });
+  }
+
+  rejectConnection(fromId) {
+    const nextHopNode = NodeStore.getNextHopNode(fromId);
+    if(!nextHopNode) {
+      logMessage(`VillageSignaler No route available to: ${fromId}`);
+      this.onComplete(fromId);
+      return; // no route to destination
+    }
+
+    nextHopNode.send({
+      type: 'routing',
+      subtype: 'reject-connection-busy',
+      destinationId: fromId,
+      senderId: Profile.getNodeID()
+    });
+  }
+
+  async createOffer(destinationId) {
     const nextHopNode = NodeStore.getNextHopNode(destinationId);
     if(!nextHopNode) {
       logMessage(`VillageSignaler No route available to: ${destinationId}`);
@@ -68,7 +117,7 @@ class _VillageSignaler {
     }
 
     try {
-      logMessage(`VillageSignaler Requesting connection to ${destinationId}`);
+      logMessage(`VillageSignaler Creating offer for ${destinationId}`);
 
       const offerNode = new _Node({
         nodeId: destinationId,
@@ -128,10 +177,10 @@ class _VillageSignaler {
         onConnection: (node) => MessageRouter.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
         sendCandidate: (candidate) => {
-            if(NodeStore.getNodeById(senderId) === node) {
-              this.sendCandidate(senderId, candidate);
-            }
+          if(NodeStore.getNodeById(senderId) === node) {
+            this.sendCandidate(senderId, candidate);
           }
+        }
       });
 
       const answerKey = await node.acceptOffer(offerKey);

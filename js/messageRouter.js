@@ -60,6 +60,24 @@ class _MessageRouter {
   onRoutingMessage(data, node) {
     const {senderId, offer, answer, routes, candidate, subtype, profile} = data;
     switch (subtype) {
+      case 'request-connection':
+        if (senderId) {
+          logMessage('MessageRouter Evaluating connection request')
+          this.coreApps.RouteBalancer.onRouteRequest(senderId);
+        }
+        break;
+      case 'accept-connection':
+        if (senderId) {
+          logMessage('MessageRouter Connection accepted, creating offer')
+          this.coreApps.VillageSignaler.createOffer(senderId);
+        }
+        break;
+      case 'reject-connection-busy':
+        if (senderId) {
+          logMessage('MessageRouter Connection refused, too busy')
+          this.coreApps.RouteBalancer.onRouteBusy(senderId);
+        }
+        break;
       case 'offer':
         if (offer && senderId) {
           logMessage('MessageRouter Accepting automated offer')

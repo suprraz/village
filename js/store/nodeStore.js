@@ -88,7 +88,10 @@ class _NodeStore {
 
     let i = 1;
     while(i < config.maxHops && routes[i-1] && routes[i-1].length) {
-      routes[i] = getRoutesByHop(i);
+      const r = getRoutesByHop(i);
+      if(r.length) {
+        routes[i] = r;
+      }
       i++;
     }
 

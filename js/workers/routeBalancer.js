@@ -8,6 +8,7 @@ import {getSwapCandidate, sortNeighbors} from "../utils/routing.js";
 class _RouteBalancer {
   constructor() {
     this.waiting = [];
+    this.busyRoutes = [];
 
     this.prevRoutes = [];
     this.sendPeriodicUpdates();
@@ -49,6 +50,28 @@ class _RouteBalancer {
     MessageRouter.coreApps.VillageSignaler.requestConnection(destinationId);
   }
 
+  onRouteRequest(fromId) {
+    const hasCapacity = NodeStore.getConnectedNodeIds().length + NodeStore.getNodesPending().length < config.maxConnectedNeighbors;
+
+    if(hasCapacity) {
+      MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
+    } else {
+      MessageRouter.coreApps.VillageSignaler.rejectConnection(fromId);
+      logMessage('RouteBalancer Connection refused: too many connections');
+    }
+  }
+
+  onRouteBusy(fromId) {
+    this.busyRoutes.push(fromId);
+    logMessage(`RouteBalancer Busy routes updated: ${this.busyRoutes}`);
+
+    this.process();
+
+    setTimeout(() => {
+      this.busyRoutes = this.busyRoutes.filter((nodeId) => nodeId !== fromId)
+    }, config.busyRouteRetry)
+  }
+
   enqueue(routes) {
     const neighbors = routes.reduce((total, curr) => {
       return [... new Set([...total, ...curr])];
@@ -71,13 +94,22 @@ class _RouteBalancer {
     }
   }
 
+  nextCandidate() {
+    const eligible = this.waiting.filter((nodeId) => !this.busyRoutes.includes(nodeId));
+
+    if(!eligible.length) {
+      return null;
+    }
+    return eligible[0];
+  }
+
   process() {
-    if(!this.waiting.length || NodeStore.getNodesPending() > 0) {
+    if(!this.waiting.length || NodeStore.getNodesPending() > config.villageParallelReqs) {
       return;
     }
 
     if(NodeStore.getConnectedNodeIds().length < config.maxConnectedNeighbors) {
-      const candidateId = this.waiting.pop();
+      const candidateId = this.nextCandidate();
       if(candidateId) {
         this.waiting = this.waiting.filter(id => id !== candidateId);
         logMessage(`RouteBalancer Processing candidate: ${candidateId}`);
