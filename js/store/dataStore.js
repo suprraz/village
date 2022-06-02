@@ -1,11 +1,32 @@
 import {logError} from "../utils/logger.js";
 
 
-class DataStore {
+class _DataStore {
   constructor() {
+    this.db = new Dexie("AppStore");
+
+    this.db.version(2).stores({
+      apps: `  
+        name,
+        installDate`,
+    });
   }
 
-  static getDocument(key) {
+  async performUpgrades() {
+      await this.migrateAppStoreFromLocalStorage();
+  }
+
+  async migrateAppStoreFromLocalStorage() {
+    const installedApps = this.getDocument('installedApps');
+    if(installedApps) {
+      await installedApps.map(async app => {
+        await this.saveApp(app.name, app.installDate, app.code);
+      });
+      localStorage.removeItem('installedApps');
+    }
+  }
+
+  getDocument(key) {
     const docJson = localStorage.getItem(key);
     if(docJson) {
       try {
@@ -18,9 +39,35 @@ class DataStore {
     return undefined;
   }
 
-  static setDocument(key, document) {
+  setDocument(key, document) {
     localStorage.setItem(key, JSON.stringify(document));
   }
+
+  async saveApp(name, installDate, code) {
+    await this.db.apps.add({
+      name,
+      installDate,
+      code
+    });
+  }
+
+  async getApp(name) {
+    const query = this.db.apps.where('name').startsWithIgnoreCase(name);
+    return query.toArray();
+  }
+
+  async getApps() {
+    return this.db.apps.toArray();
+  }
+
+  async removeApp(name) {
+    return this.db.apps.delete(name)
+  }
+
 }
+
+const DataStore = new _DataStore();
+
+await DataStore.performUpgrades();
 
 export default DataStore;

@@ -1,5 +1,5 @@
 import MessageRouter from "../messageRouter.js";
-import {logError} from "../utils/logger.js";
+import DataStore from "./dataStore.js";
 
 class _AppStore {
 
@@ -20,17 +20,12 @@ class _AppStore {
     return this.validateCode(app.code);
   }
 
-  installApp(app) {
+  async installApp(app) {
     //install/replace
     if(this.verifyApp(app)) {
-      const apps = this.getInstalledApps();
-
       app.installDate = new Date();
 
-      const updatedApps = apps.filter((a) => a.name !== app.name );
-      updatedApps.push(app);
-
-      localStorage.setItem('installedApps', JSON.stringify(updatedApps));
+      await DataStore.saveApp(app.name, app.installDate, app.code);
     } else {
       alert('Error: Invalid app');
 
@@ -39,24 +34,12 @@ class _AppStore {
 
   }
 
-  getInstalledApps() {
-    const installedApps = localStorage.getItem('installedApps');
-    let apps = [];
-    try {
-      apps = JSON.parse(installedApps) || [];
-    } catch (e) {
-      logError(e)
-    }
-
-    return apps;
+  async getInstalledApps() {
+    return await DataStore.getApps();
   }
 
-  removeApp(appName) {
-    const apps = this.getInstalledApps();
-
-    const prunedApps = apps.filter((app) => app.name !== appName);
-
-    localStorage.setItem('installedApps', JSON.stringify(prunedApps));
+  async removeApp(appName) {
+    await DataStore.removeApp(appName);
   }
 
   runApp(app) {

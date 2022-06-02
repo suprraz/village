@@ -26,8 +26,8 @@ class _AppListCard {
     }
   }
 
-  onAvailableApps(apps) {
-    const localApps = AppStore.getInstalledApps();
+  async onAvailableApps(apps) {
+    const localApps = await AppStore.getInstalledApps();
     let newApps = [];
     try {
       newApps = apps.filter((remoteApp) => {
@@ -41,14 +41,14 @@ class _AppListCard {
       });
 
       this.availableApps.push(...newApps);
-      this.updateAppList();
+      await this.updateAppList();
     } catch (e) {
       logError(e);
     }
   }
 
-  updateAppList() {
-    const installedApps = AppStore.getInstalledApps();
+  async updateAppList() {
+    const installedApps = await AppStore.getInstalledApps();
 
     const installedAppsDiv = document.getElementById("installedApps");
 
@@ -104,12 +104,6 @@ class _AppListCard {
     appEditBtn.className = "button appEditButton";
     appEditBtn.innerText = "Edit";
     appEditBtn.onclick = () => {
-      const editor = document.getElementById('editor');
-      const appName = document.getElementById('appName');
-
-      editor.value = app.code;
-      appName.value = app.name;
-
       MessageRouter.onRunApp(AceEditorApp, app);
     };
 
@@ -173,8 +167,8 @@ class _AppListCard {
     return appDiv;
   }
 
-  sendApps() {
-    const apps = AppStore.getInstalledApps();
+  async sendApps() {
+    const apps = await AppStore.getInstalledApps();
 
     NodeStore.broadcast({
       type: 'app-list',

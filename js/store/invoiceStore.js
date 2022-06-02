@@ -17,20 +17,24 @@ class _InvoiceStore {
 
   updateInvoice(appName, encryptionKey) {
     this.invoices = DataStore.getDocument('invoices');
-    const invoice = this.invoices.find(i => i.encryptedApp.name === appName);
+    const invoice = this.invoices.reverse().find(i => i.encryptedApp.name === appName);
     const { encryptedApp } = invoice;
 
-    const app = {
-      ...encryptedApp,
-      code: CryptoJS.AES.decrypt(encryptedApp.code, encryptionKey).toString(CryptoJS.enc.Utf8)
+    try {
+      const app = {
+        ...encryptedApp,
+        code: CryptoJS.AES.decrypt(encryptedApp.code, encryptionKey).toString(CryptoJS.enc.Utf8)
+      }
+
+      this.invoices = this.invoices.filter(i => i.encryptedApp.name !== appName && (new Date() - config.invoiceExpiration > i.date));
+
+      DataStore.setDocument('invoices', this.invoices);
+
+      MessageRouter.onInstallApp(app);
+      alert(`Installed '${app.name}'`);
+    } catch (e) {
+      logError(`InvoiceStore Error decrypting app code ${e}}`)
     }
-
-    this.invoices = this.invoices.filter(i => i.encryptedApp.name !== appName && (new Date() - config.invoiceExpiration > i.date));
-
-    DataStore.setDocument('invoices', this.invoices);
-
-    MessageRouter.onInstallApp(app);
-    alert(`Installed '${app.name}'`);
   }
 
   encryptApp(app, encryptionKey) {

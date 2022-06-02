@@ -82,7 +82,7 @@ class _Village {
   }
 
   addMorePeers(){
-    this.coreApps.AddPeer.run();
+    this.coreApps.AddPeerCard.run();
     this.coreApps.AddPeerCard.preparePeer();
     this.fullScreenApp();
   }
