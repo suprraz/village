@@ -3,7 +3,7 @@ import {logMessage} from "../../utils/logger.js";
 
 class _ChatCard {
   constructor() {
-    this.chatLog = [`${this.timeStamp()} Connected`];
+    this.chatLog = [`${this.timeStamp()} Entered chat`];
 
     const chatContainer = document.getElementById('chatContainer');
     chatContainer.innerHTML = chatHtml;

@@ -3,6 +3,7 @@ import NodeStore from "../../store/nodeStore.js";
 import MessageRouter from "../../messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
+import DataStore from "../../store/dataStore.js";
 
 class _AppListCard {
   constructor() {
@@ -98,13 +99,19 @@ class _AppListCard {
     const appRunBtn = document.createElement('button');
     appRunBtn.className = "button is-primary appRunButton";
     appRunBtn.innerText = "Run";
-    appRunBtn.onclick = () => { AppStore.runApp(app)};
+    appRunBtn.onclick = async () => {
+      const reloadedApp = await DataStore.getApp(app.name);
+
+      AppStore.runApp(reloadedApp)
+    };
 
     const appEditBtn = document.createElement('button');
     appEditBtn.className = "button appEditButton";
     appEditBtn.innerText = "Edit";
-    appEditBtn.onclick = () => {
-      MessageRouter.onRunApp(AceEditorApp, app);
+    appEditBtn.onclick = async () => {
+      const reloadedApp = await DataStore.getApp(app.name);
+
+      MessageRouter.onRunApp(AceEditorApp, reloadedApp);
     };
 
     const appRemoveBtn = document.createElement('button');
@@ -146,20 +153,7 @@ class _AppListCard {
     appInstallBtn.innerText = "Install";
     appInstallBtn.onclick = () => this.installApp(app);
 
-    const appEditBtn = document.createElement('button');
-    appEditBtn.className = "button appEditButton";
-    appEditBtn.innerText = "Edit";
-    appEditBtn.onclick = () => {
-      const editor = document.getElementById('editor');
-      const appName = document.getElementById('appName');
-
-      editor.value = app.code;
-      appName.value = app.name;
-    };
-
     buttonsDiv.appendChild(appBuyBtn);
-    // buttonsDiv.appendChild(appInstallBtn);
-    // buttonsDiv.appendChild(appEditBtn);
 
     appDiv.appendChild(appNameDiv);
     appDiv.appendChild(buttonsDiv);
@@ -180,7 +174,7 @@ class _AppListCard {
 
 const appListHtml = `
 <div id="appList">
-    <p class="title">Home</p>
+    <p class="title">Apps</p>
     <p class="subtitle">Installed Apps</p>
     <div id="installedApps" class="is-flex is-flex-direction-column"></div>
     <br />

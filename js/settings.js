@@ -3,6 +3,7 @@ import DataStore from "./store/dataStore.js";
 const defaultSettings = {
   showLanding: true,
   enableLogging: false,
+  adminViewVisible: true,
 }
 
 class _Settings {

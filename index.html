@@ -21,7 +21,7 @@
 <div id="main">
     <div id="appContainer"></div>
 
-    <div id="widgetsView">
+    <div id="homeScreen" class="is-hidden">
         <div class="tile is-ancestor">
             <div class="tile is-vertical is-8">
                 <div class="tile">
@@ -29,13 +29,24 @@
                         <article class="tile is-child notification is-primary">
                             <div id="appListContainer"></div>
                         </article>
+                    </div>
+                </div>
+            </div>
+            <div class="tile is-parent">
+                <article class="tile is-child notification is-info">
+                    <div id="chatContainer"></div>
+                </article>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div id="adminScreen" class="is-hidden">
+        <div class="tile is-ancestor">
+            <div class="tile is-vertical is-8">
+                <div class="tile">
+                    <div class="tile is-parent is-vertical">
                         <article class="tile is-child notification is-warning">
                             <div id="villageStateContainer"></div>
-                        </article>
-                    </div>
-                    <div class="tile is-parent">
-                        <article class="tile is-child notification is-info">
-                            <div id="chatContainer"></div>
                         </article>
                     </div>
                 </div>
@@ -54,6 +65,7 @@
         </div>
     </div>
 
+    <div id="floatingButtonContainer"></div>
     <div id="sandbox"></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>

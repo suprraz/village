@@ -18,7 +18,7 @@
 #overlayContainer {
   position: fixed;
   background-color: rgba(10,10,10,.86);
-  z-index: 1;
+  z-index: 2;
 }
 
 #sandboxIframe {
@@ -30,4 +30,11 @@
   overflow: scroll;
   min-height: 200px;
   max-height: 400px;
+}
+
+#floatingButtonContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1;
 }

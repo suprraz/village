@@ -13,6 +13,7 @@ import _VillageStateCard from "./apps/cards/villageStateCard.js";
 import _ChatCard from "./apps/cards/chatCard.js";
 import _AppListCard from "./apps/cards/appListCard.js";
 import _LoggerAppCard from "./apps/cards/loggerAppCard.js";
+import _AdminToggleBtn from "./buttons/adminToggleBtn.js";
 
 
 class _Village {
@@ -34,6 +35,7 @@ class _Village {
     const RouteBalancer = new _RouteBalancer();
     const InvoiceStore = new _InvoiceStore();
     const VillageStateCard = new _VillageStateCard();
+    const AdminToggleButton = new _AdminToggleBtn(document.getElementById('floatingButtonContainer'));
     const Sandbox = new _Sandbox();
 
     this.coreApps = {
@@ -46,7 +48,8 @@ class _Village {
       RouteBalancer,
       VillageStateCard,
       Sandbox,
-      InvoiceStore
+      InvoiceStore,
+      AdminToggleButton
     };
 
     MessageRouter.init(this.coreApps, (node) => this.onConnection(node));
@@ -69,13 +72,11 @@ class _Village {
   }
 
   fullScreenApp(){
-    hide('widgetsView');
+    hide('adminScreen');
     show('appContainer');
   }
 
   onConnection(node) {
-    show('widgetsView');
-
     this.coreApps.AddPeerCard.stop();
     this.coreApps.AppListCard.updateAppList();
     this.coreApps.AppListCard.sendApps();

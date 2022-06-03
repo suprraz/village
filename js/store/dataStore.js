@@ -44,16 +44,29 @@ class _DataStore {
   }
 
   async saveApp(name, installDate, code) {
-    await this.db.apps.add({
-      name,
-      installDate,
-      code
-    });
+    const appMatchingName = await this.getApp(name);
+    if(appMatchingName) {
+      await this.db.apps.update(name, {
+        name,
+        installDate,
+        code
+      });
+    } else {
+      await this.db.apps.add({
+        name,
+        installDate,
+        code
+      });
+    }
   }
 
   async getApp(name) {
     const query = this.db.apps.where('name').startsWithIgnoreCase(name);
-    return query.toArray();
+    const matches = await query.toArray();
+    if(matches && matches[0]) {
+      return matches[0]
+    }
+    return null;
   }
 
   async getApps() {
