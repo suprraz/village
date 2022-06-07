@@ -61,7 +61,7 @@ const sandboxHtml = `
     <div class="hero-body">
       <button class="modal-close is-large" aria-label="close"></button>
       <iframe sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"
-        height="100" width="100%" src="about:blank" name="sandboxIframe"
+        height="100%" width="100%" src="about:blank" name="sandboxIframe"
         id="sandboxIframe" srcdoc="
           <!DOCTYPE html>
           <html>

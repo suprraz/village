@@ -32,6 +32,7 @@ class _AppStore {
       throw new Error('Invalid app');
     }
 
+    MessageRouter.onAppListUpdate();
   }
 
   async getInstalledApps() {

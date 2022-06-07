@@ -147,6 +147,10 @@ class _MessageRouter {
     this.coreApps.AppListCard.installApp(app);
   }
 
+  onAppListUpdate() {
+    this.coreApps.AppListCard.updateAppList();
+  }
+
   onCloseApp(sourceAppName) {
     if(sourceAppName === 'LandingApp') {
       Settings.update('showLanding', false);
