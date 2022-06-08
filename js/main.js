@@ -12,7 +12,7 @@ import _AppListCard from "./apps/cards/appListCard.js";
 import _LoggerAppCard from "./apps/cards/loggerAppCard.js";
 import _AdminToggleBtn from "./apps/buttons/adminToggleBtn.js";
 import RiverApi from "./riverNetwork/riverApi.js";
-
+import _DeveloperAppsCard from "./apps/cards/developerAppsCard.js";
 
 class _Village {
   constructor() {
@@ -27,6 +27,7 @@ class _Village {
     const AddPeerCard = new _AddPeerCard();
 
     const AppListCard = new _AppListCard();
+    const DeveloperAppsCard = new _DeveloperAppsCard(document.getElementById('bottomPaneContainer'));
     const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
     const ChatCard = new _ChatCard();
     const InvoiceStore = new _InvoiceStore();
@@ -37,6 +38,7 @@ class _Village {
     this.coreApps = {
       AddPeerCard,
       AppListCard,
+      DeveloperAppsCard,
       LoggerAppCard,
       ChatCard,
       VillageStateCard,

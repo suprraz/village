@@ -175,7 +175,7 @@ class _AppListCard {
 const appListHtml = `
 <div id="appList">
     <p class="title">Apps</p>
-    <p class="subtitle">Installed Apps</p>
+    <p class="subtitle mt-1">Installed Apps</p>
     <div id="installedApps" class="is-flex is-flex-direction-column"></div>
     <br />
     <p class="subtitle">Available Apps</p>

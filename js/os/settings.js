@@ -1,34 +1,37 @@
 import DataStore from "./store/dataStore.js";
+import uuidv4 from "../utils/uuid.js";
 
 const defaultSettings = {
   showLanding: true,
   enableLogging: false,
   adminViewVisible: true,
+  privateKey: `private-key-${uuidv4()}`,
+  userId: `user-${uuidv4()}`
 }
 
 class _Settings {
-  constructor() {
-    this.settings = DataStore.getDocument('settings');
+  #settings
 
-    if(!this.settings) {
-      this.settings = {...defaultSettings};
-      this.save();
-    }
+  constructor() {
+    const savedSettings = DataStore.getDocument('settings') || {};
+    this.#settings = {...defaultSettings, ...savedSettings};
+
+    this.save();
   }
 
   get(key) {
-    return {...this.settings}[key];
+    return {...this.#settings}[key];
   }
 
   update(key, value) {
     if(key in defaultSettings) {
-      this.settings[key] = value;
+      this.#settings[key] = value;
       this.save();
     }
   }
 
   save() {
-    DataStore.setDocument('settings', this.settings);
+    DataStore.setDocument('settings', this.#settings);
   }
 }
 

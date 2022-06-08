@@ -1,5 +1,7 @@
 import MessageRouter from "../../messageRouter.js";
 import DataStore from "./dataStore.js";
+import Settings from "../settings.js";
+import {logError} from "../../utils/logger.js";
 
 class _AppStore {
 
@@ -36,7 +38,24 @@ class _AppStore {
   }
 
   async getInstalledApps() {
-    return await DataStore.getApps();
+    try {
+      return await DataStore.getApps();
+    } catch (e) {
+      logError(`AppStore Error getting apps ${e}`)
+      return [];
+    }
+  }
+
+  async getMyApps() {
+    const authorId = Settings.get('userId');
+
+    return await DataStore.getAppsByAuthor(authorId);
+  }
+
+  signApp(app) {
+    const pk = Settings.get('privateKey');
+
+    return CryptoJS.HmacSHA256(app.id + app.code + app.authorId, pk);
   }
 
   async removeApp(appName) {
