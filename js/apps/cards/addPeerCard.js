@@ -1,8 +1,8 @@
-import _Node from "../../node.js";
-import NodeStore from "../../store/nodeStore.js";
+import _Node from "../../riverNetwork/node.js";
+import NodeStore from "../../riverNetwork/nodeStore.js";
 import {logError, logMessage} from "../../utils/logger.js";
-import {show, hide} from "../../utils/dom.js";
-import Profile from "../../store/profile.js";
+import {show, hide} from "../../os/utils/dom.js";
+import Profile from "../../riverNetwork/profile.js";
 import MessageRouter from "../../messageRouter.js";
 
 class _AddPeerCard {

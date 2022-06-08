@@ -1,5 +1,5 @@
-import Settings from "../settings.js";
-import ScreenStore from "../store/screenStore.js";
+import Settings from "../../os/settings.js";
+import ScreenStore from "../../os/store/screenStore.js";
 
 class _AdminToggleBtn {
   constructor(container) {
@@ -13,7 +13,7 @@ class _AdminToggleBtn {
     this.toggleBtn.onclick = () => {};
 
     adminToggleBtnEl.appendChild(this.toggleBtn);
-    
+
     this.registerListeners();
 
     this.isAdminVisible = Settings.get('adminViewVisible');

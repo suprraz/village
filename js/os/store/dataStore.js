@@ -1,4 +1,4 @@
-import {logError} from "../utils/logger.js";
+import {logError} from "../../utils/logger.js";
 
 
 class _DataStore {

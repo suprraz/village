@@ -1,6 +1,6 @@
-import NodeStore from "../../store/nodeStore.js";
-import Profile from "../../store/profile.js";
-import {idDistance} from "../../utils/routing.js";
+import NodeStore from "../../riverNetwork/nodeStore.js";
+import Profile from "../../riverNetwork/profile.js";
+import {idDistance} from "../../riverNetwork/utils/routing.js";
 
 class _VillageStateCard {
   constructor() {

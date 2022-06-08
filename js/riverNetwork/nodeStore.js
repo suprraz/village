@@ -1,6 +1,6 @@
 import {logMessage} from "../utils/logger.js";
 import config from "../config.js";
-import {idDistance, sortNeighbors} from "../utils/routing.js";
+import {idDistance, sortNeighbors} from "./utils/routing.js";
 import Profile from "./profile.js";
 
 class _NodeStore {

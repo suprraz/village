@@ -1,7 +1,8 @@
-import { logMessage, logError } from './utils/logger.js';
-import Profile from "./store/profile.js";
-import MessageRouter from "./messageRouter.js";
-import config from "./config.js";
+import { logMessage, logError } from '../utils/logger.js';
+import Profile from "./profile.js";
+import config from "../config.js";
+import RiverMessenger from "./riverMessenger.js";
+
 
 class _Node {
   constructor({nodeId, onConnection, onMessage, sendCandidate, signalProtocol}) {
@@ -53,14 +54,14 @@ class _Node {
       if(this.pending === true) {
         logMessage(`Node Connection attempt to ${this.profile.nodeId} timed out.  Closing.`);
         this.pending = false;
-        MessageRouter.onNetworkChange();
+        RiverMessenger.onNetworkChange();
       }
     }, config.RTC.handshakeTimeout);
   }
 
 
   onConnectionStateChange(e) {
-    MessageRouter.onNetworkChange();
+    RiverMessenger.onNetworkChange();
   }
 
   registerDataChannelListeners() {
@@ -191,7 +192,7 @@ class _Node {
     if(selectedLocalCandidate) {
       this.candidateType = stats.get(selectedLocalCandidate)?.candidateType;
 
-      MessageRouter.onNetworkChange();  // refresh connections dashboard
+      RiverMessenger.onNetworkChange();  // refresh connections dashboard
     } else {
       this.candidateType = null;
     }

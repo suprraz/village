@@ -1,19 +1,17 @@
-import {show, hide} from "./utils/dom.js";
-import _MqttWorker from "./workers/mqttWorker.js";
+import {show, hide} from "./os/utils/dom.js";
 import MessageRouter from "./messageRouter.js";
-import _VillageSignaler from "./workers/villageSignaler.js";
-import _RouteBalancer from "./workers/routeBalancer.js";
-import Settings from "./settings.js";
-import AppStore from "./store/appStore.js";
+import Settings from "./os/settings.js";
+import AppStore from "./os/store/appStore.js";
 import LandingApp from "./apps/sandboxed/landingApp.js";
-import _Sandbox from "./sandbox.js";
-import _InvoiceStore from "./store/invoiceStore.js";
+import _Sandbox from "./os/sandbox.js";
+import _InvoiceStore from "./os/store/invoiceStore.js";
 import _AddPeerCard from "./apps/cards/addPeerCard.js";
 import _VillageStateCard from "./apps/cards/villageStateCard.js";
 import _ChatCard from "./apps/cards/chatCard.js";
 import _AppListCard from "./apps/cards/appListCard.js";
 import _LoggerAppCard from "./apps/cards/loggerAppCard.js";
-import _AdminToggleBtn from "./buttons/adminToggleBtn.js";
+import _AdminToggleBtn from "./apps/buttons/adminToggleBtn.js";
+import RiverApi from "./riverNetwork/riverApi.js";
 
 
 class _Village {
@@ -27,12 +25,10 @@ class _Village {
     }
 
     const AddPeerCard = new _AddPeerCard();
-    const MqttWorker = new _MqttWorker();
+
     const AppListCard = new _AppListCard();
     const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
     const ChatCard = new _ChatCard();
-    const VillageSignaler = new _VillageSignaler();
-    const RouteBalancer = new _RouteBalancer();
     const InvoiceStore = new _InvoiceStore();
     const VillageStateCard = new _VillageStateCard();
     const AdminToggleButton = new _AdminToggleBtn(document.getElementById('floatingButtonContainer'));
@@ -43,16 +39,16 @@ class _Village {
       AppListCard,
       LoggerAppCard,
       ChatCard,
-      MqttWorker,
-      VillageSignaler,
-      RouteBalancer,
       VillageStateCard,
       Sandbox,
       InvoiceStore,
       AdminToggleButton
     };
 
-    MessageRouter.init(this.coreApps, (node) => this.onConnection(node));
+
+    const riverApi = new RiverApi()
+
+    MessageRouter.init(riverApi, this.coreApps);
 
     if(urlParams.has('offerKey')) {
       this.coreApps.AddPeerCard.run();
@@ -63,7 +59,7 @@ class _Village {
     if(showLanding) {
       AppStore.runApp(LandingApp);
     } else {
-      this.coreApps.MqttWorker.seekNodes();
+      riverApi.connect();
     }
 
     this.coreApps.AppListCard.updateAppList();
@@ -74,12 +70,6 @@ class _Village {
   fullScreenApp(){
     hide('adminScreen');
     show('appContainer');
-  }
-
-  onConnection(node) {
-    this.coreApps.AddPeerCard.stop();
-    this.coreApps.AppListCard.updateAppList();
-    this.coreApps.AppListCard.sendApps();
   }
 
   addMorePeers(){

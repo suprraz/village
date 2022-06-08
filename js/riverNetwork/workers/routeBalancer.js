@@ -1,16 +1,23 @@
-import NodeStore from "../store/nodeStore.js";
-import Profile from "../store/profile.js";
-import MessageRouter from "../messageRouter.js";
-import {logMessage} from "../utils/logger.js";
-import config from "../config.js";
+import NodeStore from "../nodeStore.js";
+import Profile from "../profile.js";
+import {logMessage} from "../../utils/logger.js";
+import config from "../../config.js";
 import {getSwapCandidate, sortNeighbors} from "../utils/routing.js";
+import _VillageSignaler from "./villageSignaler.js";
 
 class _RouteBalancer {
+  #villageSignaler
+
   constructor() {
     this.waiting = [];
     this.busyRoutes = [];
 
     this.prevRoutes = [];
+
+    const VillageSignaler = new _VillageSignaler();
+    this.#villageSignaler = VillageSignaler;
+    this.getVillageSignaler = () => this.#villageSignaler;
+
     this.sendPeriodicUpdates();
   }
 
@@ -47,7 +54,7 @@ class _RouteBalancer {
   }
 
   requestRoute(destinationId) {
-    MessageRouter.coreApps.VillageSignaler.requestConnection(destinationId);
+    this.#villageSignaler.requestConnection(destinationId);
   }
 
   hasCapacity() {
@@ -58,13 +65,13 @@ class _RouteBalancer {
     const swapCandidate = getSwapCandidate(Profile.getNodeID(), NodeStore.getConnectedNodeIds(), [fromId]);
 
     if(this.hasCapacity()) {
-      MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
+      this.#villageSignaler.acceptConnection(fromId);
     } else if (!!swapCandidate ) {
       logMessage(`RouteBalancer Dropping connection to: ${swapCandidate.oldId} to swap with ${swapCandidate.toId}`);
 
-      MessageRouter.coreApps.VillageSignaler.acceptConnection(fromId);
+      this.#villageSignaler.acceptConnection(fromId);
     } else {
-      MessageRouter.coreApps.VillageSignaler.rejectConnection(fromId);
+      this.#villageSignaler.rejectConnection(fromId);
       logMessage('RouteBalancer Connection refused: too many connections');
     }
   }

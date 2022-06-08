@@ -1,4 +1,4 @@
-import NodeStore from "../../store/nodeStore.js";
+import NodeStore from "../../riverNetwork/nodeStore.js";
 import {logMessage} from "../../utils/logger.js";
 
 class _ChatCard {

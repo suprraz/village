@@ -1,18 +1,17 @@
-import NodeStore from "../store/nodeStore.js";
-import Profile from "../store/profile.js";
-import MessageRouter from "../messageRouter.js";
-import {logError, logMessage} from "../utils/logger.js";
+import NodeStore from "../nodeStore.js";
+import Profile from "../profile.js";
+import {logError, logMessage} from "../../utils/logger.js";
 import _Node from "../node.js";
-import config from "../config.js";
+import config from "../../config.js";
+import RiverMessenger from "../riverMessenger.js";
 
 class _VillageSignaler {
-
   onMessage(e, node) {
     if (e.data) {
       try {
         const data = JSON.parse(e.data);
 
-        MessageRouter.onMessage(data, node);
+        RiverMessenger.onMessage(data, node);
       } catch (e) {
         logError(e);
       }
@@ -20,7 +19,7 @@ class _VillageSignaler {
   }
 
   onComplete(destinationId) {
-    MessageRouter.coreApps.RouteBalancer.routeComplete(destinationId);
+    RiverMessenger.onRouteComplete(destinationId);
   }
 
   sendCandidate(toId, candidate) {
@@ -121,7 +120,7 @@ class _VillageSignaler {
 
       const offerNode = new _Node({
         nodeId: destinationId,
-        onConnection: (node) => MessageRouter.onConnection(node),
+        onConnection: (node) => RiverMessenger.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
         sendCandidate: (candidate) => {
           if(NodeStore.getNodeById(destinationId) === offerNode) {
@@ -175,7 +174,7 @@ class _VillageSignaler {
     try {
       const node = new _Node({
         nodeId: senderId,
-        onConnection: (node) => MessageRouter.onConnection(node),
+        onConnection: (node) => RiverMessenger.onConnection(node),
         onMessage: (data, node) => this.onMessage(data, node),
         sendCandidate: (candidate) => {
           if(NodeStore.getNodeById(senderId) === node) {

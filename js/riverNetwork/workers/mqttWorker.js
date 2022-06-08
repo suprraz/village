@@ -1,14 +1,19 @@
-import config from '../config.js';
-import Profile from "../store/profile.js";
-import {logError, logMessage} from "../utils/logger.js";
+import config from '../../config.js';
+import Profile from "../profile.js";
+import {logError, logMessage} from "../../utils/logger.js";
 import _Node from "../node.js";
-import NodeStore from "../store/nodeStore.js";
-import MessageRouter from "../messageRouter.js";
+import NodeStore from "../nodeStore.js";
 
 class _MqttWorker {
-  constructor() {
-    this.parentOnConnection = (node) => MessageRouter.onConnection(node);
-    this.parentOnMessage = (data, node) => MessageRouter.onMessage(data, node);
+  #onNetworkChangeHandler
+  #onConnectionHandler
+  #onMessageHandler
+
+  constructor(onNetworkChangeHandler, onConnectionHandler, onMessageHandler) {
+    this.#onNetworkChangeHandler = onNetworkChangeHandler;
+    this.#onConnectionHandler = onConnectionHandler;
+    this.#onMessageHandler = onMessageHandler;
+
     this.client = null;
     this.broadcastTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/bcast`;
     this.msgTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/msg`;
@@ -73,7 +78,7 @@ class _MqttWorker {
       try {
         const data = JSON.parse(e.data);
 
-        this.parentOnMessage(data, senderNode);
+        this.#onMessageHandler(data, senderNode);
       } catch (e) {
         logError(`MQTT message receive error: ${e}`);
       }
@@ -106,7 +111,7 @@ class _MqttWorker {
       try {
         const node = new _Node({
           nodeId: message.fromId,
-          onConnection: (node) => this.parentOnConnection(node),
+          onConnection: (node) => this.#onConnectionHandler(node),
           onMessage: (data, node) => this.onMessage(data, node),
           signalProtocol: 'mqtt'
         });
@@ -192,7 +197,7 @@ class _MqttWorker {
       try {
         const node = new _Node({
           nodeId: toId,
-          onConnection: (node) => this.parentOnConnection(node),
+          onConnection: (node) => this.#onConnectionHandler(node),
           onMessage: (data, node) => this.onMessage(data, node),
           signalProtocol: 'mqtt'
         });
@@ -239,7 +244,7 @@ class _MqttWorker {
 
     this.client.on('reconnect', () => {
       logMessage('MQTT Reconnected');
-      MessageRouter.onNetworkChange();
+      this.#onNetworkChangeHandler();
     });
   }
 

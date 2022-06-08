@@ -1,49 +1,39 @@
-import Profile from "./store/profile.js";
-import NodeStore from "./store/nodeStore.js";
 import {logError, logMessage} from "./utils/logger.js";
-import Settings from "./settings.js";
-import config from "./config.js";
-import AppStore from "./store/appStore.js";
+import Settings from "./os/settings.js";
+import AppStore from "./os/store/appStore.js";
 
 class _MessageRouter {
-  init (coreApps, onConnection) {
+  #riverApi
+
+  init (riverApi, coreApps) {
+    this.#riverApi = riverApi;
+
     this.coreApps = coreApps;
-    this.callerOnConnection = (node) => onConnection(node);
+
+    this.registerHandlers();
     this.registerListeners();
+
+    this.#riverApi.registerOnNodeConnected(() => this.onNodeConnected());
+    this.#riverApi.registerOnNetworkChangeHandler(() => this.onNetworkChange());
   }
 
-  onMessage (data, node) {
-    const { apps, destinationId, type } = data;
-
-    if(!!destinationId && destinationId !== Profile.getNodeID()) {
-      // forward message
-      const nextHopNode = NodeStore.getNextHopNode(destinationId);
-      if(nextHopNode) {
-        nextHopNode.send(data);
-      } else {
-        logMessage(`MessageRouter Route not found for ${destinationId}.`)
-      }
-      return;
-    }
-
-    switch (type) {
-      case 'app':
-        this.onAppMessage(data, node);
-        break;
-      case 'app-list':
-        if (apps) {
-          this.coreApps.AppListCard.onAvailableApps(apps);
-        }
-        break;
-      case 'routing':
-        this.onRoutingMessage(data, node)
-        break;
-      default:
-        logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
-    }
+  registerHandlers() {
+    this.#riverApi.registerHandler('app', (data) => this.onAppMessage(data));
+    this.#riverApi.registerHandler('app-list', (data) => this.onAppListMessage(data));
   }
 
-  onAppMessage(data, node) {
+  onNodeConnected() {
+    this.coreApps.AddPeerCard.stop();
+    this.coreApps.AppListCard.updateAppList();
+    this.coreApps.AppListCard.sendApps();
+  }
+
+  onNetworkChange() {
+    this.coreApps.VillageStateCard.refresh();
+  }
+
+
+  onAppMessage(data) {
     const {msg, senderId, app, } = data;
 
     switch (app) {
@@ -57,82 +47,12 @@ class _MessageRouter {
     }
   }
 
-  onRoutingMessage(data, node) {
-    const {senderId, offer, answer, candidate, subtype, profile} = data;
-    switch (subtype) {
-      case 'request-connection':
-        if (senderId) {
-          logMessage('MessageRouter Evaluating connection request')
-          this.coreApps.RouteBalancer.onRouteRequest(senderId);
-        }
-        break;
-      case 'accept-connection':
-        if (senderId) {
-          logMessage('MessageRouter Connection accepted, creating offer')
-          this.coreApps.VillageSignaler.createOffer(senderId);
-        }
-        break;
-      case 'reject-connection-busy':
-        if (senderId) {
-          logMessage('MessageRouter Connection refused, too busy')
-          this.coreApps.RouteBalancer.onRouteBusy(senderId);
-        }
-        break;
-      case 'offer':
-        if (offer && senderId) {
-          logMessage('MessageRouter Accepting automated offer')
-          this.coreApps.VillageSignaler.acceptOffer(offer, senderId, node);
-        }
-        break;
-      case 'answer':
-        if (answer && senderId) {
-          logMessage('MessageRouter Accepting automated answer')
-          this.coreApps.VillageSignaler.acceptAnswer(answer, senderId, node);
-        }
-        break;
-      case 'ice-candidate':
-        if(senderId && candidate ) {
-          logMessage(`MessageRouter Received ice candidate for ${senderId}`);
-          this.coreApps.VillageSignaler.onCandidate(senderId, candidate);
-        }
-        break;
-      case 'profile-update':
-        if (profile) {
-          logMessage(`MessageRouter Received profile for ${profile.nodeId}`);
-          node.setProfile(profile);
-          this.onNetworkChange();
-          this.coreApps.RouteBalancer.enqueue(node.profile.routes);
-        }
-        break;
-      default:
-        logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
+  onAppListMessage(data) {
+    const { apps } = data;
+
+    if (apps) {
+      this.coreApps.AppListCard.onAvailableApps(apps);
     }
-  }
-
-  onConnection(node) {
-    const profile =  Profile.getShareable();
-    logMessage(`MessageRouter Sending profile for ${profile.nodeId}`);
-    node.send({
-      type: 'routing',
-      subtype: 'profile-update',
-      profile
-    });
-
-    this.callerOnConnection(node);
-  }
-
-  onNetworkChange() {
-    const nodeCountStart = NodeStore.getNodes().length;
-    NodeStore.prune();
-    const nodeCountEnd = NodeStore.getNodes().length;
-
-    if(nodeCountEnd < config.mqttParallelReqs) {
-      this.coreApps.MqttWorker.seekNodes();
-    } else if (nodeCountEnd < nodeCountStart) {
-      this.coreApps.RouteBalancer.rebuildRoutes();
-    }
-
-    this.coreApps.VillageStateCard.refresh();
   }
 
   onRunApp(app, params) {

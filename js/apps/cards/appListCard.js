@@ -1,9 +1,9 @@
-import AppStore from "../../store/appStore.js";
-import NodeStore from "../../store/nodeStore.js";
+import AppStore from "../../os/store/appStore.js";
+import NodeStore from "../../riverNetwork/nodeStore.js";
 import MessageRouter from "../../messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
-import DataStore from "../../store/dataStore.js";
+import DataStore from "../../os/store/dataStore.js";
 
 class _AppListCard {
   constructor() {

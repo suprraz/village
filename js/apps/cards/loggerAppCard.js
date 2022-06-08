@@ -1,6 +1,6 @@
 import { Logger } from "../../utils/logger.js";
 import config from "../../config.js";
-import Settings from "../../settings.js";
+import Settings from "../../os/settings.js";
 
 class _LoggerCardApp {
   constructor(el) {
