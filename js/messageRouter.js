@@ -83,14 +83,15 @@ class _MessageRouter {
     window.addEventListener('message', (event) => {
       const data = event.data;
       if(data) {
-        if(!!data.closeApp) {
-          this.onCloseApp(data.sourceApp);
-        } else if (!!data.saveApp) {
-          AppStore.installApp(data.app);
+        if(data.type === 'closeApp') {
+          this.onCloseApp(data.payload.sourceApp);
+        } else if (data.type === 'saveApp') {
+          AppStore.saveApp(data.payload.app);
+
           this.coreApps.AppListCard.updateAppList();
           this.coreApps.AppListCard.sendApps();
-        } else if(!!data.encryptionKey) {
-          this.coreApps.InvoiceStore.updateInvoice(data.appName, data.encryptionKey)
+        } else if(data.type === 'invoicePaid') {
+          this.coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey)
         }
       }
     }, false);

@@ -19,7 +19,7 @@ class _AppListCard {
   installApp(app) {
     try {
       AppStore.installApp(app)
-      this.availableApps = this.availableApps.filter((availableApp) => !availableApp.name === app.name);
+      this.availableApps = this.availableApps.filter((availableApp) => !availableApp.id === app.id);
       this.updateAppList()
       this.sendApps();
     } catch (e) {
@@ -33,10 +33,10 @@ class _AppListCard {
     try {
       newApps = apps.filter((remoteApp) => {
         const isInstalled = localApps.some(
-          (localApp => localApp.name === remoteApp.name));
+          (localApp => localApp.id === remoteApp.id));
 
         const isAvailable = this.availableApps.some(
-          (availableApp => availableApp.name === remoteApp.name));
+          (availableApp => availableApp.id === remoteApp.id));
 
         return !isInstalled && !isAvailable;
       });
@@ -100,7 +100,7 @@ class _AppListCard {
     appRunBtn.className = "button is-primary appRunButton";
     appRunBtn.innerText = "Run";
     appRunBtn.onclick = async () => {
-      const reloadedApp = await DataStore.getApp(app.name);
+      const reloadedApp = await DataStore.getApp(app.id);
 
       AppStore.runApp(reloadedApp)
     };
@@ -109,16 +109,16 @@ class _AppListCard {
     appEditBtn.className = "button appEditButton";
     appEditBtn.innerText = "Edit";
     appEditBtn.onclick = async () => {
-      const reloadedApp = await DataStore.getApp(app.name);
+      const reloadedApp = await DataStore.getApp(app.id);
 
-      MessageRouter.onRunApp(AceEditorApp, reloadedApp);
+      MessageRouter.onRunApp(AceEditorApp, {app: reloadedApp});
     };
 
     const appRemoveBtn = document.createElement('button');
     appRemoveBtn.className = "button appRemoveButton";
     appRemoveBtn.innerText = "Remove";
     appRemoveBtn.onclick = () => {
-      AppStore.removeApp(app.name)
+      AppStore.removeApp(app.id)
       this.availableApps.push(app);
       this.updateAppList();
     };

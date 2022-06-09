@@ -2,8 +2,13 @@ import AppStore from "../../os/store/appStore.js";
 import MessageRouter from "../../messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import DataStore from "../../os/store/dataStore.js";
+import {logError} from "../../utils/logger.js";
+import uuidv4 from "../../utils/uuid.js";
+import Settings from "../../os/settings.js";
 
 class _DeveloperAppsCard {
+  #newAppTemplate = null;
+
   constructor(containerEl) {
 
     const devAppsContainerEl = containerEl;
@@ -16,12 +21,40 @@ class _DeveloperAppsCard {
     // this.updateMyAppsList();
   }
 
+  async loadTemplate() {
+    const res = await fetch('/js/apps/cards/resources/developerAppsCard/newAppTemplate.js');
+    if (!res.ok) {
+      throw new Error(`Error response: ${res.status}`);
+    }
+    return await res.text();
+  }
+
   registerListeners() {
     this.newAppBtn.addEventListener('click', (e) => this.newApp());
   }
 
-  newApp() {
-    alert('New App!')
+  async newApp() {
+    if(!this.#newAppTemplate) {
+      try {
+        this.#newAppTemplate = await this.loadTemplate();
+      } catch (e) {
+        alert('There was an error loading the New App Template');
+        logError(`DeveloperAppsCard Error loading template ${e}`);
+        return;
+      }
+    }
+
+    const app = {
+      id: `app-${uuidv4()}`,
+      name: 'New App Name',
+      authorId: Settings.get('userId'),
+      creationDate: (new Date()).getTime(),
+      code: this.#newAppTemplate
+    }
+
+    app.signature = AppStore.signApp(app);
+
+    MessageRouter.onRunApp(AceEditorApp, {app});
   }
 
   async updateMyAppsList() {
@@ -59,7 +92,7 @@ class _DeveloperAppsCard {
     appRunBtn.className = "button is-primary appRunButton";
     appRunBtn.innerText = "Run";
     appRunBtn.onclick = async () => {
-      const reloadedApp = await DataStore.getApp(app.name);
+      const reloadedApp = await DataStore.getApp(app.id);
 
       AppStore.runApp(reloadedApp)
     };
@@ -68,16 +101,16 @@ class _DeveloperAppsCard {
     appEditBtn.className = "button appEditButton";
     appEditBtn.innerText = "Edit";
     appEditBtn.onclick = async () => {
-      const reloadedApp = await DataStore.getApp(app.name);
+      const reloadedApp = await DataStore.getApp(app.id);
 
-      MessageRouter.onRunApp(AceEditorApp, reloadedApp);
+      MessageRouter.onRunApp(AceEditorApp, {app: reloadedApp});
     };
 
     const appRemoveBtn = document.createElement('button');
     appRemoveBtn.className = "button appRemoveButton";
     appRemoveBtn.innerText = "Remove";
     appRemoveBtn.onclick = () => {
-      AppStore.removeApp(app.name);
+      AppStore.removeApp(app.id);
       this.updateMyAppsList();
     };
 
@@ -108,6 +141,6 @@ const devAppsContainerHtml = `
       </div>
     </div>
 </div>
-`
+`;
 
 export default _DeveloperAppsCard;

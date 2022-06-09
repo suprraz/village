@@ -19,8 +19,8 @@ class _Village {
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('encryptionKey')) {
       document.getElementById('main').style = 'display: none;'
-      window.parent.postMessage({closeApp: true, sourceApp: 'PaymentApp'},'*');
-      window.parent.postMessage({decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appName: urlParams.get('appName')},'*');
+      window.parent.postMessage({type: 'closeApp', payload: {sourceApp: 'PaymentApp'}},'*');
+      window.parent.postMessage({type: 'invoicePaid', payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}},'*');
       return;
     }
 

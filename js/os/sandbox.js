@@ -70,7 +70,12 @@ const sandboxHtml = `
                   window.addEventListener('message', (event) => {
                       const data = event.data;
                       if(data && data.run) {
+                        try {
                           eval(data.run);
+                        } catch (e) {
+                          alert('There was an error while starting the app.  Check console logs for details.')
+                          console.error('There was an error while starting the app: ' + e);
+                        }
                       }
                   }, false);
               </script>

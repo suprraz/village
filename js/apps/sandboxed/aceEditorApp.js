@@ -4,18 +4,18 @@ const AceEditorHtml = \`
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Editor</title>
-  <link rel="stylesheet" type="text/css"  href="https://unpkg.com/bulma@0.9.3/css/bulma.min.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
   <style type="text/css" media="screen">
-      #editor {
-          position: absolute;
-          top: 56px;
-          right: 20px;
-          bottom: 0;
-          left: 20px;
-      }
+    #editor {
+        position: absolute;
+        top: 56px;
+        right: 20px;
+        bottom: 0;
+        left: 20px;
+    }
   </style>
-
+  
+  <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
 </head>
 <body>
 <div class="px-4 py-4">
@@ -25,10 +25,7 @@ const AceEditorHtml = \`
       <button id="saveBtn" class="button is-primary mx-5">Save</button>
     </div>
     
-    <pre id="editor" class="hero-body my-4">
-    function foo(items) {
-        alert('Change the code, change the world');
-    }
+    <pre id="editor" class="hero-body my-4 is-hidden">
     </pre>
   </div>
 <div>
@@ -42,6 +39,7 @@ class _AceEditor {
     params = null; //remove sensitive data from window object;
     
     document.getElementsByTagName("html")[0].innerHTML = AceEditorHtml;
+    this.editorEl = document.getElementById('editor');
     
     this.loadScript('https://unpkg.com/ace-builds@1.4.14/src-min-noconflict/ace.js', () => {
         this.init();
@@ -64,18 +62,19 @@ class _AceEditor {
   init() {
     this.editor = ace.edit("editor", {
       mode: "ace/mode/javascript",
-      selectionStyle: "text",
-      // maxLines: 80
+      selectionStyle: "text"
     });
     
     this.editor.setTheme("ace/theme/twilight");
     this.editor.session.setMode("ace/mode/javascript");
     
-    if(this.params.code) {
-      this.editor.session.setValue(this.params.code);
+    this.editorEl.classList.remove("is-hidden");
+    
+    if(this.params?.app?.code) {
+      this.editor.session.setValue(this.params.app.code);
     }    
-    if(this.params.name) {
-      document.getElementById('appName').value = this.params.name;
+    if(this.params?.app?.name) {
+      document.getElementById('appName').value = this.params.app.name;
     }
     
     const saveBtn = document.getElementById('saveBtn');
@@ -86,12 +85,18 @@ class _AceEditor {
     const code = this.editor.session.getValue();
     const name = document.getElementById('appName').value;
     
+    const app = {
+      ...this.params.app,
+      name,
+      code
+    }
+    
     if(!name.length) {
       alert("Please enter a valid app name");
       return;
     }
 
-    window.parent.postMessage({saveApp: true, app: {code, name}},'*');
+    window.parent.postMessage({type: 'saveApp', payload: {app}},'*');
   }
 }
 

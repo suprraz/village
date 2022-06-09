@@ -43,6 +43,21 @@ class _DataStore {
         signature,
         installDate`,
     });
+    this.#appStoreDb.version(26).stores({
+      installedApps: `
+        id,
+        name,
+        authorId,
+        signature,
+        installDate,
+        updateDate,
+        creationDate`,
+    }).upgrade((trans) => {
+      return trans.installedApps.toCollection().modify (app => {
+        app.updateDate = (new Date()).getTime();
+        app.creationDate = (new Date()).getTime();
+      });
+    });
   }
 
   async performUpgrades() {
@@ -76,25 +91,17 @@ class _DataStore {
     localStorage.setItem(key, JSON.stringify(document));
   }
 
-  async saveApp(name, installDate, code) {
-    const appMatchingName = await this.getApp(name);
-    if(appMatchingName) {
-      await this.#appStoreDb.installedApps.update(name, {
-        name,
-        installDate,
-        code
-      });
+  async saveApp(app) {
+    const appMatchingId= await this.getApp(app.id);
+    if(appMatchingId) {
+      await this.#appStoreDb.installedApps.update(app.id, app);
     } else {
-      await this.#appStoreDb.installedApps.add({
-        name,
-        installDate,
-        code
-      });
+      await this.#appStoreDb.installedApps.add(app);
     }
   }
 
-  async getApp(name) {
-    const query = this.#appStoreDb.installedApps.where('name').startsWithIgnoreCase(name);
+  async getApp(appId) {
+    const query = this.#appStoreDb.installedApps.where('id').startsWithIgnoreCase(appId);
     const matches = await query.toArray();
     if(matches && matches[0]) {
       return matches[0]
@@ -116,8 +123,8 @@ class _DataStore {
     return query.toArray();
   }
 
-  async removeApp(name) {
-    return this.#appStoreDb.installedApps.delete(name)
+  async removeApp(appId) {
+    return this.#appStoreDb.installedApps.delete(appId);
   }
 
 }

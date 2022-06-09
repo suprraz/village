@@ -15,9 +15,9 @@ class _InvoiceStore {
     DataStore.setDocument('invoices', this.invoices);
   }
 
-  updateInvoice(appName, encryptionKey) {
+  updateInvoice(appId, encryptionKey) {
     this.invoices = DataStore.getDocument('invoices');
-    const invoice = this.invoices.reverse().find(i => i.encryptedApp.name === appName);
+    const invoice = this.invoices.reverse().find(i => i.encryptedApp.id === appId);
     const { encryptedApp } = invoice;
 
     try {
@@ -26,7 +26,7 @@ class _InvoiceStore {
         code: CryptoJS.AES.decrypt(encryptedApp.code, encryptionKey).toString(CryptoJS.enc.Utf8)
       }
 
-      this.invoices = this.invoices.filter(i => i.encryptedApp.name !== appName && (new Date() - config.invoiceExpiration > i.date));
+      this.invoices = this.invoices.filter(i => i.encryptedApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));
 
       DataStore.setDocument('invoices', this.invoices);
 
@@ -49,7 +49,7 @@ class _InvoiceStore {
     const encryptionKey = uuidv4();
     const encryptedApp = this.encryptApp(app, encryptionKey);
 
-    const invoice = await this.createInvoice(encryptedApp.name, encryptionKey);
+    const invoice = await this.createInvoice(encryptedApp.id, encryptionKey);
 
     this.watchInvoice(encryptedApp, invoice);
 
@@ -58,7 +58,7 @@ class _InvoiceStore {
     MessageRouter.onRunApp(unrestrictedApp, {url: invoiceUrl});
   }
 
-  async createInvoice(appName, encryptionKey) {
+  async createInvoice(appId, encryptionKey) {
     try {
       const res = await fetch("https://pay.invad.com/api/v1/invoices", {
         "headers": {
@@ -68,7 +68,7 @@ class _InvoiceStore {
           new URLSearchParams({
             storeId: '6M2uJbthezgNYNyFAFe1xYp1hXexydswYaULjM613TDU',
             browserRedirect: window.location.href+'?' +
-              new URLSearchParams({encryptionKey, appName}).toString(),
+              new URLSearchParams({encryptionKey, appId}).toString(),
             price: '0.000000001',
             currency: 'BTC',
             jsonResponse: true

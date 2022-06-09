@@ -22,15 +22,20 @@ class _AppStore {
     return this.validateCode(app.code);
   }
 
+  saveApp(app) {
+    this.installApp({
+      ...app,
+      updateDate: (new Date()).getTime()
+    });
+  }
+
   async installApp(app) {
-    //install/replace
     if(this.verifyApp(app)) {
-      app.installDate = new Date();
+      app.installDate = (new Date()).getTime();
+      app.signature = AppStore.signApp(app);
 
-      await DataStore.saveApp(app.name, app.installDate, app.code);
+      await DataStore.saveApp(app);
     } else {
-      alert('Error: Invalid app');
-
       throw new Error('Invalid app');
     }
 
@@ -58,8 +63,8 @@ class _AppStore {
     return CryptoJS.HmacSHA256(app.id + app.code + app.authorId, pk);
   }
 
-  async removeApp(appName) {
-    await DataStore.removeApp(appName);
+  async removeApp(appId) {
+    await DataStore.removeApp(appId);
   }
 
   runApp(app) {
