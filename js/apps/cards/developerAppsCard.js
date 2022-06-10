@@ -1,7 +1,6 @@
 import AppStore from "../../os/store/appStore.js";
 import MessageRouter from "../../messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
-import DataStore from "../../os/store/dataStore.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import Settings from "../../os/settings.js";
@@ -12,7 +11,6 @@ class _DeveloperAppsCard {
   #newAppTemplate = null;
 
   constructor(containerEl) {
-
     const devAppsContainerEl = containerEl;
 
     devAppsContainerEl.innerHTML = devAppsContainerHtml;
@@ -50,8 +48,13 @@ class _DeveloperAppsCard {
       id: `app-${uuidv4()}`,
       name: 'New App Name',
       authorId: Settings.get('userId'),
+      code: this.#newAppTemplate,
+      version: 1,
+      price: 0,
+      installDate: (new Date()).getTime(),
+      updateDate: (new Date()).getTime(),
       creationDate: (new Date()).getTime(),
-      code: this.#newAppTemplate
+      isPublished: false
     }
 
     app.signature = AppStore.signApp(app);
@@ -130,17 +133,10 @@ class _DeveloperAppsCard {
 
 const devAppsContainerHtml = `
 <div id="developerAppsCard">
-    <p class="title">Developer Studio</p>
-    
-    <div class="is-flex is-flex-direction-row">
-      <div class="px-1 mx-3">
-          <button id="newAppBtn" class="button is-info appRunButton">New App</button>
-      </div>
-      
-      <div class="section px-7">
-        <p class="subtitle">My Apps</p>
-        <div id="myApps" class="is-flex is-flex-direction-column"></div>
-      </div>
+    <p class="title">Developer Studio</p>  
+  
+    <div class="px-1 mx-3 my-3">
+        <button id="newAppBtn" class="button is-info appRunButton">New App</button>
     </div>
 </div>
 `;

@@ -13,38 +13,39 @@ class _AppStore {
   }
 
   setAppStoreSchema() {
-    this.#appStoreDb.version(2).stores({
-      apps: `name, installDate`
-    });
-    this.#appStoreDb.version(21).stores({
-      installedApps: `
-        id,
-        name,
-        authorId,
-        signature,
-        installDate`,
-    }).upgrade(async (trans) => {
-      const apps = await trans.apps.toCollection().toArray();
-      const upgradedApps = apps.map( app => {
-        app.id = `app-${uuidv4()}`;
-        app.authorId = Settings.get('userId');
-        app.signature = AppStore.signApp(app);
-        app.installDate = (new Date(app.installDate)).getTime();
-        return app;
+    try {
+      this.#appStoreDb.version(2).stores({
+        apps: `name, installDate`
       });
-      await this.#appStoreDb.installedApps.bulkAdd(upgradedApps);
-    });
-    this.#appStoreDb.version(22).stores({
-      apps: null,
-      installedApps: `
+      this.#appStoreDb.version(21).stores({
+        installedApps: `
         id,
         name,
         authorId,
         signature,
         installDate`,
-    });
-    this.#appStoreDb.version(26).stores({
-      installedApps: `
+      }).upgrade(async (trans) => {
+        const apps = await trans.apps.toCollection().toArray();
+        const upgradedApps = apps.map(app => {
+          app.id = `app-${uuidv4()}`;
+          app.authorId = Settings.get('userId');
+          app.signature = AppStore.signApp(app);
+          app.installDate = (new Date(app.installDate)).getTime();
+          return app;
+        });
+        await this.#appStoreDb.installedApps.bulkAdd(upgradedApps);
+      });
+      this.#appStoreDb.version(22).stores({
+        apps: null,
+        installedApps: `
+        id,
+        name,
+        authorId,
+        signature,
+        installDate`,
+      });
+      this.#appStoreDb.version(26).stores({
+        installedApps: `
         id,
         name,
         authorId,
@@ -52,12 +53,79 @@ class _AppStore {
         installDate,
         updateDate,
         creationDate`,
-    }).upgrade((trans) => {
-      return trans.installedApps.toCollection().modify (app => {
-        app.updateDate = (new Date()).getTime();
-        app.creationDate = (new Date()).getTime();
+      }).upgrade((trans) => {
+        return trans.installedApps.toCollection().modify(app => {
+          app.updateDate = (new Date()).getTime();
+          app.creationDate = (new Date()).getTime();
+        });
       });
-    });
+      this.#appStoreDb.version(28).stores({
+        installedApps: `
+        id,
+        name,
+        authorId,
+        signature,
+        installDate,
+        updateDate,
+        creationDate,
+        price,
+        isPublished  `,
+      }).upgrade((trans) => {
+        return trans.installedApps.toCollection().modify(app => {
+          app.isPublished = true;
+          app.price = '0.000000002';
+        });
+      });
+      this.#appStoreDb.version(29).stores({
+        installedApps: `
+        id,
+        name,
+        version,
+        authorId,
+        signature,
+        price,
+        installDate,
+        updateDate,
+        creationDate,       
+        isPublished  `,
+      }).upgrade((trans) => {
+        return trans.installedApps.toCollection().modify(app => {
+          app.version = 1;
+        });
+      });
+      this.#appStoreDb.version(37).stores({
+        installedApps: `
+        id,
+        name,
+        version,
+        authorId,
+        signature,
+        price,
+        installDate,
+        updateDate,
+        creationDate,       
+        isPublished  `,
+      }).upgrade((trans) => {
+        return trans.installedApps.toCollection().modify(app => {
+          const signature = app.signature;
+          app = {
+            id: app.id || `app-${uuidv4()}`,
+            name: app.name || 'App name error',
+            version: app.version || 1,
+            authorId: app.authorId || Settings.get('userId'),
+            price: app.price || '0.000000002',
+            installDate: app.installDate || (new Date()).getTime(),
+            updateDate: app.updateDate || (new Date()).getTime(),
+            creationDate: app.creationDate || (new Date()).getTime(),
+            isPublished: app.isPublished || true,
+            code: app.code
+          }
+          app.signature = signature || AppStore.signApp(app);
+        });
+      });
+    } catch (e) {
+      logError(`AppStore Error ${e}`);
+    }
   }
 
   async saveApp(app) {
@@ -82,7 +150,7 @@ class _AppStore {
     try {
       return this.#appStoreDb.installedApps.toArray();
     } catch (e) {
-      logError(`DataStore Error getting apps ${e}`)
+      logError(`AppStore Error getting apps ${e}`)
       throw e;
     }
   }
@@ -147,7 +215,7 @@ class _AppStore {
   signApp(app) {
     const pk = Settings.get('privateKey');
 
-    return CryptoJS.HmacSHA256(app.id + app.code + app.authorId, pk);
+    return CryptoJS.HmacSHA256(app.id + app.code + app.authorId + app.version + app.price, pk);
   }
 
   runApp(app) {
