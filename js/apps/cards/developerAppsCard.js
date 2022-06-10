@@ -94,7 +94,7 @@ class _DeveloperAppsCard {
     appRunBtn.className = "button is-primary appRunButton";
     appRunBtn.innerText = "Run";
     appRunBtn.onclick = async () => {
-      const reloadedApp = await DataStore.getApp(app.id);
+      const reloadedApp = await AppStore.getApp(app.id);
 
       AppStore.runApp(reloadedApp)
     };
@@ -103,7 +103,7 @@ class _DeveloperAppsCard {
     appEditBtn.className = "button appEditButton";
     appEditBtn.innerText = "Edit";
     appEditBtn.onclick = async () => {
-      const reloadedApp = await DataStore.getApp(app.id);
+      const reloadedApp = await AppStore.getApp(app.id);
 
       MessageRouter.onRunApp(AceEditorApp, {app: reloadedApp});
     };

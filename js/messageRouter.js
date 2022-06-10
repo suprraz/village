@@ -86,7 +86,7 @@ class _MessageRouter {
         if(data.type === 'closeApp') {
           this.onCloseApp(data.payload.sourceApp);
         } else if (data.type === 'saveApp') {
-          AppStore.saveApp(data.payload.app);
+          AppStore.updateApp(data.payload.app);
 
           this.coreApps.AppListCard.updateAppList();
           this.coreApps.AppListCard.sendApps();
