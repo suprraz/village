@@ -54,7 +54,7 @@ class _DeveloperAppsCard {
       installDate: (new Date()).getTime(),
       updateDate: (new Date()).getTime(),
       creationDate: (new Date()).getTime(),
-      isPublished: false
+      isPublished: 0
     }
 
     app.signature = AppStore.signApp(app);

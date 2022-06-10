@@ -28,7 +28,7 @@ class _AppListCard {
   }
 
   async onAvailableApps(apps) {
-    const localApps = await AppStore.getInstalledApps();
+    const localApps = await AppStore.getPublishedApps();
     let newApps = [];
     try {
       newApps = apps.filter((remoteApp) => {
@@ -49,21 +49,21 @@ class _AppListCard {
   }
 
   async updateAppList() {
-    const installedApps = await AppStore.getInstalledApps();
+    const publishedApps = await AppStore.getPublishedApps();
 
-    const installedAppsDiv = document.getElementById("installedApps");
+    const publishedAppsDiv = document.getElementById("publishedApps");
 
-    if(!installedApps.length) {
-      installedAppsDiv.innerText = "No apps installed.";
+    if(!publishedApps.length) {
+      publishedAppsDiv.innerText = "No apps installed.";
     } else {
       // remove all children and listeners
-      while (installedAppsDiv.firstChild) {
-        installedAppsDiv.removeChild(installedAppsDiv.firstChild);
+      while (publishedAppsDiv.firstChild) {
+        publishedAppsDiv.removeChild(publishedAppsDiv.firstChild);
       }
     }
 
-    installedApps.map((app) => {
-      installedAppsDiv.appendChild(this.createInstalledAppDiv(app));
+    publishedApps.map((app) => {
+      publishedAppsDiv.appendChild(this.createPublishedAppDiv(app, false));
     })
 
 
@@ -82,10 +82,25 @@ class _AppListCard {
       availableAppsDiv.appendChild(this.createAvailableAppDiv(app));
     })
 
+    const unpublishedApps = await AppStore.getUnpublishedApps();
+    const unpublishedAppsDiv = document.getElementById("unpublishedApps");
+
+    if(!unpublishedApps.length) {
+      unpublishedAppsDiv.innerText = "No unpublished apps.";
+    } else {
+      // remove all children and listeners
+      while (unpublishedAppsDiv.firstChild) {
+        unpublishedAppsDiv.removeChild(unpublishedAppsDiv.firstChild);
+      }
+    }
+
+    unpublishedApps.map((app) => {
+      unpublishedAppsDiv.appendChild(this.createPublishedAppDiv(app, true));
+    })
 
   }
 
-  createInstalledAppDiv(app){
+  createPublishedAppDiv(app, isPublisher){
     const appDiv = document.createElement('div');
     appDiv.className = "installedApp card my-1";
 
@@ -123,9 +138,26 @@ class _AppListCard {
       this.updateAppList();
     };
 
+    const appPublishBtn = document.createElement('button');
+    appPublishBtn.className = "button";
+    appPublishBtn.innerText = "Publish";
+    appPublishBtn.onclick = () => {
+      AppStore.publishApp(app.id);
+      this.updateAppList();
+    };
+
+    const appUnpublishBtn = document.createElement('button');
+    appUnpublishBtn.className = "button";
+    appUnpublishBtn.innerText = "Unpublish";
+    appUnpublishBtn.onclick = () => {
+      AppStore.unpublishApp(app.id);
+      this.updateAppList();
+    };
+
     buttonsDiv.appendChild(appRunBtn);
     buttonsDiv.appendChild(appEditBtn);
     buttonsDiv.appendChild(appRemoveBtn);
+    isPublisher ? buttonsDiv.appendChild(appPublishBtn) : buttonsDiv.appendChild(appUnpublishBtn);
     appDiv.appendChild(appNameDiv);
     appDiv.appendChild(buttonsDiv);
 
@@ -162,7 +194,7 @@ class _AppListCard {
   }
 
   async sendApps() {
-    const apps = await AppStore.getInstalledApps();
+    const apps = await AppStore.getPublishedApps();
 
     NodeStore.broadcast({
       type: 'app-list',
@@ -176,10 +208,13 @@ const appListHtml = `
 <div id="appList">
     <p class="title">Apps</p>
     <p class="subtitle mt-1">Installed Apps</p>
-    <div id="installedApps" class="is-flex is-flex-direction-column"></div>
+    <div id="publishedApps" class="is-flex is-flex-direction-column"></div>
     <br />
-    <p class="subtitle">Available Apps</p>
+    <p class="subtitle mt-1">Available Apps</p>
     <div id="availableApps" class="is-flex is-flex-direction-column"></div>
+    
+    <p class="subtitle mt-3">Unpublished Apps</p>
+    <div id="unpublishedApps" class="is-flex is-flex-direction-column"></div>
 </div>
 `
 

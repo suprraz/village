@@ -93,7 +93,7 @@ class _AppStore {
           app.version = 1;
         });
       });
-      this.#appStoreDb.version(37).stores({
+      this.#appStoreDb.version(48).stores({
         installedApps: `
         id,
         name,
@@ -107,20 +107,19 @@ class _AppStore {
         isPublished  `,
       }).upgrade((trans) => {
         return trans.installedApps.toCollection().modify(app => {
-          const signature = app.signature;
-          app = {
-            id: app.id || `app-${uuidv4()}`,
-            name: app.name || 'App name error',
-            version: app.version || 1,
-            authorId: app.authorId || Settings.get('userId'),
-            price: app.price || '0.000000002',
-            installDate: app.installDate || (new Date()).getTime(),
-            updateDate: app.updateDate || (new Date()).getTime(),
-            creationDate: app.creationDate || (new Date()).getTime(),
-            isPublished: app.isPublished || true,
-            code: app.code
-          }
-          app.signature = signature || AppStore.signApp(app);
+          app.id = app.id || `app-${uuidv4()}`;
+          app.name = app.name || 'App name error';
+          app.version = app.version || 1;
+          app.authorId = app.authorId || Settings.get('userId');
+          app.price = app.price || '0.000000002';
+          app.installDate = app.installDate || (new Date()).getTime();
+          app.updateDate = app.updateDate || (new Date()).getTime();
+          app.creationDate = app.creationDate || (new Date()).getTime();
+          app.isPublished = [0, 1].includes(app.isPublished) ? app.isPublished : 1;
+          app.code = app.code || '';
+          app.signature = typeof app.signature === 'string' || AppStore.signApp(app);
+
+          return app;
         });
       });
     } catch (e) {
@@ -131,9 +130,9 @@ class _AppStore {
   async saveApp(app) {
     const appMatchingId= await this.getApp(app.id);
     if(appMatchingId) {
-      await this.#appStoreDb.installedApps.update(app.id, app);
+      return this.#appStoreDb.installedApps.update(app.id, app);
     } else {
-      await this.#appStoreDb.installedApps.add(app);
+      return this.#appStoreDb.installedApps.add(app);
     }
   }
 
@@ -146,15 +145,6 @@ class _AppStore {
     return null;
   }
 
-  async getApps() {
-    try {
-      return this.#appStoreDb.installedApps.toArray();
-    } catch (e) {
-      logError(`AppStore Error getting apps ${e}`)
-      throw e;
-    }
-  }
-
   async getAppsByAuthor(authorId) {
     const query = this.#appStoreDb.installedApps.where({authorId});
     return query.toArray();
@@ -164,6 +154,17 @@ class _AppStore {
     return await this.#appStoreDb.installedApps.delete(appId);
   }
 
+  async publishApp(appId) {
+    const app = await this.getApp(appId);
+    app.isPublished = 1;
+    this.#appStoreDb.installedApps.update(app.id, app);
+  }
+
+  async unpublishApp(appId) {
+    const app = await this.getApp(appId);
+    app.isPublished = 0;
+    this.#appStoreDb.installedApps.update(app.id, app);
+  }
 
   validateCode(code) {
     const unsupportedStrings = [
@@ -189,17 +190,30 @@ class _AppStore {
       app.installDate = (new Date()).getTime();
       app.signature = AppStore.signApp(app);
 
-      await this.saveApp(app);
+      try {
+        await this.saveApp(app);
+      } catch (e) {
+        logError(`AppStore Error saving app: ${e}`);
+      }
     } else {
-      throw new Error('Invalid app');
+      throw new Error('AppStore Invalid app');
     }
 
     MessageRouter.onAppListUpdate();
   }
 
-  async getInstalledApps() {
+  async getPublishedApps() {
     try {
-      return await this.getApps();
+      return await this.#appStoreDb.installedApps.where('isPublished').equals(1).toArray();
+    } catch (e) {
+      logError(`AppStore Error getting apps ${e}`)
+      return [];
+    }
+  }
+
+  async getUnpublishedApps() {
+    try {
+      return await this.#appStoreDb.installedApps.where('isPublished').equals(0).toArray();
     } catch (e) {
       logError(`AppStore Error getting apps ${e}`)
       return [];
@@ -215,7 +229,7 @@ class _AppStore {
   signApp(app) {
     const pk = Settings.get('privateKey');
 
-    return CryptoJS.HmacSHA256(app.id + app.code + app.authorId + app.version + app.price, pk);
+    return CryptoJS.HmacSHA256(app.id + app.code + app.authorId + app.version + app.price, pk).toString();
   }
 
   runApp(app) {
