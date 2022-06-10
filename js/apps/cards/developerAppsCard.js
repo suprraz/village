@@ -6,6 +6,8 @@ import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import Settings from "../../os/settings.js";
 
+const NEW_APP_TEMPLATE_PATH = 'js/apps/cards/resources/developerAppsCard/newAppTemplate.js';
+
 class _DeveloperAppsCard {
   #newAppTemplate = null;
 
@@ -22,7 +24,7 @@ class _DeveloperAppsCard {
   }
 
   async loadTemplate() {
-    const res = await fetch('/js/apps/cards/resources/developerAppsCard/newAppTemplate.js');
+    const res = await fetch( NEW_APP_TEMPLATE_PATH );
     if (!res.ok) {
       throw new Error(`Error response: ${res.status}`);
     }
