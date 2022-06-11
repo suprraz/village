@@ -12,6 +12,11 @@ const AceEditorHtml = \`
         bottom: 0;
         left: 20px;
     }
+    @media only screen and (max-width: 830px) {
+      #editor {
+        top: 76px;
+      }
+    }
   </style>
   
   <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css">
@@ -19,13 +24,40 @@ const AceEditorHtml = \`
 </head>
 <body>
 <div class="px-4 py-4">
-  <div class="hero">
-    <div class="is-flex hero-head">
-      <input type="text" class="input" name="appName" id="appName" placeholder="App name"/>
-      <button id="saveBtn" class="button is-primary mx-5">Save</button>
+  <div class="">
+    <div class="is-flex">
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Name</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <p class="control">
+              <input type="text" class="input is-static" name="appName" id="appName" placeholder="App name"/>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Price (BTC)</label>
+        </div>
+        <div class="field-body">
+          <div class="field">
+            <p class="control">
+              <input type="text" class="input is-static" name="appPrice" id="appPrice" placeholder="Price in Bitcoin.  0 = free."/>
+            </p>
+          </div>
+        </div>
+      </div>
+    
+     
+      <button id="saveBtn" class="button is-primary mx-1">Save</button>
+      <button id="runBtn" class="button is-primary mx-1">Run</button>
     </div>
     
-    <pre id="editor" class="hero-body my-4 is-hidden">
+    <pre id="editor" class="my-4 is-hidden">
     </pre>
   </div>
 <div>
@@ -41,7 +73,7 @@ class _AceEditor {
     document.getElementsByTagName("html")[0].innerHTML = AceEditorHtml;
     this.editorEl = document.getElementById('editor');
     
-    this.loadScript('https://unpkg.com/ace-builds@1.4.14/src-min-noconflict/ace.js', () => {
+    this.loadScript('https://unpkg.com/ace-builds@1.6/src-min-noconflict/ace.js', () => {
         this.init();
     });
     this.editor = null;
@@ -77,26 +109,39 @@ class _AceEditor {
       document.getElementById('appName').value = this.params.app.name;
     }
     
+    if(typeof this.params?.app?.price === "string") {
+      document.getElementById('appPrice').value = this.params.app.price;
+    }
     const saveBtn = document.getElementById('saveBtn');
-    saveBtn.addEventListener('click', () => this.save());
+    saveBtn.addEventListener('click', () => this.saveAndRun(false));
+    
+    const runBtn = document.getElementById('runBtn');
+    runBtn.addEventListener('click', () => this.saveAndRun(true));
   }
   
-  save() {
+  saveAndRun(runAfterSave) {
     const code = this.editor.session.getValue();
     const name = document.getElementById('appName').value;
-    
-    const app = {
-      ...this.params.app,
-      name,
-      code
+    const price = document.getElementById('appPrice').value;
+
+    if(typeof parseFloat(price) !== 'number') {
+      alert('Please enter a price for the app.  Set price to 0 to make the app free.');
+      return;
     }
     
     if(!name.length) {
       alert("Please enter a valid app name");
       return;
     }
+    
+    const app = {
+      ...this.params.app,
+      name,
+      code,
+      price
+    }
 
-    window.parent.postMessage({type: 'saveApp', payload: {app}},'*');
+    window.parent.postMessage({type: 'saveAndRunApp', payload: {app, runAfterSave}},'*');
   }
 }
 

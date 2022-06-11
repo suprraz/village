@@ -83,15 +83,25 @@ class _MessageRouter {
     window.addEventListener('message', (event) => {
       const data = event.data;
       if(data) {
-        if(data.type === 'closeApp') {
-          this.onCloseApp(data.payload.sourceApp);
-        } else if (data.type === 'saveApp') {
-          AppStore.updateApp(data.payload.app);
+        switch (data.type) {
+          case 'closeApp':
+            this.onCloseApp(data.payload.sourceApp);
+            break;
+          case 'saveAndRunApp':
+            if(data.payload.runAfterSave) {
+              this.onCloseApp(data.payload.sourceApp);
+            }
 
-          this.coreApps.AppListCard.updateAppList();
-          this.coreApps.AppListCard.sendApps();
-        } else if(data.type === 'invoicePaid') {
-          this.coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey)
+            AppStore.updateApp(data.payload.app, data.payload.runAfterSave);
+
+            this.coreApps.AppListCard.updateAppList();
+            break;
+          case 'invoicePaid':
+            this.coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey)
+            break;
+
+          default:
+            logError(`MessageRouter Unhandled iframe message: ${JSON.stringify(data)}`);
         }
       }
     }, false);

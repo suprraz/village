@@ -46,11 +46,11 @@ class _DeveloperAppsCard {
 
     const app = {
       id: `app-${uuidv4()}`,
-      name: 'New App Name',
+      name: 'Hello World',
       authorId: Settings.get('userId'),
       code: this.#newAppTemplate,
       version: 1,
-      price: 0,
+      price: '0.000000001',
       installDate: (new Date()).getTime(),
       updateDate: (new Date()).getTime(),
       creationDate: (new Date()).getTime(),

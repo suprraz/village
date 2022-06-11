@@ -3,7 +3,7 @@ import NodeStore from "../../riverNetwork/nodeStore.js";
 import MessageRouter from "../../messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
-import DataStore from "../../os/store/dataStore.js";
+import Settings from "../../os/settings.js";
 
 class _AppListCard {
   constructor() {
@@ -49,6 +49,8 @@ class _AppListCard {
   }
 
   async updateAppList() {
+    const userId = Settings.get('userId');
+
     const publishedApps = await AppStore.getPublishedApps();
 
     const publishedAppsDiv = document.getElementById("publishedApps");
@@ -63,7 +65,7 @@ class _AppListCard {
     }
 
     publishedApps.map((app) => {
-      publishedAppsDiv.appendChild(this.createPublishedAppDiv(app, false));
+      publishedAppsDiv.appendChild(this.createPublishedAppDiv(app, userId === app.authorId, false));
     })
 
 
@@ -95,12 +97,12 @@ class _AppListCard {
     }
 
     unpublishedApps.map((app) => {
-      unpublishedAppsDiv.appendChild(this.createPublishedAppDiv(app, true));
+      unpublishedAppsDiv.appendChild(this.createPublishedAppDiv(app, userId === app.authorId, true));
     })
 
   }
 
-  createPublishedAppDiv(app, isPublisher){
+  createPublishedAppDiv(app, isOwner, showPublished){
     const appDiv = document.createElement('div');
     appDiv.className = "installedApp card my-1";
 
@@ -131,33 +133,42 @@ class _AppListCard {
 
     const appRemoveBtn = document.createElement('button');
     appRemoveBtn.className = "button appRemoveButton";
-    appRemoveBtn.innerText = "Remove";
+    appRemoveBtn.innerText = "Delete";
     appRemoveBtn.onclick = () => {
       AppStore.removeApp(app.id)
       this.availableApps.push(app);
       this.updateAppList();
+      this.sendApps();
     };
 
     const appPublishBtn = document.createElement('button');
     appPublishBtn.className = "button";
     appPublishBtn.innerText = "Publish";
     appPublishBtn.onclick = () => {
-      AppStore.publishApp(app.id);
-      this.updateAppList();
+      AppStore.publishApp(app.id).then(() => {
+        this.updateAppList();
+        this.sendApps();
+      });
     };
 
     const appUnpublishBtn = document.createElement('button');
     appUnpublishBtn.className = "button";
-    appUnpublishBtn.innerText = "Unpublish";
+    appUnpublishBtn.innerText = "Modify";
     appUnpublishBtn.onclick = () => {
-      AppStore.unpublishApp(app.id);
-      this.updateAppList();
+      AppStore.unpublishApp(app.id).then(() => {
+        this.updateAppList();
+        this.sendApps();
+      });
     };
 
     buttonsDiv.appendChild(appRunBtn);
-    buttonsDiv.appendChild(appEditBtn);
+    if(isOwner) {
+      buttonsDiv.appendChild(appEditBtn);
+    }
     buttonsDiv.appendChild(appRemoveBtn);
-    isPublisher ? buttonsDiv.appendChild(appPublishBtn) : buttonsDiv.appendChild(appUnpublishBtn);
+    if(isOwner) {
+      showPublished ? buttonsDiv.appendChild(appPublishBtn) : buttonsDiv.appendChild(appUnpublishBtn);
+    }
     appDiv.appendChild(appNameDiv);
     appDiv.appendChild(buttonsDiv);
 

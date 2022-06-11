@@ -73,7 +73,7 @@ class _AppStore {
       }).upgrade((trans) => {
         return trans.installedApps.toCollection().modify(app => {
           app.isPublished = true;
-          app.price = '0.000000002';
+          app.price = '0.000000001';
         });
       });
       this.#appStoreDb.version(29).stores({
@@ -111,7 +111,7 @@ class _AppStore {
           app.name = app.name || 'App name error';
           app.version = app.version || 1;
           app.authorId = app.authorId || Settings.get('userId');
-          app.price = app.price || '0.000000002';
+          app.price = app.price || '0.000000001';
           app.installDate = app.installDate || (new Date()).getTime();
           app.updateDate = app.updateDate || (new Date()).getTime();
           app.creationDate = app.creationDate || (new Date()).getTime();
@@ -136,13 +136,8 @@ class _AppStore {
     }
   }
 
-  async getApp(appId) {
-    const query = this.#appStoreDb.installedApps.where('id').startsWithIgnoreCase(appId);
-    const matches = await query.toArray();
-    if(matches && matches[0]) {
-      return matches[0]
-    }
-    return null;
+  getApp(appId) {
+    return this.#appStoreDb.installedApps.get(appId);
   }
 
   async getAppsByAuthor(authorId) {
@@ -178,11 +173,15 @@ class _AppStore {
     return this.validateCode(app.code);
   }
 
-  updateApp(app) {
-    this.installApp({
+  async updateApp(app, runAfterSave) {
+    const savedApp = await this.installApp({
       ...app,
       updateDate: (new Date()).getTime()
     });
+
+    if(runAfterSave && savedApp) {
+      this.runApp(savedApp);
+    }
   }
 
   async installApp(app) {
@@ -200,6 +199,7 @@ class _AppStore {
     }
 
     MessageRouter.onAppListUpdate();
+    return this.getApp(app.id);
   }
 
   async getPublishedApps() {
