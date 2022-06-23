@@ -4,11 +4,12 @@ import AppStore from "./os/store/appStore.js";
 
 class _MessageRouter {
   #riverApi
+  #coreApps
 
   init (riverApi, coreApps) {
     this.#riverApi = riverApi;
 
-    this.coreApps = coreApps;
+    this.#coreApps = coreApps;
 
     this.registerHandlers();
     this.registerListeners();
@@ -23,13 +24,13 @@ class _MessageRouter {
   }
 
   onNodeConnected() {
-    this.coreApps.AddPeerCard.stop();
-    this.coreApps.AppListCard.updateAppList();
-    this.coreApps.AppListCard.sendApps();
+    this.#coreApps.AddPeerCard.stop();
+    this.#coreApps.AppListCard.updateAppList();
+    this.#coreApps.AppListCard.sendApps();
   }
 
   onNetworkChange() {
-    this.coreApps.VillageStateCard.refresh();
+    this.#coreApps.VillageStateCard.refresh();
   }
 
 
@@ -39,7 +40,7 @@ class _MessageRouter {
     switch (app) {
       case 'chat':
         if (msg && senderId) {
-          this.coreApps.ChatCard.messageReceived(senderId, msg);
+          this.#coreApps.ChatCard.messageReceived(senderId, msg);
         }
         break;
       default:
@@ -51,24 +52,24 @@ class _MessageRouter {
     const { apps } = data;
 
     if (apps) {
-      this.coreApps.AppListCard.onAvailableApps(apps);
+      this.#coreApps.AppListCard.onAvailableApps(apps);
     }
   }
 
   onRunApp(app, params) {
-    this.coreApps.Sandbox.run(app, params);
+    this.#coreApps.Sandbox.run(app, params);
   }
 
   onBuyApp(app) {
-    this.coreApps.InvoiceStore.purchaseApp(app);
+    this.#coreApps.InvoiceStore.purchaseApp(app);
   }
 
   onInstallApp(app) {
-    this.coreApps.AppListCard.installApp(app);
+    this.#coreApps.AppListCard.installApp(app);
   }
 
   onAppListUpdate() {
-    this.coreApps.AppListCard.updateAppList();
+    this.#coreApps.AppListCard.updateAppList();
   }
 
   onCloseApp(sourceAppName) {
@@ -76,7 +77,7 @@ class _MessageRouter {
       Settings.update('showLanding', false);
       this.onNetworkChange();
     }
-    this.coreApps.Sandbox.stop();
+    this.#coreApps.Sandbox.stop();
   }
 
   registerListeners() {
@@ -94,10 +95,10 @@ class _MessageRouter {
 
             AppStore.updateApp(data.payload.app, data.payload.runAfterSave);
 
-            this.coreApps.AppListCard.updateAppList();
+            this.#coreApps.AppListCard.updateAppList();
             break;
           case 'invoicePaid':
-            this.coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey)
+            this.#coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey)
             break;
 
           default:

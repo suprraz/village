@@ -2,13 +2,16 @@ import NodeStore from "../../riverNetwork/nodeStore.js";
 import {logMessage} from "../../utils/logger.js";
 
 class _ChatCard {
+  #chatLog
+  #chatLogEl
+
   constructor() {
-    this.chatLog = [`${this.timeStamp()} Entered chat`];
+    this.#chatLog = [`${this.timeStamp()} Entered chat`];
 
     const chatContainer = document.getElementById('chatContainer');
     chatContainer.innerHTML = chatHtml;
 
-    this.chatLogEl = document.getElementById('chatLog');
+    this.#chatLogEl = document.getElementById('chatLog');
 
     this.registerListeners();
     this.updateChat();
@@ -20,7 +23,7 @@ class _ChatCard {
 
   messageReceived(senderId, msg) {
     logMessage(`Chat Message received: ${msg}`);
-    this.chatLog.push(`${this.timeStamp()}  Peer-${senderId.substr(0,3)}: ` + msg);
+    this.#chatLog.push(`${this.timeStamp()}  Peer-${senderId.substr(0,3)}: ` + msg);
     this.updateChat();
   }
 
@@ -49,17 +52,17 @@ class _ChatCard {
     const msg = document.getElementById('chatBoxMessage').value;
     this.broadcast(msg);
 
-    this.chatLog.push(`${this.timeStamp()}  Me: ${msg}`);
+    this.#chatLog.push(`${this.timeStamp()}  Me: ${msg}`);
     this.updateChat();
     document.getElementById('chatBoxMessage').value = '';
   }
 
   updateChat() {
-    const shouldScroll = this.chatLogEl.scrollTop >= this.chatLogEl.scrollHeight - this.chatLogEl.offsetHeight;
-    this.chatLogEl.innerText = this.chatLog.join('\n');
+    const shouldScroll = this.#chatLogEl.scrollTop >= this.#chatLogEl.scrollHeight - this.#chatLogEl.offsetHeight;
+    this.#chatLogEl.innerText = this.#chatLog.join('\n');
 
     if(shouldScroll) {
-      this.chatLogEl.scrollTop = this.chatLogEl.scrollHeight;
+      this.#chatLogEl.scrollTop = this.#chatLogEl.scrollHeight;
     }
   }
 

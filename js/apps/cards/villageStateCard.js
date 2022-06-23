@@ -3,14 +3,17 @@ import Profile from "../../riverNetwork/profile.js";
 import {idDistance} from "../../riverNetwork/utils/routing.js";
 
 class _VillageStateCard {
+  #nodeStateListEl
+  #livePeersCountEl
+  #nodeIdEl
+
   constructor() {
     const villageStateContainer = document.getElementById('villageStateContainer');
     villageStateContainer.innerHTML = villageStateHtml;
 
-    this.villageStateEl = document.getElementById('villageState');
-    this.nodeStateList = document.getElementById('nodeStateList');
-    this.livePeersCount = document.getElementById('livePeersCount');
-    this.nodeId = document.getElementById('nodeId');
+    this.#nodeStateListEl = document.getElementById('nodeStateList');
+    this.#livePeersCountEl = document.getElementById('livePeersCount');
+    this.#nodeIdEl = document.getElementById('nodeId');
 
     this.refresh();
   }
@@ -18,23 +21,23 @@ class _VillageStateCard {
   refresh() {
     const nodes = NodeStore.getNodes();
 
-    while (this.nodeStateList.firstChild) {
-      this.nodeStateList.removeChild(this.nodeStateList.firstChild);
+    while (this.#nodeStateListEl.firstChild) {
+      this.#nodeStateListEl.removeChild(this.#nodeStateListEl.firstChild);
     }
 
     if(!nodes.length) {
-      this.nodeStateList.innerText = "No nodes connected.";
+      this.#nodeStateListEl.innerText = "No nodes connected.";
     }
 
     nodes.map(async (node) => {
       const rank = idDistance(Profile.getNodeID(), node.getProfile().nodeId);
 
-      this.nodeStateList.appendChild(this.createNodeStateDiv(node, rank));
+      this.#nodeStateListEl.appendChild(this.createNodeStateDiv(node, rank));
     })
 
-    this.livePeersCount.innerText = `${nodes.filter((node) => node.getConnectionState() === 'connected').length} / ${nodes.length}`;
+    this.#livePeersCountEl.innerText = `${nodes.filter((node) => node.getConnectionState() === 'connected').length} / ${nodes.length}`;
 
-    this.nodeId.innerText = `${Profile.getNodeID()}`;
+    this.#nodeIdEl.innerText = `${Profile.getNodeID()}`;
   }
 
   createNodeStateDiv(node, rank){

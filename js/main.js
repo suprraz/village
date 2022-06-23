@@ -15,6 +15,8 @@ import RiverApi from "./riverNetwork/riverApi.js";
 import _DeveloperAppsCard from "./apps/cards/developerAppsCard.js";
 
 class _Village {
+  #coreApps
+
   constructor() {
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.has('encryptionKey')) {
@@ -35,7 +37,7 @@ class _Village {
     const AdminToggleButton = new _AdminToggleBtn(document.getElementById('floatingButtonContainer'));
     const Sandbox = new _Sandbox();
 
-    this.coreApps = {
+    this.#coreApps = {
       AddPeerCard,
       AppListCard,
       DeveloperAppsCard,
@@ -50,10 +52,10 @@ class _Village {
 
     const riverApi = new RiverApi()
 
-    MessageRouter.init(riverApi, this.coreApps);
+    MessageRouter.init(riverApi, this.#coreApps);
 
     if(urlParams.has('offerKey')) {
-      this.coreApps.AddPeerCard.run();
+      this.#coreApps.AddPeerCard.run();
     }
 
     const showLanding = Settings.get('showLanding');
@@ -64,7 +66,7 @@ class _Village {
       riverApi.connect();
     }
 
-    this.coreApps.AppListCard.updateAppList();
+    this.#coreApps.AppListCard.updateAppList();
 
     this.registerListeners();
   }
@@ -75,8 +77,8 @@ class _Village {
   }
 
   addMorePeers(){
-    this.coreApps.AddPeerCard.run();
-    this.coreApps.AddPeerCard.preparePeer();
+    this.#coreApps.AddPeerCard.run();
+    this.#coreApps.AddPeerCard.preparePeer();
     this.fullScreenApp();
   }
 

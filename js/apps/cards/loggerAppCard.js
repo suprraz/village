@@ -3,18 +3,22 @@ import config from "../../config.js";
 import Settings from "../../os/settings.js";
 
 class _LoggerCardApp {
+  #log
+  #loggerTextArea
+  #loggerEnabled
+
   constructor(el) {
-    this.log = [];
+    this.#log = [];
 
     const loggerCardAppContainer = el;
     loggerCardAppContainer.innerHTML = loggerCardAppHtml;
 
-    this.loggerTextArea = loggerCardAppContainer.querySelector('#logger');
-    this.loggerEnabled = loggerCardAppContainer.querySelector('#loggerEnabled');
+    this.#loggerTextArea = loggerCardAppContainer.querySelector('#logger');
+    this.#loggerEnabled = loggerCardAppContainer.querySelector('#loggerEnabled');
 
     const isLoggingEnabled = Settings.get('enableLogging');
     this.setEnabled(isLoggingEnabled);
-    this.loggerEnabled.checked = isLoggingEnabled;
+    this.#loggerEnabled.checked = isLoggingEnabled;
 
     this.registerListeners();
   }
@@ -30,31 +34,31 @@ class _LoggerCardApp {
   }
 
   updateLog() {
-    const shouldScroll = this.loggerTextArea.scrollTop >= this.loggerTextArea.scrollHeight - this.loggerTextArea.offsetHeight;
+    const shouldScroll = this.#loggerTextArea.scrollTop >= this.#loggerTextArea.scrollHeight - this.#loggerTextArea.offsetHeight;
 
-    this.loggerTextArea.value = this.log.join('\n');
+    this.#loggerTextArea.value = this.#log.join('\n');
 
     if(shouldScroll) {
-      this.loggerTextArea.scrollTop = this.loggerTextArea.scrollHeight;
+      this.#loggerTextArea.scrollTop = this.#loggerTextArea.scrollHeight;
     }
   }
 
   printMsg(msg){
     const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit', hour12: false});
-    this.log.push(`${time} ${msg}`);
-    this.log = this.log.slice(0-config.maxLogSize);
+    this.#log.push(`${time} ${msg}`);
+    this.#log = this.#log.slice(0-config.maxLogSize);
     this.updateLog();
   }
 
   printErr(err){
     const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit', hour12: false});
-    this.log.push(`${time} ! ${err}`);
-    this.log = this.log.slice(0-config.maxLogSize);
+    this.#log.push(`${time} ! ${err}`);
+    this.#log = this.#log.slice(0-config.maxLogSize);
     this.updateLog();
   }
 
   registerListeners() {
-    this.loggerEnabled.addEventListener("change", (event) => {
+    this.#loggerEnabled.addEventListener("change", (event) => {
       Settings.update('enableLogging', event.target.checked);
       this.setEnabled(event.target.checked);
     })

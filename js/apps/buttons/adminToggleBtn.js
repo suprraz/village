@@ -2,30 +2,32 @@ import Settings from "../../os/settings.js";
 import ScreenStore from "../../os/store/screenStore.js";
 
 class _AdminToggleBtn {
+  #toggleBtn
+
   constructor(container) {
     container.innerHTML = adminToggleBtnHtml;
 
     const adminToggleBtnEl = container.querySelector('#adminToggleBtn');
 
-    this.toggleBtn = document.createElement('button');
-    this.toggleBtn.className = "button is-primary";
-    this.toggleBtn.innerText = "Toggle";
-    this.toggleBtn.onclick = () => {};
+    this.#toggleBtn = document.createElement('button');
+    this.#toggleBtn.className = "button is-primary";
+    this.#toggleBtn.innerText = "Toggle";
+    this.#toggleBtn.onclick = () => {};
 
-    adminToggleBtnEl.appendChild(this.toggleBtn);
+    adminToggleBtnEl.appendChild(this.#toggleBtn);
+
+    this.setLabel(Settings.get('adminViewVisible'));
 
     this.registerListeners();
-
-    this.isAdminVisible = Settings.get('adminViewVisible');
-    this.setLabel(this.isAdminVisible);
   }
 
   setLabel(isVisible) {
     if(isVisible) {
-     this.toggleBtn.innerText = "Home"
+     this.#toggleBtn.innerText = "Home"
     } else {
-      this.toggleBtn.innerText = "Admin"
+      this.#toggleBtn.innerText = "Admin"
     }
+    Settings.update('adminViewVisible', isVisible);
   }
 
   onToggle() {
@@ -34,7 +36,7 @@ class _AdminToggleBtn {
   }
 
   registerListeners() {
-    this.toggleBtn.addEventListener('click', (e) => this.onToggle())
+    this.#toggleBtn.addEventListener('click', (e) => this.onToggle())
   }
 }
 

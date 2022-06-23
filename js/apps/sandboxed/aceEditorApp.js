@@ -65,18 +65,22 @@ const AceEditorHtml = \`
 \`;
 
 class _AceEditor {
+  #params
+  #editorEl
+  #editor
+
   constructor() {
-    this.params = {...params};
+    this.#params = {...params};
     
     params = null; //remove sensitive data from window object;
     
     document.getElementsByTagName("html")[0].innerHTML = AceEditorHtml;
-    this.editorEl = document.getElementById('editor');
+    this.#editorEl = document.getElementById('editor');
     
     this.loadScript('https://unpkg.com/ace-builds@1.6/src-min-noconflict/ace.js', () => {
         this.init();
     });
-    this.editor = null;
+    this.#editor = null;
   }
   
   loadScript(srcUrl, callback) {
@@ -92,25 +96,25 @@ class _AceEditor {
   }
   
   init() {
-    this.editor = ace.edit("editor", {
+    this.#editor = ace.edit("editor", {
       mode: "ace/mode/javascript",
       selectionStyle: "text"
     });
     
-    this.editor.setTheme("ace/theme/twilight");
-    this.editor.session.setMode("ace/mode/javascript");
+    this.#editor.setTheme("ace/theme/twilight");
+    this.#editor.session.setMode("ace/mode/javascript");
     
-    this.editorEl.classList.remove("is-hidden");
+    this.#editorEl.classList.remove("is-hidden");
     
-    if(this.params?.app?.code) {
-      this.editor.session.setValue(this.params.app.code);
+    if(this.#params?.app?.code) {
+      this.#editor.session.setValue(this.#params.app.code);
     }    
-    if(this.params?.app?.name) {
-      document.getElementById('appName').value = this.params.app.name;
+    if(this.#params?.app?.name) {
+      document.getElementById('appName').value = this.#params.app.name;
     }
     
-    if(typeof this.params?.app?.price === "string") {
-      document.getElementById('appPrice').value = this.params.app.price;
+    if(typeof this.#params?.app?.price === "string") {
+      document.getElementById('appPrice').value = this.#params.app.price;
     }
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.addEventListener('click', () => this.saveAndRun(false));
@@ -120,7 +124,7 @@ class _AceEditor {
   }
   
   saveAndRun(runAfterSave) {
-    const code = this.editor.session.getValue();
+    const code = this.#editor.session.getValue();
     const name = document.getElementById('appName').value;
     const price = document.getElementById('appPrice').value;
 
@@ -135,7 +139,7 @@ class _AceEditor {
     }
     
     const app = {
-      ...this.params.app,
+      ...this.#params.app,
       name,
       code,
       price

@@ -6,18 +6,20 @@ import uuidv4 from "../../utils/uuid.js";
 import config from "../../config.js";
 
 class _InvoiceStore {
+  #invoices
+
   constructor() {
-    this.invoices = DataStore.getDocument('invoices') || [];
+    this.#invoices = DataStore.getDocument('invoices') || [];
   }
 
   watchInvoice(encryptedApp, invoice) {
-    this.invoices.push({...invoice, encryptedApp, date: new Date()});
-    DataStore.setDocument('invoices', this.invoices);
+    this.#invoices.push({...invoice, encryptedApp, date: new Date()});
+    DataStore.setDocument('invoices', this.#invoices);
   }
 
   updateInvoice(appId, encryptionKey) {
-    this.invoices = DataStore.getDocument('invoices');
-    const invoice = this.invoices.reverse().find(i => i.encryptedApp.id === appId);
+    this.#invoices = DataStore.getDocument('invoices');
+    const invoice = this.#invoices.reverse().find(i => i.encryptedApp.id === appId);
     const { encryptedApp } = invoice;
 
     try {
@@ -26,9 +28,9 @@ class _InvoiceStore {
         code: CryptoJS.AES.decrypt(encryptedApp.code, encryptionKey).toString(CryptoJS.enc.Utf8)
       }
 
-      this.invoices = this.invoices.filter(i => i.encryptedApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));
+      this.#invoices = this.#invoices.filter(i => i.encryptedApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));
 
-      DataStore.setDocument('invoices', this.invoices);
+      DataStore.setDocument('invoices', this.#invoices);
 
       MessageRouter.onInstallApp(app);
       alert(`Installed '${app.name}'`);

@@ -1,36 +1,41 @@
 import MessageRouter from "../messageRouter.js";
 
 class _Sandbox {
+  #sandboxContainer
+  #contentWindow
+  #overlayContainer
+  #iframe
+
   constructor() {
-    this.sandboxContainer = document.getElementById('sandbox');
-    this.contentWindow = null;
-    this.overlayContainer = null;
-    this.iframe = null;
+    this.#sandboxContainer = document.getElementById('sandbox');
+    this.#contentWindow = null;
+    this.#overlayContainer = null;
+    this.#iframe = null;
   }
 
   sanitize() {
     this.stop();
-    this.sandboxContainer.innerHTML = sandboxHtml;
+    this.#sandboxContainer.innerHTML = sandboxHtml;
 
-    this.iframe = this.sandboxContainer.querySelector("#sandboxIframe");
-    this.overlayContainer = this.sandboxContainer.querySelector("#overlayContainer");
+    this.#iframe = this.#sandboxContainer.querySelector("#sandboxIframe");
+    this.#overlayContainer = this.#sandboxContainer.querySelector("#overlayContainer");
 
     this.registerListeners();
   }
 
   stop() {
-    while (this.sandboxContainer.firstChild) {
+    while (this.#sandboxContainer.firstChild) {
       // remove all children and listeners
-      this.sandboxContainer.removeChild(this.sandboxContainer.firstChild);
+      this.#sandboxContainer.removeChild(this.#sandboxContainer.firstChild);
     }
   }
 
   runUnrestricted(url) {
     this.sanitize();
 
-    this.iframe.src = url;
-    this.iframe.removeAttribute('sandbox');
-    this.iframe.removeAttribute('srcdoc');
+    this.#iframe.src = url;
+    this.#iframe.removeAttribute('sandbox');
+    this.#iframe.removeAttribute('srcdoc');
   }
 
   run(app, params) {
@@ -46,13 +51,13 @@ class _Sandbox {
             
       ${app.code};     
     `;
-    this.iframe.onload = () => {
-      this.iframe.contentWindow.postMessage({run}, '*');
+    this.#iframe.onload = () => {
+      this.#iframe.contentWindow.postMessage({run}, '*');
     }
   }
 
   registerListeners() {
-    this.overlayContainer.addEventListener('click', () => MessageRouter.onCloseApp('LandingApp'));
+    this.#overlayContainer.addEventListener('click', () => MessageRouter.onCloseApp('LandingApp'));
   }
 }
 

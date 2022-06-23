@@ -9,12 +9,13 @@ const NEW_APP_TEMPLATE_PATH = 'js/apps/cards/resources/developerAppsCard/newAppT
 
 class _DeveloperAppsCard {
   #newAppTemplate = null;
+  #newAppBtn
 
   constructor(containerEl) {
     const devAppsContainerEl = containerEl;
 
     devAppsContainerEl.innerHTML = devAppsContainerHtml;
-    this.newAppBtn = devAppsContainerEl.querySelector('#newAppBtn');
+    this.#newAppBtn = devAppsContainerEl.querySelector('#newAppBtn');
 
     this.registerListeners();
 
@@ -30,7 +31,7 @@ class _DeveloperAppsCard {
   }
 
   registerListeners() {
-    this.newAppBtn.addEventListener('click', (e) => this.newApp());
+    this.#newAppBtn.addEventListener('click', (e) => this.newApp());
   }
 
   async newApp() {

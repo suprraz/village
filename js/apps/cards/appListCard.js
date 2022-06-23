@@ -6,20 +6,19 @@ import {logError} from "../../utils/logger.js";
 import Settings from "../../os/settings.js";
 
 class _AppListCard {
+  #availableApps
+
   constructor() {
-    this.availableApps = [];
+    this.#availableApps = [];
 
     const appListContainer = document.getElementById('appListContainer');
     appListContainer.innerHTML = appListHtml;
-
-    this.appListEl = document.getElementById('appList');
-
   }
 
   installApp(app) {
     try {
       AppStore.installApp(app)
-      this.availableApps = this.availableApps.filter((availableApp) => !availableApp.id === app.id);
+      this.#availableApps = this.#availableApps.filter((availableApp) => !availableApp.id === app.id);
       this.updateAppList()
       this.sendApps();
     } catch (e) {
@@ -35,13 +34,13 @@ class _AppListCard {
         const isInstalled = localApps.some(
           (localApp => localApp.id === remoteApp.id));
 
-        const isAvailable = this.availableApps.some(
+        const isAvailable = this.#availableApps.some(
           (availableApp => availableApp.id === remoteApp.id));
 
         return !isInstalled && !isAvailable;
       });
 
-      this.availableApps.push(...newApps);
+      this.#availableApps.push(...newApps);
       await this.updateAppList();
     } catch (e) {
       logError(e);
@@ -71,7 +70,7 @@ class _AppListCard {
 
     const availableAppsDiv = document.getElementById("availableApps");
 
-    if(!this.availableApps.length) {
+    if(!this.#availableApps.length) {
       availableAppsDiv.innerText = "No apps available.";
     } else {
       // remove all children and listeners
@@ -80,7 +79,7 @@ class _AppListCard {
       }
     }
 
-    this.availableApps.map((app) => {
+    this.#availableApps.map((app) => {
       availableAppsDiv.appendChild(this.createAvailableAppDiv(app));
     })
 
@@ -136,7 +135,7 @@ class _AppListCard {
     appRemoveBtn.innerText = "Delete";
     appRemoveBtn.onclick = () => {
       AppStore.removeApp(app.id)
-      this.availableApps.push(app);
+      this.#availableApps.push(app);
       this.updateAppList();
       this.sendApps();
     };
@@ -189,7 +188,7 @@ class _AppListCard {
     const appBuyBtn = document.createElement('button');
     appBuyBtn.className = "button is-primary appBuyButton";
     appBuyBtn.innerText = "Buy";
-    appBuyBtn.onclick = () => MessageRouter.onBuyApp(app);;
+    appBuyBtn.onclick = () => MessageRouter.onBuyApp(app);
 
     const appInstallBtn = document.createElement('button');
     appInstallBtn.className = "button appInstallButton";
