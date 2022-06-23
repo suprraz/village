@@ -4,37 +4,38 @@ import {idDistance, sortNeighbors} from "./utils/routing.js";
 import Profile from "./profile.js";
 
 class _NodeStore {
+  #nodes
   constructor() {
-    this.nodes = [];
+    this.#nodes = [];
   }
 
   getNodeById(nodeId) {
-    return this.nodes.find((node) => node.profile.nodeId === nodeId);
+    return this.#nodes.find((node) => node.getProfile().nodeId === nodeId);
   }
 
   broadcast(msgObj) {
-    this.nodes.map((node) => node.send(msgObj));
+    this.#nodes.map((node) => node.send(msgObj));
   }
 
   addNode(node) {
-    this.nodes.push(node);
-    logMessage(`NodeStore Added node: ${node.profile.nodeId}`);
+    this.#nodes.push(node);
+    logMessage(`NodeStore Added node: ${node.getProfile().nodeId}`);
   }
 
   getNodes() {
-    return this.nodes;
+    return this.#nodes;
   }
 
   getConnectedNodeIds() {
     const connectedNeighborIds = NodeStore.getNodes()
-      .filter((node) => !!node.profile?.nodeId && node.isConnected())
-      .map(node => node.profile.nodeId);
+      .filter((node) => !!node.getProfile()?.nodeId && node.isConnected())
+      .map(node => node.getProfile().nodeId);
 
     return [...new Set(connectedNeighborIds)];
   }
 
   getNextHopNode(destinationId) {
-    const nextHopDirect = this.nodes.find((node) => node.profile.nodeId === destinationId && node.isConnected());
+    const nextHopDirect = this.#nodes.find((node) => node.getProfile().nodeId === destinationId && node.isConnected());
     if( nextHopDirect ) {
       return nextHopDirect;
     }
@@ -42,9 +43,9 @@ class _NodeStore {
     let neighbor = null;
     let hops = 999999;
 
-    this.nodes.map(node => {
-      if(node.profile?.routes) {
-        node.profile.routes.map((hop,i) => {
+    this.#nodes.map(node => {
+      if(node.getProfile()?.routes) {
+        node.getProfile().routes.map((hop,i) => {
           if(hop.includes(destinationId) && i < hops) {
             neighbor = node;
             hops = i;
@@ -53,7 +54,7 @@ class _NodeStore {
       }
     })
 
-    //logMessage(`NodeStore Best route: ${neighbor?.profile?.nodeId}  Hops: ${hops}`);
+    //logMessage(`NodeStore Best route: ${neighbor?.getProfile()?.nodeId}  Hops: ${hops}`);
     return neighbor;
   }
 
@@ -62,7 +63,7 @@ class _NodeStore {
       return;
     }
 
-    const trashNodes = this.nodes.filter((node) => node.profile.nodeId === nodeId);
+    const trashNodes = this.#nodes.filter((node) => node.getProfile().nodeId === nodeId);
 
     if(trashNodes.length) {
       logMessage(`NodeStore Deleting ${trashNodes.length} nodes.`);
@@ -72,11 +73,11 @@ class _NodeStore {
       node.terminate();
     });
 
-    this.nodes = this.nodes.filter((n) => n.profile.id !== nodeId);
+    this.#nodes = this.#nodes.filter((n) => n.getProfile().id !== nodeId);
   }
 
   getNodesPending() {
-    return this.nodes.filter((n) => n.pending);
+    return this.#nodes.filter((n) => n.isPending());
   }
 
   getRoutes() {
@@ -98,11 +99,11 @@ class _NodeStore {
     function getRoutesByHop(i) {
       return neighborsList.reduce((hop, nodeId) => {
         const node = NodeStore.getNodeById(nodeId);
-        if(node?.profile?.routes) {
+        if(node?.getProfile()?.routes) {
           const coveredRoutes = routes.reduce((total, curr) => {
             return [...total, ...curr];
           }, [Profile.getNodeID()]);
-          let newRoutes = node.profile.routes[i - 1] || [];
+          let newRoutes = node.getProfile().routes[i - 1] || [];
           newRoutes = newRoutes.filter(id => !coveredRoutes.find(covered => covered === id));
           newRoutes = [...new Set([...hop, ...newRoutes])];
 
@@ -124,11 +125,11 @@ class _NodeStore {
 
   prune() {
     // failed nodes timed out while connecting or broke link after connection
-    const failedNodes = this.nodes.filter( node => !node.pending && !node.isConnected() );
+    const failedNodes = this.#nodes.filter( node => !node.isPending() && !node.isConnected() );
 
     failedNodes.map((node) => node.terminate());
 
-    this.nodes = this.nodes.filter((node) => !failedNodes.includes(node));
+    this.#nodes = this.#nodes.filter((node) => !failedNodes.includes(node));
 
     this.pruneExtraNeighbors();
   }

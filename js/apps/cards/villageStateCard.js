@@ -27,12 +27,12 @@ class _VillageStateCard {
     }
 
     nodes.map(async (node) => {
-      const rank = idDistance(Profile.getNodeID(), node.profile.nodeId);
+      const rank = idDistance(Profile.getNodeID(), node.getProfile().nodeId);
 
       this.nodeStateList.appendChild(this.createNodeStateDiv(node, rank));
     })
 
-    this.livePeersCount.innerText = `${nodes.filter((node) => node.pc.connectionState === 'connected').length} / ${nodes.length}`;
+    this.livePeersCount.innerText = `${nodes.filter((node) => node.getConnectionState() === 'connected').length} / ${nodes.length}`;
 
     this.nodeId.innerText = `${Profile.getNodeID()}`;
   }
@@ -43,7 +43,7 @@ class _VillageStateCard {
 
     const nodeNameDiv = document.createElement('div');
     nodeNameDiv.className = "card-header-title";
-    nodeNameDiv.innerText = node.profile.nodeId;
+    nodeNameDiv.innerText = node.getProfile().nodeId;
 
     const rankDiv = document.createElement('div');
     rankDiv.className = "card-content py-0";
@@ -51,19 +51,19 @@ class _VillageStateCard {
 
     const iceDiv = document.createElement('div');
     iceDiv.className = "card-content py-0";
-    iceDiv.innerText = `ICE state: ${node.pc.iceConnectionState}`;
+    iceDiv.innerText = `ICE state: ${node.getIceConnectionState()}`;
 
     const connDiv = document.createElement('div');
     connDiv.className = "card-content py-0";
-    connDiv.innerText =  `Connection state: ${node.pc.connectionState}`;
+    connDiv.innerText =  `Connection state: ${node.getConnectionState()}`;
 
     const candidateTypeDiv = document.createElement('div');
     candidateTypeDiv.className = "card-content py-0";
-    candidateTypeDiv.innerText =  `Connection type: ${node.candidateType === null ? 'Unknown' : node.candidateType}`;
+    candidateTypeDiv.innerText =  `Connection type: ${node.getCandidateType() === null ? 'Unknown' : node.getCandidateType()}`;
 
     const signalProtocolDiv = document.createElement('div');
     signalProtocolDiv.className = "card-content pt-0";
-    signalProtocolDiv.innerText =  `Signaling Protocol: ${node.signalProtocol}`;
+    signalProtocolDiv.innerText =  `Signaling Protocol: ${node.getSignalProtocol()}`;
 
     nodeDiv.appendChild(nodeNameDiv);
     nodeDiv.appendChild(rankDiv);

@@ -1,7 +1,7 @@
 import _Node from "../../riverNetwork/node.js";
 import NodeStore from "../../riverNetwork/nodeStore.js";
 import {logError, logMessage} from "../../utils/logger.js";
-import {show, hide} from "../../os/utils/dom.js";
+import {hide, show} from "../../os/utils/dom.js";
 import Profile from "../../riverNetwork/profile.js";
 import MessageRouter from "../../messageRouter.js";
 
@@ -39,8 +39,7 @@ class _AddPeerCard {
   getOfferKey(url) {
     const urlParams = new URLSearchParams((new URL(url)).search);
     if(urlParams.has('offerKey')) {
-      const offerKey = urlParams.get('offerKey');
-      return offerKey;
+      return urlParams.get('offerKey');
     }
     return null;
   }
@@ -57,9 +56,9 @@ class _AddPeerCard {
   onProfileReceived(profile, node) {
     node.setProfile(profile);
 
-    logMessage(node.profile);
+    logMessage(node.getProfile());
 
-    const desiredNeighborIds = node.profile.routes[0].filter(
+    const desiredNeighborIds = node.getProfile().routes[0].filter(
       (neighborId) => {
         return neighborId !== null &&
           neighborId !== Profile.getNodeID() &&

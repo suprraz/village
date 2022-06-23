@@ -59,7 +59,7 @@ class _VillageSignaler {
       return; // no route to destination
     }
 
-    logMessage(`VillageSignaler Sending connection request to: ${destinationId} via ${nextHopNode?.profile?.nodeId}`);
+    logMessage(`VillageSignaler Sending connection request to: ${destinationId} via ${nextHopNode?.getProfile()?.nodeId}`);
     nextHopNode.send({
       type: 'routing',
       subtype: 'request-connection',
@@ -109,7 +109,7 @@ class _VillageSignaler {
     }
 
     const existingNode = NodeStore.getNodeById(destinationId);
-    if( existingNode && (existingNode.isConnected() || existingNode.pending)) {
+    if( existingNode && (existingNode.isConnected() || existingNode.isPending())) {
       logMessage(`VillageSignaler Duplicate node on request conneciton: ${destinationId}`);
       this.onComplete(destinationId);
       return;
@@ -147,7 +147,7 @@ class _VillageSignaler {
   }
 
   sendOfferKey(nextHopNode, destinationId, offerKey) {
-    logMessage(`VillageSignaler Sending offer to: ${destinationId} via ${nextHopNode?.profile?.nodeId}`);
+    logMessage(`VillageSignaler Sending offer to: ${destinationId} via ${nextHopNode?.getProfile()?.nodeId}`);
     nextHopNode.send({
       type: 'routing',
       subtype: 'offer',
@@ -195,7 +195,7 @@ class _VillageSignaler {
 
       NodeStore.addNode(node);
 
-      logMessage(`VillageSignaler Sending answer to: ${senderId} via ${senderNode?.profile?.nodeId}`);
+      logMessage(`VillageSignaler Sending answer to: ${senderId} via ${senderNode?.getProfile()?.nodeId}`);
       senderNode.send({
         type: 'routing',
         subtype: 'answer',
@@ -214,7 +214,7 @@ class _VillageSignaler {
 
   acceptAnswer(answer, senderId, senderNode) {
     try {
-      logMessage(`VillageSignaler Accepting answer from: ${senderId} via ${senderNode?.profile?.nodeId}`);
+      logMessage(`VillageSignaler Accepting answer from: ${senderId} via ${senderNode?.getProfile()?.nodeId}`);
       const connectionObj = JSON.parse(atob(answer.answerKey));
 
       const offerNode = NodeStore.getNodeById(senderId);
