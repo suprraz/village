@@ -1,6 +1,6 @@
-import {logError, logMessage} from "./utils/logger.js";
-import Settings from "./os/settings.js";
-import AppStore from "./os/store/appStore.js";
+import {logError, logMessage} from "../utils/logger.js";
+import Settings from "./settings.js";
+import AppStore from "./store/appStore.js";
 
 class _MessageRouter {
   #riverApi

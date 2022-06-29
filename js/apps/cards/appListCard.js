@@ -1,6 +1,6 @@
 import AppStore from "../../os/store/appStore.js";
 import NodeStore from "../../riverNetwork/nodeStore.js";
-import MessageRouter from "../../messageRouter.js";
+import MessageRouter from "../../os/messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
 import Settings from "../../os/settings.js";

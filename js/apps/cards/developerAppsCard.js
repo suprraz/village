@@ -1,5 +1,5 @@
 import AppStore from "../../os/store/appStore.js";
-import MessageRouter from "../../messageRouter.js";
+import MessageRouter from "../../os/messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";

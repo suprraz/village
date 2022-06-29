@@ -1,4 +1,4 @@
-import MessageRouter from "../messageRouter.js";
+import MessageRouter from "./messageRouter.js";
 
 class _Sandbox {
   #sandboxContainer

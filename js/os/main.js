@@ -1,18 +1,18 @@
-import {show, hide} from "./os/utils/dom.js";
+import {show, hide} from "./utils/dom.js";
 import MessageRouter from "./messageRouter.js";
-import Settings from "./os/settings.js";
-import AppStore from "./os/store/appStore.js";
-import LandingApp from "./apps/sandboxed/landingApp.js";
-import _Sandbox from "./os/sandbox.js";
-import _InvoiceStore from "./os/store/invoiceStore.js";
-import _AddPeerCard from "./apps/cards/addPeerCard.js";
-import _VillageStateCard from "./apps/cards/villageStateCard.js";
-import _ChatCard from "./apps/cards/chatCard.js";
-import _AppListCard from "./apps/cards/appListCard.js";
-import _LoggerAppCard from "./apps/cards/loggerAppCard.js";
-import _AdminToggleBtn from "./apps/buttons/adminToggleBtn.js";
-import RiverApi from "./riverNetwork/riverApi.js";
-import _DeveloperAppsCard from "./apps/cards/developerAppsCard.js";
+import Settings from "./settings.js";
+import AppStore from "./store/appStore.js";
+import LandingApp from "../apps/sandboxed/landingApp.js";
+import _Sandbox from "./sandbox.js";
+import _InvoiceStore from "./store/invoiceStore.js";
+import _AddPeerCard from "../apps/cards/addPeerCard.js";
+import _VillageStateCard from "../apps/cards/villageStateCard.js";
+import _ChatCard from "../apps/cards/chatCard.js";
+import _AppListCard from "../apps/cards/appListCard.js";
+import _LoggerAppCard from "../apps/cards/loggerAppCard.js";
+import _AdminToggleBtn from "../apps/buttons/adminToggleBtn.js";
+import RiverApi from "../riverNetwork/riverApi.js";
+import _DeveloperAppsCard from "../apps/cards/developerAppsCard.js";
 
 class _Village {
   #coreApps

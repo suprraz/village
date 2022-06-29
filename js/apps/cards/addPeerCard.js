@@ -3,7 +3,7 @@ import NodeStore from "../../riverNetwork/nodeStore.js";
 import {logError, logMessage} from "../../utils/logger.js";
 import {hide, show} from "../../os/utils/dom.js";
 import Profile from "../../riverNetwork/profile.js";
-import MessageRouter from "../../messageRouter.js";
+import MessageRouter from "../../os/messageRouter.js";
 
 class _AddPeerCard {
   constructor() {
