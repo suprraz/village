@@ -84,6 +84,29 @@ class _MessageRouter {
     window.addEventListener('message', async (event) => {
       const data = event.data;
       if (data) {
+        if(data.invoiceId && data.status === 'complete') {
+          const url = 'https://corsproxy.io/?' + encodeURIComponent(`https://pay.invad.com/invoice/status?invoiceId=${data.invoiceId}`);
+
+          try {
+            const res = await fetch(url);
+
+            const invoice = await res.json();
+
+            if (invoice.merchantRefLink) {
+              const urlParams = new URLSearchParams(new URL(invoice.merchantRefLink).search);
+              const encryptionKey = urlParams.get('encryptionKey');
+              const appId = urlParams.get('appId');
+              this.onCloseApp();
+
+              this.#coreApps.InvoiceStore.updateInvoice(appId, encryptionKey);
+            } else {
+              throw new Error('MessageRouter App encryption key missing');
+            }
+          } catch (e) {
+            logError('MessageRouter Failed to register payment')
+          }
+          return;
+        }
         switch (data.type) {
           case 'closeApp':
             this.onCloseApp(data.payload.sourceApp);
