@@ -2,6 +2,7 @@ import {show, hide} from "./utils/dom.js";
 import MessageRouter from "./messageRouter.js";
 import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
+import SandboxStore from "./store/sandboxStore.js";
 import LandingApp from "../apps/sandboxed/landingApp.js";
 import _Sandbox from "./sandbox.js";
 import _InvoiceStore from "./store/invoiceStore.js";
@@ -45,6 +46,7 @@ class _Village {
       ChatCard,
       VillageStateCard,
       Sandbox,
+      SandboxStore,
       InvoiceStore,
       AdminToggleButton
     };

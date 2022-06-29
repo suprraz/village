@@ -46,11 +46,55 @@ const PageHtml = `
 </body>
 `;
 
+async function waitForData (type, key) {
+  return new Promise((resolve) => {
+
+    function msgWaiter(event) {
+      const data = event.data;
+      if(data.type === type && data.payload.key === key) {
+        window.removeEventListener('message', msgWaiter)
+        resolve(data);
+      }
+    }
+
+    window.addEventListener('message', msgWaiter, false);
+  });
+}
+
+async function saveData(key, value) {
+  window.parent.postMessage({type: 'saveData', payload: {
+      key,
+      value
+    }},'*');
+
+  return waitForData('saveDataSuccess', key);
+}
+
+async function readData(key) {
+  window.parent.postMessage({type: 'readData', payload: {
+      key
+    }},'*');
+
+  const data = await waitForData('readDataSuccess', key);
+
+  return data.payload.value;
+}
+
+
 class _Page {
   constructor() {
     document.getElementsByTagName("html")[0].innerHTML = PageHtml;
 
     this.registerListeners();
+
+    this.saveAndRetreiveData();
+  }
+
+  async saveAndRetreiveData() {
+    await saveData('hello', 'world');
+
+    const val = await readData('hello');
+    console.log('read value: '+ val );
   }
 
   closeApp() {

@@ -128,12 +128,7 @@ class _AppStore {
   }
 
   async saveApp(app) {
-    const appMatchingId= await this.getApp(app.id);
-    if(appMatchingId) {
-      return this.#appStoreDb.installedApps.update(app.id, app);
-    } else {
-      return this.#appStoreDb.installedApps.add(app);
-    }
+    return this.#appStoreDb.installedApps.put(app);
   }
 
   getApp(appId) {

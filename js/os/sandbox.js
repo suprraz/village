@@ -5,12 +5,16 @@ class _Sandbox {
   #contentWindow
   #overlayContainer
   #iframe
+  #runningAppId
+  #runningAppName
 
   constructor() {
     this.#sandboxContainer = document.getElementById('sandbox');
     this.#contentWindow = null;
     this.#overlayContainer = null;
     this.#iframe = null;
+    this.#runningAppId = null;
+    this.#runningAppName = null;
   }
 
   sanitize() {
@@ -46,18 +50,28 @@ class _Sandbox {
 
     this.sanitize();
 
-    const run = `      
+    const payload = `      
       let params = ${JSON.stringify(params || {})};
             
       ${app.code};     
     `;
     this.#iframe.onload = () => {
-      this.#iframe.contentWindow.postMessage({run}, '*');
+      this.#iframe.contentWindow.postMessage({type: 'run', payload}, '*');
+      this.#runningAppId = app.id;
+      this.#runningAppName = app.name;
     }
   }
 
+  getRunningAppId() {
+    return this.#runningAppId;
+  }
+
+  postMessage(message) {
+    this.#iframe?.contentWindow?.postMessage(message, '*');
+  }
+
   registerListeners() {
-    this.#overlayContainer.addEventListener('click', () => MessageRouter.onCloseApp('LandingApp'));
+    this.#overlayContainer.addEventListener('click', () => MessageRouter.onCloseApp(this.#runningAppId));
   }
 }
 
@@ -72,17 +86,20 @@ const sandboxHtml = `
           <html>
           <head>
               <script>
-                  window.addEventListener('message', (event) => {
+                  function runOnce(event) {
+                      window.removeEventListener('message', runOnce);
+                      
                       const data = event.data;
-                      if(data && data.run) {
+                      if(data && data.type === 'run') {
                         try {
-                          eval(data.run);
+                          eval(data.payload);
                         } catch (e) {
                           alert('There was an error while starting the app.  Check console logs for details.')
                           console.error('There was an error while starting the app: ' + e);
                         }
                       }
-                  }, false);
+                  }
+                  window.addEventListener('message', runOnce, false);
               </script>
           </head>
           <body>

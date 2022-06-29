@@ -100,6 +100,7 @@ const Landing = new _Landing();
 
 
 const LandingApp = {
+  id: 'landingAppId',
   name: 'Landing Page',
   code,
 }

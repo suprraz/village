@@ -72,8 +72,8 @@ class _MessageRouter {
     this.#coreApps.AppListCard.updateAppList();
   }
 
-  onCloseApp(sourceAppName) {
-    if(sourceAppName === 'LandingApp') {
+  onCloseApp(sourceAppId) {
+    if(sourceAppId === 'landingAppId') {
       Settings.update('showLanding', false);
       this.onNetworkChange();
     }
@@ -81,15 +81,15 @@ class _MessageRouter {
   }
 
   registerListeners() {
-    window.addEventListener('message', (event) => {
+    window.addEventListener('message', async (event) => {
       const data = event.data;
-      if(data) {
+      if (data) {
         switch (data.type) {
           case 'closeApp':
             this.onCloseApp(data.payload.sourceApp);
             break;
           case 'saveAndRunApp':
-            if(data.payload.runAfterSave) {
+            if (data.payload.runAfterSave) {
               this.onCloseApp(data.payload.sourceApp);
             }
 
@@ -98,7 +98,24 @@ class _MessageRouter {
             this.#coreApps.AppListCard.updateAppList();
             break;
           case 'invoicePaid':
-            this.#coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey)
+            this.#coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey);
+            break;
+          case 'saveData':
+            try {
+              await this.#coreApps.SandboxStore.save(this.#coreApps.Sandbox.getRunningAppId(), data.payload?.key, data.payload?.value);
+              this.#coreApps.Sandbox.postMessage({type: 'saveDataSuccess', payload: data.payload})
+            } catch (e) {
+              this.#coreApps.Sandbox.postMessage({type: 'saveDataFailure', payload: data.payload})
+            }
+            break;
+          case 'readData':
+            const { key } = data?.payload;
+            try {
+              const storedObject = await this.#coreApps.SandboxStore.read(this.#coreApps.Sandbox.getRunningAppId(), data.payload.key);
+              this.#coreApps.Sandbox.postMessage({type: 'readDataSuccess', payload: {key, value: storedObject.value}});
+            } catch (e) {
+              this.#coreApps.Sandbox.postMessage({type: 'readDataFailure', payload: data.payload})
+            }
             break;
 
           default:
