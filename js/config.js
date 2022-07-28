@@ -4,7 +4,7 @@ export default {
   appNameConcat: 'VillageOS',
   appVersion: '0.1',
   maxLogSize: 100,
-  mqttBrokers: ['wss://broker.emqx.io:8084/mqtt'],
+  mqttBrokers: ['ws://broker.hivemq.com:8000/mqtt'],
   mqttOptions: {
     keepalive: 60,
     protocolId: 'MQTT',
