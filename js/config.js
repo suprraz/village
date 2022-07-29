@@ -4,14 +4,14 @@ export default {
   appNameConcat: 'VillageOS',
   appVersion: '0.1',
   maxLogSize: 100,
-  mqttBrokers: ['ws://broker.hivemq.com:8000/mqtt'],
+  mqttBrokers: ['wss://test.mosquitto.org:8081/mqtt'],
   mqttOptions: {
     keepalive: 60,
     protocolId: 'MQTT',
     protocolVersion: 4,
     clean: true,
     reconnectPeriod: 1000,
-    connectTimeout: 30 * 1000,             // 30 sec
+    connectTimeout: 4000,                   // 4 sec
     useSSL: true,
   },
   mqttParallelReqs: 3,
