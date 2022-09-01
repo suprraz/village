@@ -37,5 +37,8 @@ export default {
         "turns:ws-turn2.xirsys.com:5349?transport=tcp"
       ]
     }]
+  },
+  lnbits: {
+    apiKey: 'ae305400152743c0b7eb1dfaeb98c787'
   }
 }

@@ -1,6 +1,7 @@
 import {logError, logMessage} from "../utils/logger.js";
 import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
+import NodeStore from "../riverNetwork/nodeStore.js";
 
 class _MessageRouter {
   #riverApi
@@ -21,6 +22,8 @@ class _MessageRouter {
   registerHandlers() {
     this.#riverApi.registerHandler('app', (data) => this.onAppMessage(data));
     this.#riverApi.registerHandler('app-list', (data) => this.onAppListMessage(data));
+    this.#riverApi.registerHandler('app-broker-request', (data) => this.onAppBrokerRequest(data));
+    this.#riverApi.registerHandler('app-broker-response', (data) => this.onAppBrokerResponse(data));
   }
 
   onNodeConnected() {
@@ -56,12 +59,52 @@ class _MessageRouter {
     }
   }
 
+  async onAppBrokerRequest(data) {
+    const { app, senderId } = data;
+    const fullApp = await AppStore.getApp(app.id);
+    if(fullApp) {
+      const paywalledApp = await this.#coreApps.InvoiceStore.paywallApp(fullApp);
+
+      const requestingNode = NodeStore.getNodeById(senderId);
+
+      if(requestingNode) {
+        requestingNode.send({
+          type: 'app-broker-response',
+          paywalledApp
+        });
+      } else {
+        alert('Failed to download app: Peer is no longer available');
+      }
+    } else {
+      logError('MessageRouter App is no longer available');
+    }
+
+  }
+
   onRunApp(app, params) {
     this.#coreApps.Sandbox.run(app, params);
   }
 
-  onBuyApp(app) {
-    this.#coreApps.InvoiceStore.purchaseApp(app);
+  onRequestApp(app) {
+    if(app.brokerNodeId) {
+      const brokerNode = NodeStore.getNodeById(app.brokerNodeId);
+      if(brokerNode) {
+        brokerNode.send({
+          type: 'app-broker-request',
+          app
+        });
+      } else {
+        alert('Failed to download app: Peer is no longer available');
+        logError('MessageRouter App broker is no longer available')
+      }
+
+    }
+  }
+
+  onAppBrokerResponse(data) {
+    const { paywalledApp } = data;
+
+    this.#coreApps.InvoiceStore.purchaseApp(paywalledApp);
   }
 
   onInstallApp(app) {
@@ -84,29 +127,6 @@ class _MessageRouter {
     window.addEventListener('message', async (event) => {
       const data = event.data;
       if (data) {
-        if(data.invoiceId && data.status === 'complete') {
-          const url = 'https://corsproxy.io/?' + encodeURIComponent(`https://pay.invad.com/invoice/status?invoiceId=${data.invoiceId}`);
-
-          try {
-            const res = await fetch(url);
-
-            const invoice = await res.json();
-
-            if (invoice.merchantRefLink) {
-              const urlParams = new URLSearchParams(new URL(invoice.merchantRefLink).search);
-              const encryptionKey = urlParams.get('encryptionKey');
-              const appId = urlParams.get('appId');
-              this.onCloseApp();
-
-              this.#coreApps.InvoiceStore.updateInvoice(appId, encryptionKey);
-            } else {
-              throw new Error('MessageRouter App encryption key missing');
-            }
-          } catch (e) {
-            logError('MessageRouter Failed to register payment')
-          }
-          return;
-        }
         switch (data.type) {
           case 'closeApp':
             this.onCloseApp(data.payload.sourceApp);

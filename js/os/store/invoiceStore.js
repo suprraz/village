@@ -1,9 +1,9 @@
 import DataStore from "./dataStore.js";
 import MessageRouter from "../messageRouter.js";
 import {logError} from "../../utils/logger.js";
-import unrestrictedApp from "../../apps/sandboxed/unrestrictedApp.js";
 import uuidv4 from "../../utils/uuid.js";
 import config from "../../config.js";
+import paymentApp from "../../apps/sandboxed/paymentApp.js";
 
 class _InvoiceStore {
   #invoices
@@ -12,8 +12,8 @@ class _InvoiceStore {
     this.#invoices = DataStore.getDocument('invoices') || [];
   }
 
-  watchInvoice(encryptedApp, invoice) {
-    this.#invoices.push({...invoice, encryptedApp, date: new Date()});
+  watchInvoice(encryptedApp) {
+    this.#invoices.push({encryptedApp, date: new Date()});
     DataStore.setDocument('invoices', this.#invoices);
   }
 
@@ -25,7 +25,7 @@ class _InvoiceStore {
     try {
       const app = {
         ...encryptedApp,
-        code: CryptoJS.AES.decrypt(encryptedApp.code, encryptionKey).toString(CryptoJS.enc.Utf8)
+        code: CryptoJS.AES.decrypt(encryptedApp.encryptedCode, encryptionKey).toString(CryptoJS.enc.Utf8)
       }
 
       this.#invoices = this.#invoices.filter(i => i.encryptedApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));
@@ -39,51 +39,63 @@ class _InvoiceStore {
     }
   }
 
-  encryptApp(app, encryptionKey) {
-    const encryptedApp = {
-      ...app,
-      code: CryptoJS.AES.encrypt(app.code, encryptionKey).toString()
-    };
-    return encryptedApp;
+  encryptCode(code, encryptionKey) {
+    return CryptoJS.AES.encrypt(code, encryptionKey).toString()
   }
 
-  async purchaseApp(app) {
+  async purchaseApp(paywalledApp) {
+
+    this.watchInvoice(paywalledApp);
+
+    MessageRouter.onRunApp(paymentApp, {
+      appName: paywalledApp.name,
+      appId: paywalledApp.id,
+      paywall: paywalledApp.paywall,
+      apiKey: config.lnbits.apiKey,
+    });
+
+  }
+
+  async paywallApp(app) {
     const encryptionKey = uuidv4();
-    const encryptedApp = this.encryptApp(app, encryptionKey);
 
-    const invoice = await this.createInvoice(encryptedApp.id, encryptionKey);
+    const encryptedCode = this.encryptCode(app.code, encryptionKey);
 
-    this.watchInvoice(encryptedApp, invoice);
+    const paywall = await this.createPaywall(config.lnbits.apiKey, app.id, encryptionKey);
 
-    const { invoiceId, invoiceUrl } = invoice;
-
-    MessageRouter.onRunApp(unrestrictedApp, {url: invoiceUrl});
+    return {
+      ...app,
+      code: null,
+      encryptedCode,
+      paywall
+    }
   }
 
-  async createInvoice(appId, encryptionKey) {
+  async createPaywall(apiKey, appId, encryptionKey) {
     try {
-      const res = await fetch("https://pay.invad.com/api/v1/invoices", {
-        "headers": {
-          "Content-Type": "application/x-www-form-urlencoded",
+      const res = await fetch("https://legend.lnbits.com/paywall/api/v1/paywalls", {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Api-Key": apiKey
         },
-        "body":
-          new URLSearchParams({
-            storeId: '6M2uJbthezgNYNyFAFe1xYp1hXexydswYaULjM613TDU',
-            browserRedirect: window.location.href+'?' +
-              new URLSearchParams({encryptionKey, appId}).toString(),
-            price: '0.000000001',
-            currency: 'BTC',
-            jsonResponse: true
-          }).toString(),
-        "method": "POST"
+        body: JSON.stringify(
+          {
+            "amount": 2,
+            "description": 'paywall invoice',
+            "memo": 'memo1',
+            "remembers": true,
+            "url": window.location.href+'?' + new URLSearchParams({encryptionKey, appId}).toString()
+          }
+        ),
+        method: "POST"
       });
 
       const resObj = await res.json();
 
       return resObj;
     } catch (e) {
-      alert("Failed to generate invoice. Please check payment settings.")
-      logError("Failed to generate invoice. Please check payment settings.");
+      alert("Failed to generate paywall. Please check payment settings.")
+      logError("Failed to generate paywall. Please check payment settings.");
     }
   }
 

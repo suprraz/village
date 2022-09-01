@@ -4,6 +4,7 @@ import MessageRouter from "../../os/messageRouter.js";
 import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
 import Settings from "../../os/settings.js";
+import Profile from "../../riverNetwork/profile.js";
 
 class _AppListCard {
   #availableApps
@@ -188,7 +189,7 @@ class _AppListCard {
     const appBuyBtn = document.createElement('button');
     appBuyBtn.className = "button is-primary appBuyButton";
     appBuyBtn.innerText = "Buy";
-    appBuyBtn.onclick = () => MessageRouter.onBuyApp(app);
+    appBuyBtn.onclick = () => MessageRouter.onRequestApp(app);
 
     const appInstallBtn = document.createElement('button');
     appInstallBtn.className = "button appInstallButton";
@@ -205,10 +206,17 @@ class _AppListCard {
 
   async sendApps() {
     const apps = await AppStore.getPublishedApps();
+    const appsForBroadcast = apps.map(app => {
+      return {
+        ...app,
+        code: null,  //strip the code
+        brokerNodeId: Profile.getNodeID()
+      };
+    });
 
     NodeStore.broadcast({
       type: 'app-list',
-      apps
+      apps: appsForBroadcast
     });
   }
 }
