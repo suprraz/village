@@ -136,7 +136,7 @@ class _Payment {
 
 
   async waitForPayment(paywall, invoice) {
-    const minutesToAdd = 1;
+    const minutesToAdd = 5;
     const currentDate = new Date();
     const timeoutDate = new Date(currentDate.getTime() + minutesToAdd*60000);
 

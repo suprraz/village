@@ -2,6 +2,7 @@ import MessageRouter from "../messageRouter.js";
 import Settings from "../settings.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
+import config from "../../config.js";
 
 class _AppStore {
   #appStoreDb
@@ -111,7 +112,39 @@ class _AppStore {
           app.name = app.name || 'App name error';
           app.version = app.version || 1;
           app.authorId = app.authorId || Settings.get('userId');
-          app.price = app.price || '0.000000001';
+          app.price = app.price || '1';
+          app.installDate = app.installDate || (new Date()).getTime();
+          app.updateDate = app.updateDate || (new Date()).getTime();
+          app.creationDate = app.creationDate || (new Date()).getTime();
+          app.isPublished = [0, 1].includes(app.isPublished) ? app.isPublished : 1;
+          app.code = app.code || '';
+          app.signature = typeof app.signature === 'string' || AppStore.signApp(app);
+
+          return app;
+        });
+      });
+
+      this.#appStoreDb.version(49).stores({
+        installedApps: `
+        id,
+        name,
+        version,
+        authorId,
+        authorWalletId,
+        signature,
+        price,
+        installDate,
+        updateDate,
+        creationDate,       
+        isPublished  `,
+      }).upgrade((trans) => {
+        return trans.installedApps.toCollection().modify(app => {
+          app.id = app.id || `app-${uuidv4()}`;
+          app.name = app.name || 'App name error';
+          app.version = app.version || 1;
+          app.authorId = app.authorId || Settings.get('userId');
+          app.authorWalletId = app.authorWalletId || config.lnbits.villageWalletId;
+          app.price = app.price || '1';
           app.installDate = app.installDate || (new Date()).getTime();
           app.updateDate = app.updateDate || (new Date()).getTime();
           app.creationDate = app.creationDate || (new Date()).getTime();

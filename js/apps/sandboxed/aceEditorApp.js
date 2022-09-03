@@ -41,12 +41,12 @@ const AceEditorHtml = \`
       
       <div class="field is-horizontal">
         <div class="field-label is-normal">
-          <label class="label">Price (BTC)</label>
+          <label class="label">Price (Sats)</label>
         </div>
         <div class="field-body">
           <div class="field">
             <p class="control">
-              <input type="text" class="input is-static" name="appPrice" id="appPrice" placeholder="Price in Bitcoin.  0 = free."/>
+              <input type="text" class="input is-static" name="appPrice" id="appPrice" placeholder="Price in sats.  0 = free."/>
             </p>
           </div>
         </div>

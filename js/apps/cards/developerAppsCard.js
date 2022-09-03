@@ -4,6 +4,7 @@ import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import Settings from "../../os/settings.js";
+import WalletStore from "../../os/store/walletStore.js";
 
 const NEW_APP_TEMPLATE_PATH = 'js/apps/cards/resources/developerAppsCard/newAppTemplate.js';
 
@@ -49,9 +50,10 @@ class _DeveloperAppsCard {
       id: `app-${uuidv4()}`,
       name: 'Hello World',
       authorId: Settings.get('userId'),
+      authorWalletId: await WalletStore.getPrimaryWalletId(),
       code: this.#newAppTemplate,
       version: 1,
-      price: '0.000000001',
+      price: '1',
       installDate: (new Date()).getTime(),
       updateDate: (new Date()).getTime(),
       creationDate: (new Date()).getTime(),

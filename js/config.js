@@ -39,6 +39,6 @@ export default {
     }]
   },
   lnbits: {
-    apiKey: 'ae305400152743c0b7eb1dfaeb98c787'
+    villageWalletId: 'd5447e7968c64b2cbe975cb4a0201834',
   }
 }

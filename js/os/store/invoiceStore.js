@@ -4,6 +4,7 @@ import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import config from "../../config.js";
 import paymentApp from "../../apps/sandboxed/paymentApp.js";
+import WalletStore from "./walletStore.js";
 
 class _InvoiceStore {
   #invoices
@@ -51,7 +52,7 @@ class _InvoiceStore {
       appName: paywalledApp.name,
       appId: paywalledApp.id,
       paywall: paywalledApp.paywall,
-      apiKey: config.lnbits.apiKey,
+      apiKey: WalletStore.getPrimaryWalletReadKey(),
     });
 
   }
@@ -61,7 +62,9 @@ class _InvoiceStore {
 
     const encryptedCode = this.encryptCode(app.code, encryptionKey);
 
-    const paywall = await this.createPaywall(config.lnbits.apiKey, app.id, encryptionKey);
+    const appWallet = await WalletStore.getOrCreateAppWallet(app);
+
+    const paywall = await this.createPaywall(appWallet.readKey, app.id, encryptionKey, app.price);
 
     return {
       ...app,
@@ -71,16 +74,16 @@ class _InvoiceStore {
     }
   }
 
-  async createPaywall(apiKey, appId, encryptionKey) {
+  async createPaywall(apiKey, appId, encryptionKey, price) {
     try {
       const res = await fetch("https://legend.lnbits.com/paywall/api/v1/paywalls", {
         headers: {
           "Content-Type": "application/json",
-          "X-Api-Key": apiKey
+          "X-Api-Key": apiKey,
         },
         body: JSON.stringify(
           {
-            "amount": 2,
+            "amount": parseFloat(price),
             "description": 'paywall invoice',
             "memo": 'memo1',
             "remembers": true,
