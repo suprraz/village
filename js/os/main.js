@@ -1,4 +1,3 @@
-import {show, hide} from "./utils/dom.js";
 import MessageRouter from "./messageRouter.js";
 import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
@@ -11,7 +10,6 @@ import _VillageStateCard from "../apps/cards/villageStateCard.js";
 import _ChatCard from "../apps/cards/chatCard.js";
 import _AppListCard from "../apps/cards/appListCard.js";
 import _LoggerAppCard from "../apps/cards/loggerAppCard.js";
-import _AdminToggleBtn from "../apps/buttons/adminToggleBtn.js";
 import RiverApi from "../riverNetwork/riverApi.js";
 import _DeveloperAppsCard from "../apps/cards/developerAppsCard.js";
 
@@ -27,30 +25,9 @@ class _Village {
       return;
     }
 
-    const AddPeerCard = new _AddPeerCard();
+    _Village.#initFullpageScrolling();
 
-    const AppListCard = new _AppListCard();
-    const DeveloperAppsCard = new _DeveloperAppsCard(document.getElementById('bottomPaneContainer'));
-    const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
-    const ChatCard = new _ChatCard();
-    const InvoiceStore = new _InvoiceStore();
-    const VillageStateCard = new _VillageStateCard();
-    const AdminToggleButton = new _AdminToggleBtn(document.getElementById('floatingButtonContainer'));
-    const Sandbox = new _Sandbox();
-
-    this.#coreApps = {
-      AddPeerCard,
-      AppListCard,
-      DeveloperAppsCard,
-      LoggerAppCard,
-      ChatCard,
-      VillageStateCard,
-      Sandbox,
-      SandboxStore,
-      InvoiceStore,
-      AdminToggleButton
-    };
-
+    this.#initCoreApps();
 
     const riverApi = new RiverApi()
 
@@ -69,24 +46,48 @@ class _Village {
     }
 
     this.#coreApps.AppListCard.updateAppList();
-
-    this.registerListeners();
   }
 
-  fullScreenApp(){
-    hide('adminScreen');
-    show('appContainer');
+  static #initFullpageScrolling() {
+    new fullpage('#fullpage', {
+      menu: '#menu',
+      autoScrolling:true,
+      credits: { enabled: false },
+      anchors: [
+        'homeScreenAnchor',
+        'appStoreScreenAnchor',
+        'networkScreenAnchor'
+      ],
+      paddingTop: '5em',
+      normalScrollElements: '.scrollable',
+      navigation: true,
+      licenseKey: 'K7S16-5QZ9I-L8GKK-ENJW8-JHUOM'
+    });
   }
 
-  addMorePeers(){
-    this.#coreApps.AddPeerCard.run();
-    this.#coreApps.AddPeerCard.preparePeer();
-    this.fullScreenApp();
-  }
+  #initCoreApps() {
+    const AddPeerCard = new _AddPeerCard();
 
+    const AppListCard = new _AppListCard();
+    const DeveloperAppsCard = new _DeveloperAppsCard(document.getElementById('developerAppsCardContainer'));
+    const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
+    const ChatCard = new _ChatCard();
+    const InvoiceStore = new _InvoiceStore();
+    const VillageStateCard = new _VillageStateCard();
+    const Sandbox = new _Sandbox();
 
-  registerListeners() {
-    document.getElementById('peerAppBtn').addEventListener('click', () => this.addMorePeers());
+    this.#coreApps = {
+      AddPeerCard,
+      AppListCard,
+      DeveloperAppsCard,
+      LoggerAppCard,
+      ChatCard,
+      VillageStateCard,
+      Sandbox,
+      SandboxStore,
+      InvoiceStore
+    };
+
   }
 
 }

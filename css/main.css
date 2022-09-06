@@ -1,5 +1,78 @@
 
 
+#overlayContainer {
+  position: fixed;
+  background-color: rgba(10,10,10,.86);
+  z-index: 2;
+}
+
+#sandboxIframe {
+  height: 100%;
+  border-radius: 6px;
+}
+
+#menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  letter-spacing: 1px;
+  font-size: 2em;
+  background-color: #002b36;
+  padding: 10px 10px 16px 13px;
+  border-bottom-left-radius: 4px;
+}
+
+#menu > ul {
+  list-style: none;
+  font-weight: 700;
+  font-size: clamp(2rem, 3vw, 3rem);
+  text-align: center;
+}
+
+#menu > li {
+  display: inline-block;
+}
+
+#menu > li > a {
+  color: inherit;
+  text-underline-offset: var(--offset, 0.2em);
+  text-decoration: underline;
+  transition: --offset 400ms, text-decoration-color 400ms;
+}
+
+#menu > li.active > a,
+#menu > li > a:hover,
+#menu > li > a:focus {
+  --offset: 0.4em;
+  text-decoration-color: orange;
+}
+
+@supports not (background: paint(something)) {
+  #menu > li > a {
+    transition: text-underline-offset 400ms, text-decoration-color 400ms;
+  }
+
+  #menu > li.active > a,
+  #menu > li > a:hover,
+  #menu > li > a:focus {
+    text-underline-offset: 0.4em;
+  }
+}
+
+.scrollable {
+  overflow: scroll;
+  max-height: 80vh;
+}
+
+#fp-nav.fp-right {
+  right: 5px;
+}
+
+#fp-nav ul li a span {
+  background: rgb(131, 148, 150);
+}
+
 .overflow-elipsis {
   white-space: nowrap;
   overflow: hidden;
@@ -15,26 +88,8 @@
   margin-right: 5px;
 }
 
-#overlayContainer {
-  position: fixed;
-  background-color: rgba(10,10,10,.86);
-  z-index: 2;
-}
-
-#sandboxIframe {
-  height: 100%;
-  border-radius: 6px;
-}
-
 .chatBox {
   overflow: scroll;
   min-height: 200px;
   max-height: 400px;
-}
-
-#floatingButtonContainer {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1;
 }

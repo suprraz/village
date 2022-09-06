@@ -223,7 +223,7 @@ class _AppListCard {
 
 
 const appListHtml = `
-<div id="appList">
+<div id="appList" class="scrollable">
     <p class="title">Apps</p>
     <p class="subtitle mt-1">Installed Apps</p>
     <div id="publishedApps" class="is-flex is-flex-direction-column"></div>

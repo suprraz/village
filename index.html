@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta HTTP-EQUIV="Pragma" content="no-cache">
 
     <title>Village</title>
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/fullpage.js@4.0.10/dist/fullpage.min.css" />
     <link rel="stylesheet" href="css/main.css"/>
+
+    <script src="https://unpkg.com/fullpage.js@4.0.10/dist/fullpage.min.js"></script>
     <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <script src="https://unpkg.com/webrtc-adapter@8.1.1/out/adapter.js"></script>
@@ -22,58 +24,64 @@
 <body>
 
 <div id="main">
-    <div id="appContainer"></div>
-
-    <div id="homeScreen" class="is-hidden">
-        <div class="tile is-ancestor">
-            <div class="tile is-vertical is-8">
-                <div class="tile">
-                    <div class="tile is-parent is-vertical">
-                        <article class="tile is-child notification is-primary">
-                            <div id="appListContainer"></div>
-                        </article>
-                    </div>
-                </div>
-            </div>
-            <div class="tile is-parent">
-                <article class="tile is-child notification is-info">
-                    <div id="chatContainer"></div>
-                </article>
-            </div>
-        </div>
-        <div class="tile is-parent">
-            <article class="tile is-child notification is-warning">
-                <div id="bottomPaneContainer"></div>
+    <div id="fullpage">
+        <div class="section" id="homeScreen" data-anchor="homeScreenAnchor">
+            <article class="tile is-4 is-child notification is-info">
+                <div id="chatContainer"></div>
             </article>
         </div>
-    </div>
 
-    <div id="adminScreen" class="is-hidden">
-        <div class="tile is-ancestor">
-            <div class="tile is-vertical is-8">
-                <div class="tile">
-                    <div class="tile is-parent is-vertical">
-                        <article class="tile is-child notification is-warning">
-                            <div id="villageStateContainer"></div>
-                        </article>
+        <div class="section" id="appStoreScreen" data-anchor="appStoreScreenAnchor">
+            <div class="tile is-ancestor">
+                <div class="tile is-vertical is-8">
+                    <div class="tile">
+                        <div class="tile is-parent is-vertical">
+                            <article class="tile is-child notification is-primary">
+                                <div id="appListContainer"></div>
+                            </article>
+                        </div>
                     </div>
                 </div>
                 <div class="tile is-parent">
-                    <article class="tile is-child notification is-danger">
-                        <p class="title">Connect peer</p>
-                        <button id="peerAppBtn" class="button">Peer App</button>
-                    </article>
+                    <div class="tile is-parent">
+                        <article class="tile is-child notification is-warning">
+                            <div id="developerAppsCardContainer"></div>
+                        </article>
+                    </div>
                 </div>
             </div>
-            <div class="tile is-parent">
-                <article class="tile is-child notification is-success">
-                    <div id="rightPaneContainer"></div>
-                </article>
+
+        </div>
+
+        <div class="section" id="networkScreen" data-anchor="networkScreenAnchor">
+            <div class="tile is-ancestor">
+                <div class="tile is-vertical is-8">
+                    <div class="tile">
+                        <div class="tile is-parent is-vertical">
+                            <article class="tile is-child notification is-warning">
+                                <div id="villageStateContainer"></div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <div class="tile is-parent">
+                        <article class="tile is-child notification is-success">
+                            <div id="rightPaneContainer"></div>
+                        </article>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="floatingButtonContainer"></div>
+    <ul id="menu">
+        <li data-menuanchor="homeScreenAnchor"><a href="#homeScreenAnchor">Village</a></li>
+        <li data-menuanchor="appStoreScreenAnchor"><a href="#appStoreScreenAnchor">Store</a></li>
+        <li data-menuanchor="networkScreenAnchor"><a href="#networkScreenAnchor">Network</a></li>
+    </ul>
+
+    <div id="appContainer"></div>
     <div id="sandbox"></div>
 </div>
 </body>

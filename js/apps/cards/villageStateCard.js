@@ -81,7 +81,7 @@ class _VillageStateCard {
 }
 
 const villageStateHtml = `
-<div id="villageState">
+<div id="villageState" class="scrollable">
     <p class="title">Neighbors</p>
     <div class="subtitle" id="nodeId"></div>
     <div class="subtitle"> 
