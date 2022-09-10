@@ -11,16 +11,27 @@ const NEW_APP_TEMPLATE_PATH = 'js/apps/cards/resources/developerAppsCard/newAppT
 class _DeveloperAppsCard {
   #newAppTemplate = null;
   #newAppBtn
+  #devWalletBalanceEl
+  #brokerWalletBalanceEl
 
   constructor(containerEl) {
-    const devAppsContainerEl = containerEl;
 
-    devAppsContainerEl.innerHTML = devAppsContainerHtml;
-    this.#newAppBtn = devAppsContainerEl.querySelector('#newAppBtn');
+    containerEl.innerHTML = devAppsContainerHtml;
+    this.#newAppBtn = containerEl.querySelector('#newAppBtn');
+    this.#devWalletBalanceEl = containerEl.querySelector('#devWalletBalance');
+    this.#brokerWalletBalanceEl = containerEl.querySelector('#brokerWalletBalance');
 
     this.registerListeners();
 
-    // this.updateMyAppsList();
+    this.refreshBalances();
+  }
+
+  async refreshBalances() {
+    const primaryWalletBalance = await WalletStore.getPrimaryWalletBalance();
+    const secondaryWalletBalance = await WalletStore.getSecondaryWalletBalance();
+
+    this.#devWalletBalanceEl.innerText = primaryWalletBalance;
+    this.#brokerWalletBalanceEl.innerText = secondaryWalletBalance;
   }
 
   async loadTemplate() {
@@ -32,7 +43,7 @@ class _DeveloperAppsCard {
   }
 
   registerListeners() {
-    this.#newAppBtn.addEventListener('click', (e) => this.newApp());
+    this.#newAppBtn.addEventListener('click', () => this.newApp());
   }
 
   async newApp() {
@@ -136,10 +147,17 @@ class _DeveloperAppsCard {
 
 const devAppsContainerHtml = `
 <div id="developerAppsCard">
-    <p class="title">Developer Studio</p>  
-  
+    <p class="title">Earnings</p>
+    
     <div class="px-1 mx-3 my-3">
-        <button id="newAppBtn" class="button is-info appRunButton">New App</button>
+      <p class="subtitle my-3">Reseller</p>
+      <div class="wallet">Wallet balance: <span id="brokerWalletBalance">(loading...)</span> sats</div> 
+    </div>
+    
+    <div class="px-1 mx-3 mt-6">
+        <p class="subtitle">Developer</p>
+        <div class="wallet">Wallet balance: <span id="devWalletBalance">(loading...)</span> sats</div> 
+        <button id="newAppBtn" class="button is-info appRunButton mt-5">Create New App</button>
     </div>
 </div>
 `;

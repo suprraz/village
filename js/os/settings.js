@@ -3,7 +3,7 @@ import uuidv4 from "../utils/uuid.js";
 
 const defaultSettings = {
   showLanding: true,
-  enableLogging: false,
+  enableLogging: true,
   privateKey: `private-key-${uuidv4()}`,
   userId: `user-${uuidv4()}`
 }

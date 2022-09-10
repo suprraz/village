@@ -11,12 +11,19 @@ class _WalletStore {
     adminKey: null,
     readKey: null,
   };
+  #secondaryWallet = {
+    userId: null,
+    walletId: null,
+    adminKey: null,
+    readKey: null,
+  };
 
   constructor() {
     this.#walletStoreDb = new Dexie("WalletStore");
     this.#setWalletStoreSchema();
 
     this.getPrimaryWalletReadKey();
+    this.getSecondaryWalletReadKey();
   }
 
   async getPrimaryWalletReadKey() {
@@ -24,6 +31,13 @@ class _WalletStore {
       await this.#loadOrCreatePrimaryWallet();
     }
     return this.#primaryWallet.readKey;
+  }
+
+  async getSecondaryWalletReadKey() {
+    if(!this.#secondaryWallet.readKey) {
+      await this.#loadOrCreateSecondaryWallet();
+    }
+    return this.#secondaryWallet.readKey;
   }
 
   async getPrimaryWalletId() {
@@ -54,9 +68,37 @@ class _WalletStore {
     return wallet;
   }
 
+  async getPrimaryWalletBalance() {
+    return this.#getWalletBalance(await this.#loadOrCreatePrimaryWallet());
+  }
+
+  async getSecondaryWalletBalance() {
+    return this.#getWalletBalance(await this.#loadOrCreateSecondaryWallet());
+  }
+
+  async #getWalletBalance(wallet) {
+    const res = await fetch('https://legend.lnbits.com/api/v1/wallet', {
+      method: 'GET',
+      headers: {
+        "Content-Type": "application/json",
+        "X-Api-Key": wallet.readKey
+      }
+    })
+
+    if(res.ok) {
+      let walletDetails = await res.json();
+
+      return walletDetails.balance;
+
+    } else {
+      logError('WalletStore Error getting wallet balance')
+      throw 'Error getting wallet balance';
+    }
+  }
+
   async #splitPayments(wallet, app) {
-    let targets = [];
-    if(app.authorWalletId === this.#primaryWallet.walletId) {
+    let targets;
+    if(app.authorWalletId === this.#secondaryWallet.walletId) {
       targets = [
         {
           wallet: app.authorWalletId,
@@ -82,7 +124,7 @@ class _WalletStore {
           percent: 20
         },
         {
-          wallet: this.#primaryWallet.walletId,
+          wallet: this.#secondaryWallet.walletId,
           alias: 'Broker (me) rev share for ' + app.name,
           percent: 10
         },
@@ -166,6 +208,22 @@ class _WalletStore {
     return null;
   }
 
+  async #getSecondaryWallet() {
+    const query = this.#walletStoreDb.wallets.where({type: 'secondary'});
+    const results = await query.toArray();
+
+    if(results.length) {
+      return {
+        userId: results[0].userId,
+        walletId: results[0].id,
+        adminKey: results[0].adminKey,
+        readKey: results[0].readKey,
+      };
+    }
+
+    return null;
+  }
+
   async #saveAppIdWallet(wallet) {
     return this.#walletStoreDb.wallets.put({
       id: wallet.walletId,
@@ -188,6 +246,16 @@ class _WalletStore {
     });
   }
 
+  async #saveSecondaryWallet() {
+    return this.#walletStoreDb.wallets.put({
+      id: this.#secondaryWallet.walletId,
+      type: 'secondary',
+      userId: this.#secondaryWallet.userId,
+      adminKey: this.#secondaryWallet.adminKey,
+      readKey: this.#secondaryWallet.readKey,
+      appId: null,
+    });
+  }
 
   async #loadOrCreatePrimaryWallet() {
     this.#primaryWallet = await this.#getPrimaryWallet();
@@ -199,6 +267,22 @@ class _WalletStore {
       if(this.#primaryWallet) {
         await this.#savePrimaryWallet();
         return this.#primaryWallet;
+      }
+    }
+
+    return null;
+  }
+
+  async #loadOrCreateSecondaryWallet() {
+    this.#secondaryWallet = await this.#getSecondaryWallet();
+    if(this.#secondaryWallet) {
+      return this.#secondaryWallet;
+    } else {
+      this.#secondaryWallet = await this.#createWallet(WALLET_NAME);
+
+      if(this.#secondaryWallet) {
+        await this.#saveSecondaryWallet();
+        return this.#secondaryWallet;
       }
     }
 
