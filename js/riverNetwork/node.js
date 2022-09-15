@@ -2,6 +2,9 @@ import { logMessage, logError } from '../utils/logger.js';
 import Profile from "./profile.js";
 import config from "../config.js";
 import RiverMessenger from "./riverMessenger.js";
+import uuidv4 from "../utils/uuid.js";
+
+const DOWNLOAD_TIMEOUT = 2 * 60 * 60 * 1000; // 2 hours
 
 class _Node {
   #onConnection
@@ -13,6 +16,8 @@ class _Node {
   #pending
   #dataChannel
   #profile
+  #maxMessageSize = 131070
+  #chunkBuffer = {}
 
   constructor({nodeId, onConnection, onMessage, sendCandidate, signalProtocol}) {
 
@@ -83,7 +88,7 @@ class _Node {
 
   registerDataChannelListeners() {
     this.#dataChannel.onopen = (e) => this.#onConnection(this);
-    this.#dataChannel.onmessage = (e) => this.#onMessage(e, this);
+    this.#dataChannel.onmessage = (e) => this.#msgReceived(e, this);
     this.#dataChannel.onerror = (e) => logError(`Node Datachannel Error: ${e}`);
   }
 
@@ -156,6 +161,9 @@ class _Node {
       };
 
       const remoteOffer = JSON.parse(atob(offerKey));
+
+      this.#setMaxMessageSize(remoteOffer);
+
       this.#pc.setRemoteDescription(remoteOffer)
         .then(() => this.#pc.createAnswer())
         .then(answerDesc => this.#pc.setLocalDescription(answerDesc))
@@ -173,24 +181,128 @@ class _Node {
 
   async setRemoteDescription(desc) {
     try {
+      this.#setMaxMessageSize(desc);
+
       await this.#pc.setRemoteDescription(desc);
     } catch (e) {
       logError(`Node Error while setting remote description: ${e}`);
     }
   }
 
+  #setMaxMessageSize(desc) {
+    const match = desc.sdp?.match(/a=max-message-size:\s*(\d+)/);
+    if (match !== null && match.length >= 2) {
+      this.#maxMessageSize = Math.min(this.#maxMessageSize, parseInt(match[1]));
+    }
+  }
+
   send(msgObj) {
     if ( this.isConnected() ) {
       try {
-        const msg = JSON.stringify({
+        const msg = {
           destinationId: this.#profile.nodeId,  //overridable
           senderId: Profile.getNodeID(),
           ...msgObj,
           version: config.appVersion
-        });
+        };
 
-        this.#dataChannel.send(msg);
+        const msgJson = JSON.stringify(msg);
 
+        if(msgJson.length > this.#maxMessageSize) {
+
+          const toChunks = (str, size) => str.match(new RegExp(`.{1,${size}}`, 'g'));
+
+          const splitMsgId = uuidv4();
+
+          const base = {
+            destinationId: msg.destinationId,
+            senderId: msg.senderId,
+            version: msg.version,
+            splitMsgId,
+            chunk: '',
+            chunkNum: 0,
+            chunkCount: 0,
+          }
+
+          const extraBuffer = 128;
+
+          const chunks = toChunks(msgJson, this.#maxMessageSize - JSON.stringify(base).length - extraBuffer);
+
+          chunks.map((chunk,i) => {
+            this.#dataChannel.send(JSON.stringify({
+              ...base,
+              chunk,
+              chunkNum: i,
+              chunkCount: chunks.length
+            }));
+
+            logMessage('Node Sent chunk #' + i);
+          });
+
+
+
+        } else {
+          this.#dataChannel.send(msgJson);
+        }
+
+      } catch (e) {
+        logError(e);
+      }
+    }
+  }
+
+  #msgReceived(e, context) {
+    if (e.data) {
+      try {
+        const data = JSON.parse(e.data);
+
+        if(!data.chunk) {
+          return this.#onMessage(e, context);
+        }
+
+        const {
+          splitMsgId,
+          chunkNum,
+          chunkCount,
+          chunk
+        } = data;
+
+        if(chunkNum === 0) {
+          //garbage collect on timeout
+
+          setTimeout(() => {
+            if(this.#chunkBuffer[splitMsgId]) {
+              delete this.#chunkBuffer[splitMsgId];
+            }
+          }, DOWNLOAD_TIMEOUT);
+        }
+
+        if(!this.#chunkBuffer[data.splitMsgId]) {
+          this.#chunkBuffer[data.splitMsgId] = [];
+        }
+
+        this.#chunkBuffer[splitMsgId][chunkNum] = chunk;
+
+        logMessage('Node Received chunk #' + chunkNum);
+
+        let allChunksReceived = true;
+        for(let i = 0; i < chunkCount; i++) {
+          if(!this.#chunkBuffer[splitMsgId][i]) {
+            allChunksReceived = false;
+          }
+        }
+
+        if (allChunksReceived) {
+          const msgJson = this.#chunkBuffer[splitMsgId].join('');
+          try {
+            this.#onMessage({data: msgJson}, context);
+
+          } catch (e) {
+            logError(e)
+          }
+
+          delete this.#chunkBuffer[splitMsgId];
+        }
       } catch (e) {
         logError(e);
       }
