@@ -1,12 +1,11 @@
 import AppStore from "../../os/store/appStore.js";
 import MessageRouter from "../../os/messageRouter.js";
-import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import Settings from "../../os/settings.js";
 import WalletStore from "../../os/store/walletStore.js";
 
-const NEW_APP_TEMPLATE_PATH = 'js/apps/cards/resources/developerAppsCard/newAppTemplate.js';
+const NEW_APP_TEMPLATE_PATH = 'js/apps/sandboxed/newAppTemplate.html';
 
 class _DeveloperAppsCard {
   #newAppTemplate = null;
@@ -39,7 +38,7 @@ class _DeveloperAppsCard {
     if (!res.ok) {
       throw new Error(`Error response: ${res.status}`);
     }
-    return await res.text();
+    return res.text();
   }
 
   registerListeners() {
@@ -73,7 +72,7 @@ class _DeveloperAppsCard {
 
     app.signature = AppStore.signApp(app);
 
-    MessageRouter.onRunApp(AceEditorApp, {app});
+    MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app});
   }
 
   async updateMyAppsList() {
@@ -122,7 +121,7 @@ class _DeveloperAppsCard {
     appEditBtn.onclick = async () => {
       const reloadedApp = await AppStore.getApp(app.id);
 
-      MessageRouter.onRunApp(AceEditorApp, {app: reloadedApp});
+      MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app: reloadedApp});
     };
 
     const appRemoveBtn = document.createElement('button');
@@ -143,7 +142,6 @@ class _DeveloperAppsCard {
   }
 
 }
-
 
 const devAppsContainerHtml = `
 <div id="developerAppsCard">

@@ -3,7 +3,6 @@ import MessageRouter from "../messageRouter.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import config from "../../config.js";
-import paymentApp from "../../apps/sandboxed/paymentApp.js";
 import WalletStore from "./walletStore.js";
 
 class _InvoiceStore {
@@ -48,7 +47,7 @@ class _InvoiceStore {
 
     this.watchInvoice(paywalledApp);
 
-    MessageRouter.onRunApp(paymentApp, {
+    MessageRouter.onRunApp({appFileName: 'paymentApp.html'}, {
       appName: paywalledApp.name,
       appId: paywalledApp.id,
       paywall: paywalledApp.paywall,
@@ -93,9 +92,7 @@ class _InvoiceStore {
         method: "POST"
       });
 
-      const resObj = await res.json();
-
-      return resObj;
+      return await res.json();
     } catch (e) {
       alert("Failed to generate paywall. Please check payment settings.")
       logError("Failed to generate paywall. Please check payment settings.");

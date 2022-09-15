@@ -34,29 +34,37 @@ class _Sandbox {
     }
   }
 
-  runUnrestricted(url) {
-    this.sanitize();
-
-    this.#iframe.src = url;
-    this.#iframe.removeAttribute('sandbox');
-    this.#iframe.removeAttribute('srcdoc');
+  async loadAppByFilename(filename) {
+    const res = await fetch( `js/apps/sandboxed/${filename}`);
+    if (!res.ok) {
+      throw new Error(`Sandbox Failed to load app by name: ${res.status}`);
+    }
+    return await res.text();
   }
 
   run(app, params) {
-    if(params && params.url) {
-      this.runUnrestricted(params.url);
-      return;
-    }
-
     this.sanitize();
 
-    const payload = `      
-      let params = ${JSON.stringify(params || {})};
-            
-      ${app.code};     
-    `;
-    this.#iframe.onload = () => {
-      this.#iframe.contentWindow.postMessage({type: 'run', payload}, '*');
+    this.#iframe.onload = async () => {
+      let html;
+
+      if(app.appFileName) {
+        html = await this.loadAppByFilename(app.appFileName);
+      } else {
+        html = app.code;
+      }
+
+      const appParams = !params ? '' : `
+      <script> 
+        let params = '${btoa(JSON.stringify(params))}';
+      </script>`;
+
+      //insert global params before first script
+      html = html.replace(/<script/, `${appParams}<script`);
+
+      const payload = btoa(html);
+
+      this.#iframe.contentWindow.postMessage({payload}, '*');
       this.#runningAppId = app.id;
       this.#runningAppName = app.name;
     }
@@ -90,14 +98,10 @@ const sandboxHtml = `
                       window.removeEventListener('message', runOnce);
                       
                       const data = event.data;
-                      if(data && data.type === 'run') {
-                        try {
-                          eval(data.payload);
-                        } catch (e) {
-                          alert('There was an error while starting the app.  Check console logs for details.')
-                          console.error('There was an error while starting the app: ' + e);
-                        }
-                      }
+                     
+                      document.open();
+                      document.write(atob(data.payload));
+                      document.close();
                   }
                   window.addEventListener('message', runOnce, false);
               </script>

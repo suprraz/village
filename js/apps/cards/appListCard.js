@@ -1,7 +1,6 @@
 import AppStore from "../../os/store/appStore.js";
 import NodeStore from "../../riverNetwork/nodeStore.js";
 import MessageRouter from "../../os/messageRouter.js";
-import AceEditorApp from "../sandboxed/aceEditorApp.js";
 import {logError} from "../../utils/logger.js";
 import Settings from "../../os/settings.js";
 import Profile from "../../riverNetwork/profile.js";
@@ -128,7 +127,7 @@ class _AppListCard {
     appEditBtn.onclick = async () => {
       const reloadedApp = await AppStore.getApp(app.id);
 
-      MessageRouter.onRunApp(AceEditorApp, {app: reloadedApp});
+      MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app: reloadedApp});
     };
 
     const appRemoveBtn = document.createElement('button');
