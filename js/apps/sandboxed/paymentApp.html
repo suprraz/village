@@ -6,12 +6,16 @@
 
     <title>Village Payment Page</title>
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/darkly/bulmaswatch.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
     <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js" type="text/javascript"></script>
 
     <script type="text/javascript">
       class _Payment {
         #params
+        #secondsLeft = 10 * 60 * 1000;
+        #appName
+        #timer
+        #walletLink
 
         constructor() {
 
@@ -27,6 +31,10 @@
           document.addEventListener('DOMContentLoaded', () => {
             const placeholder = document.getElementById('placeholder');
             const payment = document.getElementById('payment');
+            this.#timer = document.getElementById('timer');
+            this.#appName = document.getElementById('appName');
+            this.#walletLink = document.getElementById('walletLink');
+
             payment.removeAttribute('style');
             placeholder.remove();
 
@@ -37,7 +45,12 @@
         async start() {
           const invoice = await this.createInvoice(this.#params.paywall);
 
+          this.#appName.innerText = this.#params.appName;
+          this.#walletLink.setAttribute('href', `ln://${invoice.payment_request}`);
+
           new QRCode(document.getElementById("qrcode"), invoice.payment_request);
+
+          this.updateTimer();
 
           let url = null;
           try {
@@ -58,6 +71,7 @@
               payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}
             }, '*');
           }
+
         }
 
         async createInvoice(paywall) {
@@ -125,6 +139,19 @@
 
           return status;
         }
+
+        updateTimer() {
+          if (this.#secondsLeft > 0) {
+            this.#secondsLeft = this.#secondsLeft - 1000;
+            const minutes = Math.floor(this.#secondsLeft / 60000);
+            const seconds =  (this.#secondsLeft % 60000) / 1000;
+
+            this.#timer.innerText = minutes + (seconds < 10 ? ':0': ':') + seconds;
+            setTimeout(() => this.updateTimer(), 1000);
+          } else {
+            this.#timer.innerText = 'Invoice expired.';
+          }
+        }
       }
 
       new _Payment();
@@ -139,20 +166,20 @@
         <h1 class="title">
             App purchase
         </h1>
-        <p id="appName" class="subtitle">
-
-        </p>
+        <div><span id="appName" class="subtitle"></span></div>
 
     </section>
 
-    <section class="hero is-medium is-link">
-        <div class="hero-body">
-            <section class="container">
-                <div id="qrcode"></div>
-                <div><a href="ln://lnbc20n...part8rt">Open Wallet</a></div>
-                <div> 09:58 Timeout</div>
-            </section>
-        </div>
+    <section class="container is-medium">
+
+        <div><a id="walletLink" class="is-link my-4 is-size-4" href="#">Open Wallet</a></div>
+
+        <div>Expires in <span id="timer">10:00</span></div>
+
+        <section class="container mt-5">
+            <div id="qrcode"></div>
+
+        </section>
     </section>
 
 </div>
