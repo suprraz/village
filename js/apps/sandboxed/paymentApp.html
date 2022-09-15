@@ -46,7 +46,7 @@
           const invoice = await this.createInvoice(this.#params.paywall);
 
           this.#appName.innerText = this.#params.appName;
-          this.#walletLink.setAttribute('href', `ln://${invoice.payment_request}`);
+          this.#walletLink.setAttribute('href', `lightning:${invoice.payment_request}`);
 
           new QRCode(document.getElementById("qrcode"), invoice.payment_request);
 
