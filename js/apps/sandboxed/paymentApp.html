@@ -14,6 +14,7 @@
         #params
         #secondsLeft = 10 * 60 * 1000;
         #appName
+        #price
         #timer
         #walletLink
 
@@ -33,6 +34,7 @@
             const payment = document.getElementById('payment');
             this.#timer = document.getElementById('timer');
             this.#appName = document.getElementById('appName');
+            this.#price = document.getElementById('price');
             this.#walletLink = document.getElementById('walletLink');
 
             payment.removeAttribute('style');
@@ -46,6 +48,7 @@
           const invoice = await this.createInvoice(this.#params.paywall);
 
           this.#appName.innerText = this.#params.appName;
+          this.#price.innerText = this.#params.paywall.amount + ' Sats';
           this.#walletLink.setAttribute('href', `lightning:${invoice.payment_request}`);
 
           new QRCode(document.getElementById("qrcode"), invoice.payment_request);
@@ -166,11 +169,11 @@
         <h1 class="title">
             App purchase
         </h1>
-        <div><span id="appName" class="subtitle"></span></div>
+        <div><span id="appName" class="subtitle"></span> : <span id="price" class="subtitle"></span></div>
 
     </section>
 
-    <section class="container is-medium">
+    <section class="section is-medium mx-1">
 
         <div><a id="walletLink" class="is-link my-4 is-size-4" href="#">Open Wallet</a></div>
 
