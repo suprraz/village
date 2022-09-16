@@ -76,7 +76,6 @@
               payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}
             }, '*');
           }
-
         }
 
         async createInvoice(paywall) {
@@ -117,14 +116,14 @@
 
             return  await res.json();
           } catch (e) {
-            alert("Failed to check invoice: " + e);
+            return {error: e};
           }
         }
 
 
         async waitForPayment(paywall, invoice) {
           return new Promise(async (resolve, reject) => {
-            const minutesToAdd = 5;
+            const minutesToAdd = 10;
             const currentDate = new Date();
             const timeoutDate = new Date(currentDate.getTime() + minutesToAdd * 60000);
 
@@ -133,16 +132,17 @@
 
             let interval;
             interval = setInterval(async () => {
-              if (timeoutDate < new Date()) {
-                reject('Waiting for payment timed out.');
-                throw new Error('Waiting for payment timed out.')
-              }
-
               status = await this.checkInvoice(paywall, invoice)
 
               if (!!status?.paid) {
                 clearInterval(interval);
                 resolve(status);
+              }
+
+              if (!status?.paid && timeoutDate < new Date()) {
+                reject('Waiting for payment timed out.');
+                window.parent.postMessage({type: 'closeApp', payload: {sourceApp: 'PaymentApp'}},'*');
+                throw new Error('Waiting for payment timed out.')
               }
             }, 1000);
           });
@@ -196,7 +196,6 @@
 
         </section>
     </section>
-
 </div>
 </body>
 </html>
