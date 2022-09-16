@@ -63,7 +63,7 @@
 
             url = status.url;
           } catch (e) {
-            alert(e.message)
+            alert('There was an error while waiting for payment: '+ e);
           }
 
           const urlObj = new URL(url);
