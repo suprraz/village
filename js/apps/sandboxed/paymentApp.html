@@ -49,7 +49,12 @@
 
           this.#appName.innerText = this.#params.appName;
           this.#price.innerText = this.#params.paywall.amount + ' Sats';
-          this.#walletLink.setAttribute('href', `lightning:${invoice.payment_request}`);
+          const link = `lightning:${invoice.payment_request}`;
+
+          this.#walletLink.setAttribute('href', link);
+          this.#walletLink.addEventListener('click', () => {
+            window.open(link, '_system');
+          });
 
           new QRCode(document.getElementById("qrcode"), invoice.payment_request);
 
@@ -175,7 +180,7 @@
 
     <section class="section is-medium mx-1">
 
-        <div><a id="walletLink" class="is-link my-4 is-size-4" href="#">Open Wallet</a></div>
+        <div><a id="walletLink" class="is-link my-4 is-size-4" href="#" target="_system">Open Wallet</a></div>
 
         <div>Expires in <span id="timer">10:00</span></div>
 
