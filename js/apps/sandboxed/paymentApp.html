@@ -45,21 +45,19 @@
         }
 
         async start() {
-          const invoice = await this.createInvoice(this.#params.paywall);
-
           this.#appName.innerText = this.#params.appName;
           this.#price.innerText = this.#params.paywall.amount + ' Sats';
-          const link = `lightning:${invoice.payment_request}`;
+          const link = `lightning:${this.#params.invoice.payment_request}`;
 
           this.#walletLink.setAttribute('href', link);
 
-          new QRCode(document.getElementById("qrcode"), invoice.payment_request);
+          new QRCode(document.getElementById("qrcode"), this.#params.invoice.payment_request);
 
           this.updateTimer();
 
           let url = null;
           try {
-            const status = await this.waitForPayment(this.#params.paywall, invoice);
+            const status = await this.waitForPayment(this.#params.paywall, this.#params.invoice);
 
             url = status.url;
           } catch (e) {
@@ -75,27 +73,6 @@
               type: 'invoicePaid',
               payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}
             }, '*');
-          }
-        }
-
-        async createInvoice(paywall) {
-          try {
-            const res = await fetch('https://legend.lnbits.com/paywall/api/v1/paywalls/invoice/' + paywall.id, {
-              headers: {
-                "Content-Type": "application/json",
-                "X-Api-Key": this.#params.apiKey
-              },
-              body: JSON.stringify(
-                {
-                  "amount": paywall.amount,
-                }
-              ),
-              method: "POST"
-            });
-
-            return await res.json();
-          } catch (e) {
-            alert("Failed to generate invoice. Please check payment settings.")
           }
         }
 
@@ -164,9 +141,6 @@
             }
           }, 1000);
         }
-
-
-
       }
 
       new _Payment();

@@ -10,25 +10,50 @@ class _InvoiceStore {
 
   constructor() {
     this.#invoices = DataStore.getDocument('invoices') || [];
+
+    // check old invoices
+    this.#invoices.map(async (invoice) => {
+      let url = null;
+      try {
+        const status = await this.checkInvoice(invoice.paywalledApp.paywall, invoice.invoice);
+
+        url = status.url;
+      } catch (e) {
+        alert('There was an error while waiting for payment: '+ e);
+      }
+
+      if(url) {
+        const urlObj = new URL(url);
+        const urlParams = new URLSearchParams(urlObj.search);
+
+        if (urlParams.has('encryptionKey') && urlParams.has('appId')) {
+          this.updateInvoice(urlParams.get('appId'), urlParams.get('encryptionKey'));
+        }
+      }
+    });
+
+    this.#invoices = this.#invoices.filter(i => (new Date() - config.invoiceExpiration > i.date));
+
   }
 
-  watchInvoice(encryptedApp) {
-    this.#invoices.push({encryptedApp, date: new Date()});
+  watchInvoice(paywalledApp, invoice) {
+    const newInvoice = {paywalledApp, invoice, date: new Date()};
+    this.#invoices.push(newInvoice);
     DataStore.setDocument('invoices', this.#invoices);
   }
 
   updateInvoice(appId, encryptionKey) {
     this.#invoices = DataStore.getDocument('invoices');
-    const invoice = this.#invoices.reverse().find(i => i.encryptedApp.id === appId);
-    const { encryptedApp } = invoice;
+    const invoice = this.#invoices.reverse().find(i => i.paywalledApp.id === appId);
+    const { paywalledApp } = invoice;
 
     try {
       const app = {
-        ...encryptedApp,
-        code: CryptoJS.AES.decrypt(encryptedApp.encryptedCode, encryptionKey).toString(CryptoJS.enc.Utf8)
+        ...paywalledApp,
+        code: CryptoJS.AES.decrypt(paywalledApp.encryptedCode, encryptionKey).toString(CryptoJS.enc.Utf8)
       }
 
-      this.#invoices = this.#invoices.filter(i => i.encryptedApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));
+      this.#invoices = this.#invoices.filter(i => i.paywalledApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));
 
       DataStore.setDocument('invoices', this.#invoices);
 
@@ -39,19 +64,64 @@ class _InvoiceStore {
     }
   }
 
+  async #createInvoice(paywall) {
+    try {
+      const res = await fetch('https://legend.lnbits.com/paywall/api/v1/paywalls/invoice/' + paywall.id, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Api-Key": WalletStore.getPrimaryWalletReadKey()
+        },
+        body: JSON.stringify(
+          {
+            "amount": paywall.amount,
+          }
+        ),
+        method: "POST"
+      });
+
+      return await res.json();
+    } catch (e) {
+      alert("Failed to generate invoice. Please check payment settings.")
+    }
+  }
+
+  async checkInvoice(paywall, invoice) {
+    try {
+      const res = await fetch('https://legend.lnbits.com/paywall/api/v1/paywalls/check_invoice/' + paywall.id, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Api-Key": WalletStore.getPrimaryWalletReadKey()
+        },
+        body: JSON.stringify(
+          {
+            "payment_hash": invoice.payment_hash,
+          }
+        ),
+        method: "POST"
+      });
+
+      return  await res.json();
+    } catch (e) {
+      return {error: e};
+    }
+  }
+
   encryptCode(code, encryptionKey) {
     return CryptoJS.AES.encrypt(code, encryptionKey).toString()
   }
 
   async purchaseApp(paywalledApp) {
 
-    this.watchInvoice(paywalledApp);
+    const invoice = await this.#createInvoice(paywalledApp.paywall);
+
+    this.watchInvoice(paywalledApp, invoice);
 
     MessageRouter.onRunApp({appFileName: 'paymentApp.html'}, {
       appName: paywalledApp.name,
       appId: paywalledApp.id,
       paywall: paywalledApp.paywall,
       apiKey: WalletStore.getPrimaryWalletReadKey(),
+      invoice
     });
 
   }
