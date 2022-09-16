@@ -117,7 +117,7 @@
 
             return  await res.json();
           } catch (e) {
-            alert("Failed to check invoice. Please check payment settings.")
+            alert("Failed to check invoice: " + e);
           }
         }
 
@@ -133,7 +133,7 @@
             });
           }
 
-          let status = await this.checkInvoice(paywall, invoice)
+          let status = await this.checkInvoice(paywall, invoice);
           while (status.paid !== true) {
             if (timeoutDate < new Date()) {
               throw new Error('Waiting for payment timed out.')
