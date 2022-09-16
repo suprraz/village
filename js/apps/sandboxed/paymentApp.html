@@ -52,12 +52,6 @@
           const link = `lightning:${invoice.payment_request}`;
 
           this.#walletLink.setAttribute('href', link);
-          this.#walletLink.innerText = link;
-          this.#walletLink.addEventListener('click', () => {
-            alert('clicking');
-            window.open(link, '_system');
-            alert('clicked');
-          });
 
           new QRCode(document.getElementById("qrcode"), invoice.payment_request);
 
