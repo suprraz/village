@@ -123,40 +123,50 @@
 
 
         async waitForPayment(paywall, invoice) {
-          const minutesToAdd = 5;
-          const currentDate = new Date();
-          const timeoutDate = new Date(currentDate.getTime() + minutesToAdd * 60000);
+          return new Promise(async (resolve, reject) => {
+            const minutesToAdd = 5;
+            const currentDate = new Date();
+            const timeoutDate = new Date(currentDate.getTime() + minutesToAdd * 60000);
 
-          function wait(ms) {
-            return new Promise(resolve => {
-              setTimeout(resolve, ms);
-            });
-          }
 
-          let status = await this.checkInvoice(paywall, invoice);
-          while (status.paid !== true) {
-            if (timeoutDate < new Date()) {
-              throw new Error('Waiting for payment timed out.')
-            }
-            await wait(1000);
-            status = await this.checkInvoice(paywall, invoice)
-          }
+            let status = await this.checkInvoice(paywall, invoice);
 
-          return status;
+            let interval;
+            interval = setInterval(async () => {
+              if (timeoutDate < new Date()) {
+                reject('Waiting for payment timed out.');
+                throw new Error('Waiting for payment timed out.')
+              }
+
+              status = await this.checkInvoice(paywall, invoice)
+
+              if (!!status?.paid) {
+                clearInterval(interval);
+                resolve(status);
+              }
+            }, 1000);
+          });
         }
 
         updateTimer() {
-          if (this.#secondsLeft > 0) {
-            this.#secondsLeft = this.#secondsLeft - 1000;
-            const minutes = Math.floor(this.#secondsLeft / 60000);
-            const seconds =  (this.#secondsLeft % 60000) / 1000;
+          let interval;
 
-            this.#timer.innerText = minutes + (seconds < 10 ? ':0': ':') + seconds;
-            setTimeout(() => this.updateTimer(), 1000);
-          } else {
-            this.#timer.innerText = 'Invoice expired.';
-          }
+          interval = setInterval(() => {
+            if (this.#secondsLeft > 0) {
+              this.#secondsLeft = this.#secondsLeft - 1000;
+              const minutes = Math.floor(this.#secondsLeft / 60000);
+              const seconds = (this.#secondsLeft % 60000) / 1000;
+
+              this.#timer.innerText = minutes + (seconds < 10 ? ':0' : ':') + seconds;
+            } else {
+              this.#timer.innerText = 'Invoice expired.';
+              clearInterval(interval);
+            }
+          }, 1000);
         }
+
+
+
       }
 
       new _Payment();
