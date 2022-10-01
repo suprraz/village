@@ -29,8 +29,8 @@ class _DeveloperAppsCard {
     const primaryWalletBalance = await WalletStore.getPrimaryWalletBalance();
     const secondaryWalletBalance = await WalletStore.getSecondaryWalletBalance();
 
-    this.#devWalletBalanceEl.innerText = primaryWalletBalance;
-    this.#brokerWalletBalanceEl.innerText = secondaryWalletBalance;
+    this.#devWalletBalanceEl.innerText = primaryWalletBalance / 1000;
+    this.#brokerWalletBalanceEl.innerText = secondaryWalletBalance / 1000;
   }
 
   async loadTemplate() {
@@ -148,13 +148,13 @@ const devAppsContainerHtml = `
     <p class="title">Earnings</p>
     
     <div class="px-1 mx-3 my-3">
-      <p class="subtitle my-3">Reseller</p>
-      <div class="wallet">Wallet balance: <span id="brokerWalletBalance">(loading...)</span> sats</div> 
+      <p class="subtitle my-3">Distributor Wallet</p>
+      <div class="wallet">Wallet balance: <span id="brokerWalletBalance">(loading...)</span> satoshis</div> 
     </div>
     
     <div class="px-1 mx-3 mt-6">
-        <p class="subtitle">Developer</p>
-        <div class="wallet">Wallet balance: <span id="devWalletBalance">(loading...)</span> sats</div> 
+        <p class="subtitle">Developer Wallet</p>
+        <div class="wallet">Wallet balance: <span id="devWalletBalance">(loading...)</span> satoshis</div> 
         <button id="newAppBtn" class="button is-info appRunButton mt-5">Create New App</button>
     </div>
 </div>

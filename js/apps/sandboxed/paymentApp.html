@@ -48,7 +48,7 @@
           const invoice = await this.createInvoice(this.#params.paywall);
 
           this.#appName.innerText = this.#params.appName;
-          this.#price.innerText = this.#params.paywall.amount + ' Sats';
+          this.#price.innerText = this.#params.paywall.amount + ' satoshis';
           const link = `lightning:${invoice.payment_request}`;
 
           this.#walletLink.setAttribute('href', link);
@@ -177,21 +177,18 @@
 <div id="placeholder" style='background-color: #0a0a0a; height: 100%;'></div>
 <div id="payment" style='display: none;'>
     <section class="section">
-
-        <h1 class="title">
-            App purchase
-        </h1>
-        <div><span id="appName" class="subtitle"></span> : <span id="price" class="subtitle"></span></div>
+        <div class="is-size-3">Purchasing App: <span id="appName" ></span></div>
+        <div class="is-size-3">Price: <span id="price"></span></div>
 
     </section>
 
-    <section class="section is-medium mx-1">
+    <section class="section mx-1">
 
-        <div><a id="walletLink" class="is-link my-4 is-size-4" href="#" target="_system">Open Wallet</a></div>
+        <div><a id="walletLink" class="is-link my-4 is-size-4" href="#" target="_system">Open Bitcoin Lightning Wallet</a></div>
 
-        <div>Expires in <span id="timer">10:00</span></div>
+        <div>Invoice expires in <span id="timer">10:00</span></div>
 
-        <section class="container mt-5">
+        <section class="section mt-5">
             <div id="qrcode"></div>
 
         </section>

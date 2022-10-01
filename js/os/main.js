@@ -6,7 +6,6 @@ import _Sandbox from "./sandbox.js";
 import _InvoiceStore from "./store/invoiceStore.js";
 import _AddPeerCard from "../apps/cards/addPeerCard.js";
 import _VillageStateCard from "../apps/cards/villageStateCard.js";
-import _ChatCard from "../apps/cards/chatCard.js";
 import _AppListCard from "../apps/cards/appListCard.js";
 import _LoggerAppCard from "../apps/cards/loggerAppCard.js";
 import RiverApi from "../riverNetwork/riverApi.js";
@@ -53,7 +52,6 @@ class _Village {
       autoScrolling:true,
       credits: { enabled: false },
       anchors: [
-        'homeScreenAnchor',
         'appStoreScreenAnchor',
         'networkScreenAnchor'
       ],
@@ -66,11 +64,9 @@ class _Village {
 
   #initCoreApps() {
     const AddPeerCard = new _AddPeerCard();
-
     const AppListCard = new _AppListCard();
     const DeveloperAppsCard = new _DeveloperAppsCard(document.getElementById('developerAppsCardContainer'));
     const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
-    const ChatCard = new _ChatCard();
     const InvoiceStore = new _InvoiceStore();
     const VillageStateCard = new _VillageStateCard();
     const Sandbox = new _Sandbox();
@@ -80,7 +76,6 @@ class _Village {
       AppListCard,
       DeveloperAppsCard,
       LoggerAppCard,
-      ChatCard,
       VillageStateCard,
       Sandbox,
       SandboxStore,

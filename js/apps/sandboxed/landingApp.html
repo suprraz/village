@@ -22,7 +22,14 @@
           }, false);
         }
 
+        hideLanding() {
+          return !!document.getElementById('hideLanding').checked;
+        }
+
         start() {
+          if(this.hideLanding()) {
+            window.parent.postMessage({type: 'hideLanding', payload: {sourceApp: 'landingAppId'}}, '*');
+          }
           window.parent.postMessage({type: 'closeApp', payload: {sourceApp: 'landingAppId'}}, '*');
         }
 
@@ -32,7 +39,7 @@
       }
 
       new _Landing();
-      </script>
+    </script>
 </head>
 
 <body>
@@ -41,10 +48,10 @@
     <section class="section">
 
         <h1 class="title">
-            Village: An Internet OS.
+            The Village Protocol
         </h1>
-        <p class="subtitle">
-            Change the code, change the world.
+        <p class="subtitle is-size-4">
+            A decentralized app network powered by Bitcoin Lightning
         </p>
 
     </section>
@@ -55,39 +62,47 @@
                 <p class="block is-size-3"> Ready to join peer-to-peer?</p>
 
                 <button id="btn_start" class="button is-primary is-large">Bring me in!</button>
+
+                <div class="is-size-5 mt-6">
+                    <label class="checkbox">
+                        <input type="checkbox" class="checkbox" name="hideLanding" id="hideLanding" />
+                        Hide this page in the future
+                    </label>
+                </div>
             </section>
         </div>
     </section>
 
     <section class="section">
         <div class="container">
-            <div class="content">
+            <div class="content is-size-5">
                 <h3>What is Village?</h3>
 
-                <p>Village is a fully decentralized peer-to-peer network living in web browsers. Once you join the
-                    network
-                    and connect to your peers, all the content in your web page is served by your peers. Servers are not
-                    used except to facilitate the very first time you connect to the network.
+                <p>
+                    Village is a fully decentralized peer-to-peer app store and network living inside a mesh of web
+                    browsers. Developers, distributors and protocol maintainers make Bitcoin for scaling the protocol.
+                    After joining the network and connect to peers, all the content in the web page is served by peers.
+                    Servers are not used except to facilitate the network discovery and enable revenue distribution.
+                    This codebase can be downloaded and run on any computer - it's really just an HTML file.
                 </p>
 
                 <h3>How is Village built?</h3>
 
                 <p>Village is coded by its users. When an improvement is proposed, users decide whether they want to use
-                    it
-                    or reject it. This makes village continue improving. Have an idea to improve Village? Code it up and
+                    it or reject it. This makes village continue improving. Have an idea to improve Village? Code it up
+                    and
                     share it with the Village!
                 </p>
 
-                <h3>What tools are required to code Village components?</h3>
-
-                <p>Village can be coded directly in the web browser - no special tools needed. You can start coding
-                    Village
-                    today with just simple Javascript</p>
+                <p>
+                    Village is open source and hosted here:
+                    <a href="https://github.com/suprraz/village" target="_blank">https://github.com/suprraz/village</a>
+                </p>
 
                 <h3>Where is the Village data stored?</h3>
 
-                <p>Village data is stored in the web browser's cache. When new data enters the network, it is shared and
-                    stored amongst peers as backup</p>
+                <p>Village data is stored in the web browser's data stores. When new data enters the network, it is
+                    shared and replicated amongst peers as backup.</p>
             </div>
         </div>
     </section>

@@ -41,11 +41,6 @@ class _MessageRouter {
     const {msg, senderId, app, } = data;
 
     switch (app) {
-      case 'chat':
-        if (msg && senderId) {
-          this.#coreApps.ChatCard.messageReceived(senderId, msg);
-        }
-        break;
       default:
         logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
     }
@@ -115,11 +110,7 @@ class _MessageRouter {
     this.#coreApps.AppListCard.updateAppList();
   }
 
-  onCloseApp(sourceAppId) {
-    if(sourceAppId === 'landingAppId') {
-      Settings.update('showLanding', false);
-      this.onNetworkChange();
-    }
+  onCloseApp() {
     this.#coreApps.Sandbox.stop();
   }
 
@@ -128,8 +119,16 @@ class _MessageRouter {
       const data = event.data;
       if (data) {
         switch (data.type) {
+          case 'hideLanding':
+            if(data.payload.sourceApp === 'landingAppId') {
+              Settings.update('showLanding', false);
+            }
+            break;
           case 'closeApp':
             this.onCloseApp(data.payload.sourceApp);
+            if(data.payload.sourceApp === 'landingAppId') {
+              this.onNetworkChange();
+            }
             break;
           case 'saveAndRunApp':
             if (data.payload.runAfterSave) {
