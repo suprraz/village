@@ -45,25 +45,23 @@
         }
 
         async start() {
-          const invoice = await this.createInvoice(this.#params.paywall);
-
           this.#appName.innerText = this.#params.appName;
           this.#price.innerText = this.#params.paywall.amount + ' satoshis';
-          const link = `lightning:${invoice.payment_request}`;
+          const link = `lightning:${this.#params.invoice.payment_request}`;
 
           this.#walletLink.setAttribute('href', link);
 
-          new QRCode(document.getElementById("qrcode"), invoice.payment_request);
+          new QRCode(document.getElementById("qrcode"), this.#params.invoice.payment_request);
 
           this.updateTimer();
 
           let url = null;
           try {
-            const status = await this.waitForPayment(this.#params.paywall, invoice);
+            const status = await this.waitForPayment(this.#params.paywall, this.#params.invoice);
 
             url = status.url;
           } catch (e) {
-            alert(e.message)
+            alert('There was an error while waiting for payment: '+ e);
           }
 
           const urlObj = new URL(url);
@@ -75,28 +73,6 @@
               type: 'invoicePaid',
               payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}
             }, '*');
-          }
-
-        }
-
-        async createInvoice(paywall) {
-          try {
-            const res = await fetch('https://legend.lnbits.com/paywall/api/v1/paywalls/invoice/' + paywall.id, {
-              headers: {
-                "Content-Type": "application/json",
-                "X-Api-Key": this.#params.apiKey
-              },
-              body: JSON.stringify(
-                {
-                  "amount": paywall.amount,
-                }
-              ),
-              method: "POST"
-            });
-
-            return await res.json();
-          } catch (e) {
-            alert("Failed to generate invoice. Please check payment settings.")
           }
         }
 
@@ -117,14 +93,14 @@
 
             return  await res.json();
           } catch (e) {
-            alert("Failed to check invoice: " + e);
+            return {error: e};
           }
         }
 
 
         async waitForPayment(paywall, invoice) {
           return new Promise(async (resolve, reject) => {
-            const minutesToAdd = 5;
+            const minutesToAdd = 10;
             const currentDate = new Date();
             const timeoutDate = new Date(currentDate.getTime() + minutesToAdd * 60000);
 
@@ -133,16 +109,17 @@
 
             let interval;
             interval = setInterval(async () => {
-              if (timeoutDate < new Date()) {
-                reject('Waiting for payment timed out.');
-                throw new Error('Waiting for payment timed out.')
-              }
-
               status = await this.checkInvoice(paywall, invoice)
 
               if (!!status?.paid) {
                 clearInterval(interval);
                 resolve(status);
+              }
+
+              if (!status?.paid && timeoutDate < new Date()) {
+                reject('Waiting for payment timed out.');
+                window.parent.postMessage({type: 'closeApp', payload: {sourceApp: 'PaymentApp'}},'*');
+                throw new Error('Waiting for payment timed out.')
               }
             }, 1000);
           });
@@ -164,9 +141,6 @@
             }
           }, 1000);
         }
-
-
-
       }
 
       new _Payment();
@@ -193,7 +167,6 @@
 
         </section>
     </section>
-
 </div>
 </body>
 </html>
