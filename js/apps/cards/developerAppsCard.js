@@ -7,11 +7,18 @@ import WalletStore from "../../os/store/walletStore.js";
 
 const NEW_APP_TEMPLATE_PATH = 'js/apps/sandboxed/newAppTemplate.html';
 
+const MIN_SATS_WITHDRAWAL = 10;
+const MIN_SATS_BUFFER = 5;
+
 class _DeveloperAppsCard {
   #newAppTemplate = null;
   #newAppBtn
+  #devWalletBalanceAmt
+  #brokerWalletBalanceAmt
   #devWalletBalanceEl
   #brokerWalletBalanceEl
+  #withdrawDevEl
+  #withdrawBrokerEl
 
   constructor(containerEl) {
 
@@ -19,6 +26,8 @@ class _DeveloperAppsCard {
     this.#newAppBtn = containerEl.querySelector('#newAppBtn');
     this.#devWalletBalanceEl = containerEl.querySelector('#devWalletBalance');
     this.#brokerWalletBalanceEl = containerEl.querySelector('#brokerWalletBalance');
+    this.#withdrawDevEl = containerEl.querySelector('#withdrawDev');
+    this.#withdrawBrokerEl = containerEl.querySelector('#withdrawBroker');
 
     this.registerListeners();
 
@@ -26,11 +35,25 @@ class _DeveloperAppsCard {
   }
 
   async refreshBalances() {
-    const primaryWalletBalance = await WalletStore.getPrimaryWalletBalance();
-    const secondaryWalletBalance = await WalletStore.getSecondaryWalletBalance();
+    this.#devWalletBalanceAmt =  await WalletStore.getPrimaryWalletBalance() / 1000;
+    this.#brokerWalletBalanceAmt = await WalletStore.getSecondaryWalletBalance() / 1000;
 
-    this.#devWalletBalanceEl.innerText = primaryWalletBalance / 1000;
-    this.#brokerWalletBalanceEl.innerText = secondaryWalletBalance / 1000;
+    this.#devWalletBalanceEl.innerText = this.#devWalletBalanceAmt;
+    this.#brokerWalletBalanceEl.innerText = this.#brokerWalletBalanceAmt;
+    
+    if(this.addBuffer(this.#devWalletBalanceAmt) > MIN_SATS_WITHDRAWAL) {
+      this.#withdrawDevEl.innerText = 'Withdraw ' + this.addBuffer(this.#devWalletBalanceAmt) + ' satoshis';
+      this.#withdrawDevEl.setAttribute('style', '');
+    } else {
+      this.#withdrawDevEl.setAttribute('style', 'display: none');
+    }
+
+    if(this.addBuffer(this.#brokerWalletBalanceAmt) > MIN_SATS_WITHDRAWAL) {
+      this.#withdrawBrokerEl.innerText = 'Withdraw ' + this.addBuffer(this.#brokerWalletBalanceAmt) + ' satoshis';
+      this.#withdrawBrokerEl.setAttribute('style', '');
+    } else {
+      this.#withdrawBrokerEl.setAttribute('style', 'display: none');
+    }
   }
 
   async loadTemplate() {
@@ -41,8 +64,32 @@ class _DeveloperAppsCard {
     return res.text();
   }
 
+  addBuffer(amt) {
+    return Math.floor(amt - MIN_SATS_BUFFER);
+  }
+
+  async withdrawBroker(e) {
+    e.stopPropagation();
+
+    const withdrawalUrl = await WalletStore.getSecondaryWalletWithdrawalUrl(this.addBuffer(this.#brokerWalletBalanceAmt));
+    await navigator.clipboard.writeText(withdrawalUrl);
+
+    alert('Withdrawal url has been copied to clipboard.  Paste in a LNURL compatible lightning wallet.');
+  }
+
+  async withdrawDev(e) {
+    e.stopPropagation();
+
+    const withdrawalUrl = await WalletStore.getPrimaryWalletWithdrawalUrl(this.addBuffer(this.#devWalletBalanceAmt));
+    await navigator.clipboard.writeText(withdrawalUrl);
+
+    alert('Withdrawal url has been copied to clipboard.  Paste in a LNURL compatible lightning wallet.');
+  }
+
   registerListeners() {
     this.#newAppBtn.addEventListener('click', () => this.newApp());
+    this.#withdrawDevEl.addEventListener('click', (e) => this.withdrawDev(e));
+    this.#withdrawBrokerEl.addEventListener('click', (e) => this.withdrawBroker(e));
   }
 
   async newApp() {
@@ -147,14 +194,17 @@ const devAppsContainerHtml = `
 <div id="developerAppsCard">
     <p class="title">Earnings</p>
     
-    <div class="px-1 mx-3 my-3">
-      <p class="subtitle my-3">Distributor Wallet</p>
-      <div class="wallet">Wallet balance: <span id="brokerWalletBalance">(loading...)</span> satoshis</div> 
+   <div class="px-1 mx-3 mt-3">
+        <div class="is-size-5">Developer Wallet Balance: <span id="devWalletBalance">-</span> satoshis</div>
+        <a href="#blank" id="withdrawDev" style="display: none">Withdraw</a>  
     </div>
     
-    <div class="px-1 mx-3 mt-6">
-        <p class="subtitle">Developer Wallet</p>
-        <div class="wallet">Wallet balance: <span id="devWalletBalance">(loading...)</span> satoshis</div> 
+    <div class="px-1 mx-3 mt-3">
+      <div class="is-size-5 my-3">Distributor Wallet Balance: <span id="brokerWalletBalance">-</span> satoshis</div>
+      <a href="#blank" id="withdrawBroker" style="display: none">Withdraw</a> 
+    </div>
+    
+    <div class="mt-5">
         <button id="newAppBtn" class="button is-info appRunButton mt-5">Create New App</button>
     </div>
 </div>

@@ -76,6 +76,44 @@ class _WalletStore {
     return this.#getWalletBalance(await this.#loadOrCreateSecondaryWallet());
   }
 
+  async getPrimaryWalletWithdrawalUrl(satsAmt) {
+    return this.#getWalletWithdrawalUrl(await this.#loadOrCreatePrimaryWallet(), satsAmt);
+  }
+
+  async getSecondaryWalletWithdrawalUrl(satsAmt) {
+    return this.#getWalletWithdrawalUrl(await this.#loadOrCreateSecondaryWallet(), satsAmt);
+  }
+
+  async #getWalletWithdrawalUrl(wallet, satsAmt) {
+    const res = await fetch('https://legend.lnbits.com/withdraw/api/v1/links', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "X-Api-Key": wallet.adminKey
+      },
+      body: JSON.stringify(
+        {
+          "title": "Village withdrawal",
+          "min_withdrawable": 10,
+          "max_withdrawable": satsAmt,
+          "uses": 1,
+          "wait_time": 1,
+          "is_unique": false,
+        })
+    });
+
+    if(res.ok) {
+      let withdrawalDetails = await res.json();
+
+      return withdrawalDetails.lnurl;
+
+    } else {
+      logError('WalletStore Error getting withdrawal link')
+      throw 'Error getting withdrawal link';
+    }
+  }
+
+
   async #getWalletBalance(wallet) {
     const res = await fetch('https://legend.lnbits.com/api/v1/wallet', {
       method: 'GET',
