@@ -39,9 +39,9 @@ class _Village {
 
     if(showLanding) {
       AppStore.runApp({appFileName: 'landingApp.html'});
-    } else {
-      riverApi.connect();
     }
+
+    riverApi.connect();
 
     this.#coreApps.AppListCard.updateAppList();
   }
