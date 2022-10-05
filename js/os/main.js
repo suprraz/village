@@ -38,7 +38,7 @@ class _Village {
     const showLanding = Settings.get('showLanding');
 
     if(urlParams.has('runAppFromUrl')) {
-      AppStore.runApp({runUrl: urlParams.get('runUrl')});
+      AppStore.runApp({runUrl: urlParams.get('runAppFromUrl')});
     } else if(showLanding) {
       AppStore.runApp({appFileName: 'landingApp.html'});
     }
