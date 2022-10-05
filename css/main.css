@@ -87,9 +87,3 @@
 .installedApp > * {
   margin-right: 5px;
 }
-
-.chatBox {
-  overflow: scroll;
-  min-height: 200px;
-  max-height: 400px;
-}

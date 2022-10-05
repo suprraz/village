@@ -38,11 +38,12 @@ class _MessageRouter {
 
 
   onAppMessage(data) {
-    const {msg, senderId, app, } = data;
+    const { app } = data;
 
-    switch (app) {
-      default:
-        logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
+    if(app === this.#coreApps.Sandbox.getRunningAppId()) {
+      this.#coreApps.Sandbox.postMessage({type: 'message', payload: data.payload});
+    } else {
+      logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
     }
   }
 
@@ -158,6 +159,13 @@ class _MessageRouter {
             } catch (e) {
               this.#coreApps.Sandbox.postMessage({type: 'readDataFailure', payload: data.payload})
             }
+            break;
+          case 'broadcastMessage':
+            NodeStore.broadcast({
+              app: this.#coreApps.Sandbox.getRunningAppId(),
+              payload: data?.payload,
+              type: 'app'
+            });
             break;
 
           default:
