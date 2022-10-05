@@ -45,6 +45,12 @@ class _Sandbox {
   run(app, params) {
     this.sanitize();
 
+    if(app.runUrl) {
+      this.#iframe.setAttribute("src", app.runUrl);
+      this.#iframe.removeAttribute("srcDoc");
+      return;
+    }
+
     this.#iframe.onload = async () => {
       let html;
 
