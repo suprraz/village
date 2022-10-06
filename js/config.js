@@ -11,18 +11,19 @@ export default {
     protocolVersion: 4,
     clean: true,
     reconnectPeriod: 1000,
-    connectTimeout: 4000,                   // 4 sec
+    connectTimeout: 4000,                  // 4 sec
     useSSL: true,
   },
   mqttParallelReqs: 3,
   villageParallelReqs: 3,
   maxConnectedNeighbors: 100,
   maxHops: 5,
-  routingTableUpdateFrequency: 30000,      // 30 sec
+  routingTableUpdateFrequency: 30*1000,    // 30 sec
   busyRouteRetry: 5*60*1000,               // 5 min
-  invoiceExpiration: 10*60*1000,            // 10 min
+  invoiceExpiration: 10*60*1000,           // 10 min
+  checkForUpgradeFreq: 60*60*1000,         // 1 hour
   RTC: {
-    handshakeTimeout: 30 * 1000,
+    handshakeTimeout: 30 * 1000,           // 30 sec
     iceServers: [{
       urls: [ "stun:ws-turn2.xirsys.com" ]
     }, {

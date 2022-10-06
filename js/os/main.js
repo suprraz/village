@@ -2,6 +2,7 @@ import MessageRouter from "./messageRouter.js";
 import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
 import SandboxStore from "./store/sandboxStore.js";
+import UpgradeStore from "./store/upgradeStore.js";
 import _Sandbox from "./sandbox.js";
 import _InvoiceStore from "./store/invoiceStore.js";
 import _AddPeerCard from "../apps/cards/addPeerCard.js";
@@ -81,7 +82,8 @@ class _Village {
       VillageStateCard,
       Sandbox,
       SandboxStore,
-      InvoiceStore
+      InvoiceStore,
+      UpgradeStore
     };
 
   }
