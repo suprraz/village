@@ -195,12 +195,16 @@ const devAppsContainerHtml = `
     <p class="title">Earnings</p>
     
    <div class="px-1 mx-3 mt-3">
-        <div class="is-size-5">Developer Wallet Balance: <span id="devWalletBalance">-</span> satoshis</div>
+        <div class="is-size-5">Developer Wallet Balance: 
+          <div class="is-family-monospace"><span id="devWalletBalance">-</span> satoshis</div>
+        </div>
         <a href="#blank" id="withdrawDev" style="display: none">Withdraw</a>  
     </div>
     
     <div class="px-1 mx-3 mt-3">
-      <div class="is-size-5 my-3">Distributor Wallet Balance: <span id="brokerWalletBalance">-</span> satoshis</div>
+      <div class="is-size-5 my-3">Distributor Wallet Balance: 
+        <div class="is-family-monospace"><span id="brokerWalletBalance">-</span> satoshis</div>
+      </div>
       <a href="#blank" id="withdrawBroker" style="display: none">Withdraw</a> 
     </div>
     

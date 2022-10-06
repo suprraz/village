@@ -19,7 +19,7 @@ class _InvoiceStore {
 
         url = status.url;
       } catch (e) {
-        alert('There was an error while waiting for payment: '+ e);
+        logError('There was an error while waiting for payment: '+ e);
       }
 
       if(url) {
@@ -81,7 +81,7 @@ class _InvoiceStore {
 
       return await res.json();
     } catch (e) {
-      alert("Failed to generate invoice. Please check payment settings.")
+      logError("Failed to generate invoice. Please check payment settings.")
     }
   }
 
@@ -164,7 +164,6 @@ class _InvoiceStore {
 
       return await res.json();
     } catch (e) {
-      alert("Failed to generate paywall. Please check payment settings.")
       logError("Failed to generate paywall. Please check payment settings.");
     }
   }

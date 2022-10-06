@@ -134,10 +134,11 @@ class _AppListCard {
     appRemoveBtn.className = "button appRemoveButton";
     appRemoveBtn.innerText = "Delete";
     appRemoveBtn.onclick = () => {
-      AppStore.removeApp(app.id)
-      this.#availableApps.push(app);
-      this.updateAppList();
-      this.sendApps();
+      if(window.confirm(`Delete ${app.name}?`)) {
+        AppStore.removeApp(app.id);
+        this.updateAppList();
+        this.sendApps();
+      }
     };
 
     const appPublishBtn = document.createElement('button');
@@ -229,8 +230,8 @@ const appListHtml = `
     <br />
     <p class="subtitle mt-1">Available Apps</p>
     <div id="availableApps" class="is-flex is-flex-direction-column"></div>
-    
-    <p class="subtitle mt-3">Unpublished Apps</p>
+    <br />
+    <p class="subtitle mt-1">Apps I Created</p>
     <div id="unpublishedApps" class="is-flex is-flex-direction-column"></div>
 </div>
 `

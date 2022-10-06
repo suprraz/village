@@ -81,8 +81,8 @@
           const name = document.getElementById('appName').value;
           const price = document.getElementById('appPrice').value;
 
-          if (typeof parseFloat(price) !== 'number') {
-            alert('Please enter a price for the app.  Set price to 0 to make the app free.');
+          if (Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
+            alert('Please enter a price for the app.');
             return;
           }
 
