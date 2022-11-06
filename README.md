@@ -84,6 +84,15 @@ Apps run in iFrame sandboxes. Apps interface with the Village Protocol via an AP
 App paywalls and payout distributions are facilitated by [LNBits](https://github.com/lnbits/lnbits). Once
 [Bolt12](https://www.bolt12.org) is ready The Village Protocol payouts can be further decentralized.
 
+### Local development
+
+To run Village locally simply install an http server and serve the local `index.html`:
+
+```
+$ npm install --global http-server
+$ http-server -c-1 .
+```
+
 ### License
 
 The Village Protocol is released under the terms of the MIT license. See https://opensource.org/licenses/MIT.

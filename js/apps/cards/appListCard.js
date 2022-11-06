@@ -188,7 +188,7 @@ class _AppListCard {
 
     const appBuyBtn = document.createElement('button');
     appBuyBtn.className = "button is-primary appBuyButton";
-    appBuyBtn.innerText = "Buy";
+    appBuyBtn.innerText = app.price + " Satoshis";
     appBuyBtn.onclick = () => MessageRouter.onRequestApp(app);
 
     const appInstallBtn = document.createElement('button');
