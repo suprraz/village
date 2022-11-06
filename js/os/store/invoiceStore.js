@@ -1,15 +1,19 @@
-import DataStore from "./dataStore.js";
 import MessageRouter from "../messageRouter.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import config from "../../config.js";
 import WalletStore from "./walletStore.js";
+import KeyValueStore from "./keyValueStore.js";
 
 class _InvoiceStore {
   #invoices
 
   constructor() {
-    this.#invoices = DataStore.getDocument('invoices') || [];
+    this.init();
+  }
+
+  async init() {
+    this.#invoices = await KeyValueStore.getDocument('invoices') || [];
 
     // check old invoices
     this.#invoices.map(async (invoice) => {
@@ -19,15 +23,15 @@ class _InvoiceStore {
 
         url = status.url;
       } catch (e) {
-        logError('There was an error while waiting for payment: '+ e);
+        logError('There was an error while waiting for payment: ' + e);
       }
 
-      if(url) {
+      if (url) {
         const urlObj = new URL(url);
         const urlParams = new URLSearchParams(urlObj.search);
 
         if (urlParams.has('encryptionKey') && urlParams.has('appId')) {
-          this.updateInvoice(urlParams.get('appId'), urlParams.get('encryptionKey'));
+          await this.updateInvoice(urlParams.get('appId'), urlParams.get('encryptionKey'));
         }
       }
     });
@@ -39,11 +43,11 @@ class _InvoiceStore {
   watchInvoice(paywalledApp, invoice) {
     const newInvoice = {paywalledApp, invoice, date: new Date()};
     this.#invoices.push(newInvoice);
-    DataStore.setDocument('invoices', this.#invoices);
+    KeyValueStore.setDocument('invoices', this.#invoices);
   }
 
-  updateInvoice(appId, encryptionKey) {
-    this.#invoices = DataStore.getDocument('invoices');
+  async updateInvoice(appId, encryptionKey) {
+    this.#invoices = await KeyValueStore.getDocument('invoices');
     const invoice = this.#invoices.reverse().find(i => i.paywalledApp.id === appId);
     const { paywalledApp } = invoice;
 
@@ -55,7 +59,7 @@ class _InvoiceStore {
 
       this.#invoices = this.#invoices.filter(i => i.paywalledApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));
 
-      DataStore.setDocument('invoices', this.#invoices);
+      await KeyValueStore.setDocument('invoices', this.#invoices);
 
       MessageRouter.onInstallApp(app);
       alert(`Installed '${app.name}'`);

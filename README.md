@@ -90,7 +90,7 @@ To run Village locally simply install an http server and serve the local `index.
 
 ```
 $ npm install --global http-server
-$ http-server -c-1 .
+$ http-server -c-1 -p 8000 .
 ```
 
 ### License
