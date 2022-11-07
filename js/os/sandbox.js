@@ -42,7 +42,7 @@ class _Sandbox {
     return await res.text();
   }
 
-  run(app, params) {
+  async run(app, params) {
     this.sanitize();
 
     if(app.runUrl) {
@@ -51,29 +51,26 @@ class _Sandbox {
       return;
     }
 
-    this.#iframe.onload = async () => {
-      let html;
+    let html;
 
-      if(app.appFileName) {
-        html = await this.loadAppByFilename(app.appFileName);
-      } else {
-        html = app.code;
-      }
-
-      const appParams = !params ? '' : `
-      <script> 
-        let params = '${btoa(JSON.stringify(params))}';
-      </script>`;
-
-      //insert global params before first script
-      html = html.replace(/<script/, `${appParams}<script`);
-
-      const payload = btoa(html);
-
-      this.#iframe.contentWindow.postMessage({payload}, '*');
-      this.#runningAppId = app.id;
-      this.#runningAppName = app.name;
+    if(app.appFileName) {
+      html = await this.loadAppByFilename(app.appFileName);
+    } else {
+      html = app.code;
     }
+
+    const appParams = !params ? '' : `
+    <script> 
+      let params = '${btoa(JSON.stringify(params))}';
+    </script>`;
+
+    //insert global params before first script
+    html = html.replace(/<script/, `${appParams}<script`);
+
+    this.#iframe.setAttribute('srcdoc', html)
+
+    this.#runningAppId = app.id;
+    this.#runningAppName = app.name;
   }
 
   getRunningAppId() {
@@ -99,18 +96,6 @@ const sandboxHtml = `
           <!DOCTYPE html>
           <html>
           <head>
-              <script>
-                  function runOnce(event) {
-                      window.removeEventListener('message', runOnce);
-                      
-                      const data = event.data;
-                     
-                      document.open();
-                      document.write(atob(data.payload));
-                      document.close();
-                  }
-                  window.addEventListener('message', runOnce, false);
-              </script>
           </head>
           <body>
             <div style='background-color: #0a0a0a; height: 100%'></div>
