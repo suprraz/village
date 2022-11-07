@@ -118,7 +118,7 @@ class _AppListCard {
 
     const appRunBtn = document.createElement('button');
     appRunBtn.className = "button is-primary appRunButton";
-    appRunBtn.innerText = "Run";
+    appRunBtn.innerText = app.type === 'eBook-app-type' ? 'Read' : "Run";
     appRunBtn.onclick = async () => {
       const reloadedApp = await AppStore.getApp(app.id);
 
