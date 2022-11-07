@@ -7,6 +7,7 @@ class _riverMessenger {
   #handlers
   #onNodeConnected
   #onNetworkChangeHandler
+  #onDownloadProgressHandler
   #riverApps
 
   init(riverApps) {
@@ -35,6 +36,10 @@ class _riverMessenger {
 
   registerOnNetworkChangeHandler(onNetworkChangeHandler) {
     this.#onNetworkChangeHandler = onNetworkChangeHandler;
+  }
+
+  registerOnDownloadProgressHandler(onDownloadProgressHandler) {
+    this.#onDownloadProgressHandler = onDownloadProgressHandler;
   }
 
   onMessage (data, node) {
@@ -145,6 +150,12 @@ class _riverMessenger {
 
     if(typeof this.#onNetworkChangeHandler === 'function') {
       this.#onNetworkChangeHandler();
+    }
+  }
+
+  onDownloadProgress(text, value, total) {
+    if(typeof this.#onDownloadProgressHandler === 'function') {
+      this.#onDownloadProgressHandler(text, value, total);
     }
   }
 

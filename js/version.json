@@ -1,5 +1,5 @@
 {
-  "version": 0.03,
-  "promptForUpgrade" : 0.02,
-  "autoUpgrade": 0.01
+  "version": 0.04,
+  "autoUpgrade": 0.03,
+  "promptForUpgrade" : 0.03
 }

@@ -29,6 +29,10 @@ class RiverApi {
     this.#RiverMessenger.registerOnNetworkChangeHandler(onNetworkChangeHandler);
   }
 
+  registerOnDownloadProgressHandler(onDownloadProgressHandler) {
+    this.#RiverMessenger.registerOnDownloadProgressHandler(onDownloadProgressHandler);
+  }
+
   registerHandler(type, handler) {
     this.#RiverMessenger.registerHandler(type, handler);
   }

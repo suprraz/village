@@ -210,6 +210,7 @@ class _AppListCard {
       return {
         ...app,
         code: null,  //strip the code
+        encryptedCode: undefined,  //strip the code
         brokerNodeId: Profile.getNodeID()
       };
     });

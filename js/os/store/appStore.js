@@ -155,6 +155,27 @@ class _AppStore {
           return app;
         });
       });
+
+      this.#appStoreDb.version(50).stores({
+        installedApps: `
+        id,
+        name,
+        version,
+        authorId,
+        authorWalletId,
+        signature,
+        price,
+        installDate,
+        updateDate,
+        creationDate,       
+        isPublished  `,
+      }).upgrade((trans) => {
+        return trans.installedApps.toCollection().modify(app => {
+          app.encryptedCode = undefined;
+
+          return app;
+        });
+      });
     } catch (e) {
       logError(`AppStore Error ${e}`);
     }

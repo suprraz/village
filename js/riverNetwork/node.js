@@ -274,6 +274,7 @@ class _Node {
             if(this.#chunkBuffer[splitMsgId]) {
               delete this.#chunkBuffer[splitMsgId];
             }
+            RiverMessenger.onDownloadProgress('Downloading', 0, 0);
           }, DOWNLOAD_TIMEOUT);
         }
 
@@ -284,6 +285,7 @@ class _Node {
         this.#chunkBuffer[splitMsgId][chunkNum] = chunk;
 
         logMessage('Node Received chunk #' + chunkNum);
+        RiverMessenger.onDownloadProgress('Downloading', chunkNum, chunkCount);
 
         let allChunksReceived = true;
         for(let i = 0; i < chunkCount; i++) {
@@ -296,14 +298,15 @@ class _Node {
           const msgJson = this.#chunkBuffer[splitMsgId].join('');
           try {
             this.#onMessage({data: msgJson}, context);
-
           } catch (e) {
             logError(e)
           }
+          RiverMessenger.onDownloadProgress('Downloading', 0, 0);
 
           delete this.#chunkBuffer[splitMsgId];
         }
       } catch (e) {
+        RiverMessenger.onDownloadProgress('Downloading', 0, 0);
         logError(e);
       }
     }

@@ -17,6 +17,7 @@ class _MessageRouter {
 
     this.#riverApi.registerOnNodeConnected(() => this.onNodeConnected());
     this.#riverApi.registerOnNetworkChangeHandler(() => this.onNetworkChange());
+    this.#riverApi.registerOnDownloadProgressHandler((text, value, total) => this.onDownloadProgress(text, value, total));
   }
 
   registerHandlers() {
@@ -34,6 +35,10 @@ class _MessageRouter {
     this.#coreApps.Notify.confirm(text, onConfirm, onCancel);
   }
 
+  progress(text, value, total) {
+    this.#coreApps.Notify.progress(text, value, total);
+  }
+
   onNodeConnected() {
     this.#coreApps.AddPeerCard.stop();
     this.#coreApps.AppListCard.updateAppList();
@@ -42,6 +47,10 @@ class _MessageRouter {
 
   onNetworkChange() {
     this.#coreApps.VillageStateCard.refresh();
+  }
+
+  onDownloadProgress(text, value, total) {
+    this.progress(text, value, total)
   }
 
   onAppMessage(data) {
