@@ -77,18 +77,23 @@ class _Notify {
   }
 
   progress(text, value, total) {
+    if(typeof value !== 'number' || typeof total !== 'number' || total === 0 || value > total) {
+      return this.close();
+    }
+
     this.#promptTitle.innerText = text;
     this.#promptModal.classList.remove('is-active');
     this.#progressModal.classList.add('is-active');
     this.#promptTitle.innerText = 'Progress';
     this.#progressTitle.innerText = text;
-    this.#progressIndicator.setAttribute('value', value);
     this.#progressIndicator.setAttribute('max', total);
-    this.#el.classList.remove('is-hidden');
-
-    if(typeof value !== 'number' || typeof total !== 'number' || total === 0 || value > total) {
-      this.close();
+    if(value < 0) {
+      // show endless indicator
+      this.#progressIndicator.removeAttribute('value');
+    } else {
+      this.#progressIndicator.setAttribute('value', value);
     }
+    this.#el.classList.remove('is-hidden');
   }
 
   close() {

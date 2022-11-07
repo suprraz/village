@@ -188,6 +188,11 @@ class _MessageRouter {
               this.alert(data.payload.alertMsg);
             }
             break;
+          case 'progress':
+            if (typeof data.payload?.progressLabel === "string" && typeof data.payload?.progressValue === "number" && typeof data.payload?.progressTotal === "number") {
+              this.progress( data.payload.progressLabel, data.payload.progressValue, data.payload.progressTotal );
+            }
+            break;
           default:
             logError(`MessageRouter Unhandled iframe message: ${JSON.stringify(data)}`);
         }

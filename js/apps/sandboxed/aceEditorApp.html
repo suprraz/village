@@ -22,7 +22,7 @@
 
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
-    <script src="https://unpkg.com/ace-builds@1.6/src-min-noconflict/ace.js" charset="utf-8"
+    <script src="https://unpkg.com/ace-builds@1.12.4/src-min-noconflict/ace.js" charset="utf-8"
             type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -41,11 +41,20 @@
             }
           }
 
+          this.progress('Loading editor', -1, 1);
+
           document.addEventListener('DOMContentLoaded', () => {
             this.#editorEl = document.getElementById('editor');
 
             this.init();
           }, false);
+        }
+
+        progress(text, value, total) {
+          window.parent.postMessage({
+            type: 'progress',
+            payload: {progressLabel: text, progressValue: value, progressTotal: total}
+          }, '*');
         }
 
         init() {
@@ -54,7 +63,7 @@
             selectionStyle: "text"
           });
 
-          this.#editor.setTheme("ace/theme/twilight");
+          this.#editor.setTheme("ace/theme/twilight", () => this.progress('Loading editor', 0, 0));
           this.#editor.session.setMode("ace/mode/javascript");
 
           this.#editorEl.classList.remove("is-hidden");

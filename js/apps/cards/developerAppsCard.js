@@ -119,6 +119,7 @@ class _DeveloperAppsCard {
 
     app.signature = AppStore.signApp(app);
 
+    MessageRouter.progress('Loading editor', -1, 1);
     MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app});
   }
 
@@ -168,6 +169,7 @@ class _DeveloperAppsCard {
     appEditBtn.onclick = async () => {
       const reloadedApp = await AppStore.getApp(app.id);
 
+      MessageRouter.progress('Loading editor', -1, 1);
       MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app: reloadedApp});
     };
 
