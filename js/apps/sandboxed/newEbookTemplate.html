@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Ebook</title>
+    <title>Hello World Page</title>
     <style>
       body {
           background-color: #0a0a0a;
@@ -24,9 +24,7 @@
     <script type="text/javascript">
       class _Page {
         constructor() {
-          document.addEventListener('DOMContentLoaded', () => {
-            this.loadPdf();
-          });
+          this.loadPdf();
         }
 
         async loadPdf() {
@@ -35,8 +33,7 @@
           const blob = await (await fetch(ebookDataUrl)).blob();
           const url = URL.createObjectURL( blob );
 
-          const ebookCont = document.getElementById('ebookContainer');
-          ebookCont.innerHTML = `<embed width='100%' height='100%' src='${url}'></embed>`;
+          window.open(url, '_blank');
         }
       }
 
@@ -46,7 +43,7 @@
 
 <body>
 <div id="ebookContainer">
-
+    <p class="is-size-4 ml-4 mt-4">Ebook opened in a new tab.  Please enable popups.</p>
 </div>
 </body>
 </html>
