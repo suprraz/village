@@ -106,7 +106,7 @@ class _AppListCard {
     appDiv.className = "installedApp card my-1";
 
     const appNameDiv = document.createElement('div');
-    appNameDiv.className = "card-header-title title appName";
+    appNameDiv.className = "card-header-title is-size-5 appName";
     appNameDiv.innerText = app.name;
 
     const buttonsDiv = document.createElement('div');
