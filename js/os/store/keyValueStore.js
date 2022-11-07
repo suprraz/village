@@ -33,15 +33,6 @@ class _KeyValueStore {
       this.#keyValueStoreDb.version(2).stores({
         keyValue: `key, doc`
       });
-
-      const oldSettings = localStorage.getItem('settings');
-      if(oldSettings) {
-        try {
-          const settingsObj = JSON.parse(oldSettings);
-          this.setDocument('settings', settingsObj);
-        } catch (e) {}
-        localStorage.removeItem('settings');
-      }
     } catch (e) {
       logError(`AppStore Error ${e}`);
     }
