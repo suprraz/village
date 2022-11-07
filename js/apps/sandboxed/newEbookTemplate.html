@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Ebook</title>
+    <style>
+      body {
+          background-color: #0a0a0a;
+      }
+
+      #ebookContainer {
+          height: 100%;
+          position: absolute;
+          width: 100%;
+          overflow-y: scroll;
+      }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
+
+
+    <script type="text/javascript">
+      class _Page {
+        constructor() {
+          document.addEventListener('DOMContentLoaded', () => {
+            this.loadPdf();
+          });
+        }
+
+        async loadPdf() {
+          const ebookDataUrl = window.ebookDataUrl;
+
+          const blob = await (await fetch(ebookDataUrl)).blob();
+          const url = URL.createObjectURL( blob );
+
+          const ebookCont = document.getElementById('ebookContainer');
+          ebookCont.innerHTML = `<embed width='100%' height='100%' src='${url}'></embed>`;
+        }
+      }
+
+      new _Page();
+    </script>
+</head>
+
+<body>
+<div id="ebookContainer">
+
+</div>
+</body>
+</html>

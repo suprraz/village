@@ -127,7 +127,7 @@ class _AppListCard {
     appEditBtn.onclick = async () => {
       const reloadedApp = await AppStore.getApp(app.id);
 
-      MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app: reloadedApp});
+      MessageRouter.onRunApp({appFileName: 'appEditorApp.html'}, {app: reloadedApp});
     };
 
     const appRemoveBtn = document.createElement('button');

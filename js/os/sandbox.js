@@ -61,7 +61,7 @@ class _Sandbox {
 
     const appParams = !params ? '' : `
     <script> 
-      let params = '${btoa(JSON.stringify(params))}';
+      const params = '${btoa(JSON.stringify(params))}';
     </script>`;
 
     //insert global params before first script

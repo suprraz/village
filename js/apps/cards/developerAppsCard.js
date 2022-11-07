@@ -6,13 +6,16 @@ import Settings from "../../os/settings.js";
 import WalletStore from "../../os/store/walletStore.js";
 
 const NEW_APP_TEMPLATE_PATH = 'js/apps/sandboxed/newAppTemplate.html';
+const NEW_EBOOK_TEMPLATE_PATH = 'js/apps/sandboxed/newEbookTemplate.html';
 
 const MIN_SATS_WITHDRAWAL = 10;
 const MIN_SATS_BUFFER = 5;
 
 class _DeveloperAppsCard {
   #newAppTemplate = null;
+  #newEbookTemplate = null;
   #newAppBtn
+  #newEbookBtn
   #devWalletBalanceAmt
   #brokerWalletBalanceAmt
   #devWalletBalanceEl
@@ -24,6 +27,7 @@ class _DeveloperAppsCard {
 
     containerEl.innerHTML = devAppsContainerHtml;
     this.#newAppBtn = containerEl.querySelector('#newAppBtn');
+    this.#newEbookBtn = containerEl.querySelector('#newEbookBtn');
     this.#devWalletBalanceEl = containerEl.querySelector('#devWalletBalance');
     this.#brokerWalletBalanceEl = containerEl.querySelector('#brokerWalletBalance');
     this.#withdrawDevEl = containerEl.querySelector('#withdrawDev');
@@ -56,8 +60,8 @@ class _DeveloperAppsCard {
     }
   }
 
-  async loadTemplate() {
-    const res = await fetch( NEW_APP_TEMPLATE_PATH );
+  async loadTemplate(path) {
+    const res = await fetch( path );
     if (!res.ok) {
       throw new Error(`Error response: ${res.status}`);
     }
@@ -88,6 +92,7 @@ class _DeveloperAppsCard {
 
   registerListeners() {
     this.#newAppBtn.addEventListener('click', () => this.newApp());
+    this.#newEbookBtn.addEventListener('click', () => this.newEbook());
     this.#withdrawDevEl.addEventListener('click', (e) => this.withdrawDev(e));
     this.#withdrawBrokerEl.addEventListener('click', (e) => this.withdrawBroker(e));
   }
@@ -95,7 +100,7 @@ class _DeveloperAppsCard {
   async newApp() {
     if(!this.#newAppTemplate) {
       try {
-        this.#newAppTemplate = await this.loadTemplate();
+        this.#newAppTemplate = await this.loadTemplate(NEW_APP_TEMPLATE_PATH);
       } catch (e) {
         MessageRouter.alert('There was an error loading the New App Template');
         logError(`DeveloperAppsCard Error loading template ${e}`);
@@ -114,12 +119,44 @@ class _DeveloperAppsCard {
       installDate: (new Date()).getTime(),
       updateDate: (new Date()).getTime(),
       creationDate: (new Date()).getTime(),
-      isPublished: 0
+      isPublished: 0,
+      type: 'regular-app-type'
     }
 
     app.signature = AppStore.signApp(app);
 
-    MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app});
+    MessageRouter.onRunApp({appFileName: 'appEditorApp.html'}, {app});
+  }
+
+  async newEbook() {
+    if(!this.#newEbookTemplate) {
+      try {
+        this.#newEbookTemplate = await this.loadTemplate(NEW_EBOOK_TEMPLATE_PATH);
+      } catch (e) {
+        MessageRouter.alert('There was an error loading the New Ebook Template');
+        logError(`DeveloperAppsCard Error loading template ${e}`);
+        return;
+      }
+    }
+
+    const app = {
+      id: `app-${uuidv4()}`,
+      name: 'Hello World',
+      authorId: Settings.get('userId'),
+      authorWalletId: await WalletStore.getPrimaryWalletId(),
+      code: this.#newEbookTemplate,
+      version: 1,
+      price: '1',
+      installDate: (new Date()).getTime(),
+      updateDate: (new Date()).getTime(),
+      creationDate: (new Date()).getTime(),
+      isPublished: 0,
+      type: 'eBook-app-type'
+    }
+
+    app.signature = AppStore.signApp(app);
+
+    MessageRouter.onRunApp({appFileName: 'appEditorApp.html'}, {app});
   }
 
   async updateMyAppsList() {
@@ -168,7 +205,7 @@ class _DeveloperAppsCard {
     appEditBtn.onclick = async () => {
       const reloadedApp = await AppStore.getApp(app.id);
 
-      MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app: reloadedApp});
+      MessageRouter.onRunApp({appFileName: 'appEditorApp.html'}, {app: reloadedApp});
     };
 
     const appRemoveBtn = document.createElement('button');
@@ -209,7 +246,8 @@ const devAppsContainerHtml = `
     </div>
     
     <div class="mt-5">
-        <button id="newAppBtn" class="button is-info appRunButton mt-5">Create New App</button>
+        <button id="newAppBtn" class="button is-info appRunButton mt-5 mr-2">New App</button>
+        <button id="newEbookBtn" class="button is-info appRunButton mt-5">New eBook</button>
     </div>
 </div>
 `;
