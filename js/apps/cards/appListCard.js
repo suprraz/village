@@ -67,21 +67,25 @@ class _AppListCard {
       publishedAppsDiv.appendChild(this.createPublishedAppDiv(app, userId === app.authorId, false));
     })
 
-
     const availableAppsDiv = document.getElementById("availableApps");
 
-    if(!this.#availableApps.length) {
-      availableAppsDiv.innerText = "No apps available.";
-    } else {
-      // remove all children and listeners
-      while (availableAppsDiv.firstChild) {
-        availableAppsDiv.removeChild(availableAppsDiv.firstChild);
-      }
+    while (availableAppsDiv.firstChild) {
+      availableAppsDiv.removeChild(availableAppsDiv.firstChild);
     }
 
     this.#availableApps.map((app) => {
       availableAppsDiv.appendChild(this.createAvailableAppDiv(app));
     })
+
+    if(NodeStore.getConnectedNodeIds().length < 1 || this.#availableApps.length < 1) {
+      const progressDiv = document.createElement('div');
+      progressDiv.className = "progress-small my-1";
+      progressDiv.innerHTML = '<progress class="progress is-small is-primary " max="100"></progress>';
+      availableAppsDiv.appendChild(progressDiv);
+    }
+
+    availableAppsDiv.appendChild(this.createAvailableAppDiv(app))
+
 
     const unpublishedApps = await AppStore.getUnpublishedApps();
     const unpublishedAppsDiv = document.getElementById("unpublishedApps");

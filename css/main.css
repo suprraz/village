@@ -97,3 +97,7 @@
   background-color: rgba(10,10,10,.86);
   z-index: 9999999;
 }
+
+.progress-small {
+  width: 200px;
+}
