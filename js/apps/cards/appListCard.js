@@ -127,7 +127,6 @@ class _AppListCard {
     appEditBtn.onclick = async () => {
       const reloadedApp = await AppStore.getApp(app.id);
 
-      MessageRouter.progress('Loading editor', -1, 1);
       MessageRouter.onRunApp({appFileName: 'aceEditorApp.html'}, {app: reloadedApp});
     };
 
