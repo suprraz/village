@@ -84,9 +84,6 @@ class _AppListCard {
       availableAppsDiv.appendChild(progressDiv);
     }
 
-    availableAppsDiv.appendChild(this.createAvailableAppDiv(app))
-
-
     const unpublishedApps = await AppStore.getUnpublishedApps();
     const unpublishedAppsDiv = document.getElementById("unpublishedApps");
 
