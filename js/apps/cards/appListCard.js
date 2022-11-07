@@ -107,7 +107,7 @@ class _AppListCard {
 
     const appNameDiv = document.createElement('div');
     appNameDiv.className = "card-header-title is-size-5 appName";
-    appNameDiv.innerText = app.name;
+    appNameDiv.innerText = app.type === 'eBook-app-type' ? 'eBook: ' + app.name : app.name;
 
     const buttonsDiv = document.createElement('div');
     buttonsDiv.className = "buttons card-content";
