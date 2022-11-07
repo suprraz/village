@@ -26,6 +26,14 @@ class _MessageRouter {
     this.#riverApi.registerHandler('app-broker-response', (data) => this.onAppBrokerResponse(data));
   }
 
+  alert(text) {
+    this.#coreApps.Notify.alert(text);
+  }
+
+  confirm(text, onConfirm, onCancel) {
+    this.#coreApps.Notify.confirm(text, onConfirm, onCancel);
+  }
+
   onNodeConnected() {
     this.#coreApps.AddPeerCard.stop();
     this.#coreApps.AppListCard.updateAppList();
@@ -35,7 +43,6 @@ class _MessageRouter {
   onNetworkChange() {
     this.#coreApps.VillageStateCard.refresh();
   }
-
 
   onAppMessage(data) {
     const { app } = data;
@@ -69,7 +76,7 @@ class _MessageRouter {
           paywalledApp
         });
       } else {
-        alert('Failed to download app: Peer is no longer available');
+        this.alert('Failed to download app: Peer is no longer available');
       }
     } else {
       logError('MessageRouter App is no longer available');
@@ -90,7 +97,7 @@ class _MessageRouter {
           app
         });
       } else {
-        alert('Failed to download app: Peer is no longer available');
+        this.alert('Failed to download app: Peer is no longer available');
         logError('MessageRouter App broker is no longer available')
       }
 
@@ -167,7 +174,11 @@ class _MessageRouter {
               type: 'app'
             });
             break;
-
+          case 'alert':
+            if (typeof data.payload?.alertMsg === "string") {
+              this.alert(data.payload.alertMsg);
+            }
+            break;
           default:
             logError(`MessageRouter Unhandled iframe message: ${JSON.stringify(data)}`);
         }

@@ -264,7 +264,7 @@ class _AppStore {
     if(this.verifyApp(app)) {
       MessageRouter.onRunApp(app);
     } else {
-      alert('Error: Invalid app')
+      MessageRouter.alert('Error: Invalid app')
     }
   }
 }

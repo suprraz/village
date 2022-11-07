@@ -11,6 +11,7 @@ import _AppListCard from "../apps/cards/appListCard.js";
 import _LoggerAppCard from "../apps/cards/loggerAppCard.js";
 import RiverApi from "../riverNetwork/riverApi.js";
 import _DeveloperAppsCard from "../apps/cards/developerAppsCard.js";
+import Notify from "./notify.js";
 
 class _Village {
   #coreApps
@@ -83,9 +84,9 @@ class _Village {
       Sandbox,
       SandboxStore,
       InvoiceStore,
-      UpgradeStore
+      UpgradeStore,
+      Notify,
     };
-
   }
 
 }

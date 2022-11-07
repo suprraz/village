@@ -74,7 +74,7 @@ class _DeveloperAppsCard {
     const withdrawalUrl = await WalletStore.getSecondaryWalletWithdrawalUrl(this.addBuffer(this.#brokerWalletBalanceAmt));
     await navigator.clipboard.writeText(withdrawalUrl);
 
-    alert('Withdrawal url has been copied to clipboard.  Paste in a LNURL compatible lightning wallet.');
+    MessageRouter.alert('Withdrawal url has been copied to clipboard.  Paste in a LNURL compatible lightning wallet.');
   }
 
   async withdrawDev(e) {
@@ -83,7 +83,7 @@ class _DeveloperAppsCard {
     const withdrawalUrl = await WalletStore.getPrimaryWalletWithdrawalUrl(this.addBuffer(this.#devWalletBalanceAmt));
     await navigator.clipboard.writeText(withdrawalUrl);
 
-    alert('Withdrawal url has been copied to clipboard.  Paste in a LNURL compatible lightning wallet.');
+    MessageRouter.alert('Withdrawal url has been copied to clipboard.  Paste in a LNURL compatible lightning wallet.');
   }
 
   registerListeners() {
@@ -97,7 +97,7 @@ class _DeveloperAppsCard {
       try {
         this.#newAppTemplate = await this.loadTemplate();
       } catch (e) {
-        alert('There was an error loading the New App Template');
+        MessageRouter.alert('There was an error loading the New App Template');
         logError(`DeveloperAppsCard Error loading template ${e}`);
         return;
       }

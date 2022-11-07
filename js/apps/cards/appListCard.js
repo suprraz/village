@@ -134,11 +134,11 @@ class _AppListCard {
     appRemoveBtn.className = "button appRemoveButton";
     appRemoveBtn.innerText = "Delete";
     appRemoveBtn.onclick = () => {
-      if(window.confirm(`Delete ${app.name}?`)) {
+      MessageRouter.confirm(`Delete ${app.name}?`, () => {
         AppStore.removeApp(app.id);
         this.updateAppList();
         this.sendApps();
-      }
+      }, () => {});
     };
 
     const appPublishBtn = document.createElement('button');

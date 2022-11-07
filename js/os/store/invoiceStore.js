@@ -62,7 +62,7 @@ class _InvoiceStore {
       await KeyValueStore.setDocument('invoices', this.#invoices);
 
       MessageRouter.onInstallApp(app);
-      alert(`Installed '${app.name}'`);
+      MessageRouter.alert(`Installed '${app.name}'`);
     } catch (e) {
       logError(`InvoiceStore Error decrypting app code ${e}}`)
     }

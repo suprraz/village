@@ -82,12 +82,12 @@
           const price = document.getElementById('appPrice').value;
 
           if (Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
-            alert('Please enter a price for the app.');
+            window.parent.postMessage({type: 'alert', payload: {alertMsg: 'Please enter a valid price'}}, '*');
             return;
           }
 
           if (!name.length) {
-            alert("Please enter a valid app name");
+            window.parent.postMessage({type: 'alert', payload: {alertMsg: 'Please enter a valid app name'}}, '*');
             return;
           }
 

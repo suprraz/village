@@ -61,7 +61,7 @@
 
             url = status.url;
           } catch (e) {
-            alert('There was an error while waiting for payment: '+ e);
+            window.parent.postMessage({type: 'alert', payload: {alertMsg: 'There was an error while waiting for payment: '+ e}}, '*');
           }
 
           const urlObj = new URL(url);
