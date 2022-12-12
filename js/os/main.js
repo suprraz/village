@@ -12,9 +12,11 @@ import _LoggerAppCard from "../apps/cards/loggerAppCard.js";
 import RiverApi from "../riverNetwork/riverApi.js";
 import _DeveloperAppsCard from "../apps/cards/developerAppsCard.js";
 import Notify from "./notify.js";
+import MainPage from "./mainPage.js";
 
 class _Village {
   #coreApps
+  #MainPage
 
   constructor() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -24,8 +26,6 @@ class _Village {
       window.parent.postMessage({type: 'invoicePaid', payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}},'*');
       return;
     }
-
-    _Village.#initFullpageScrolling();
 
     this.#initCoreApps();
 
@@ -48,22 +48,8 @@ class _Village {
     riverApi.connect();
 
     this.#coreApps.AppListCard.updateAppList();
-  }
 
-  static #initFullpageScrolling() {
-    new fullpage('#fullpage', {
-      menu: '#menu',
-      autoScrolling:true,
-      credits: { enabled: false },
-      anchors: [
-        'appStoreScreenAnchor',
-        'networkScreenAnchor'
-      ],
-      paddingTop: '5em',
-      normalScrollElements: '.scrollable',
-      navigation: true,
-      licenseKey: 'K7S16-5QZ9I-L8GKK-ENJW8-JHUOM'
-    });
+    this.#MainPage = MainPage;
   }
 
   #initCoreApps() {
@@ -88,7 +74,6 @@ class _Village {
       Notify,
     };
   }
-
 }
 
 const Village = new _Village();

@@ -8,10 +8,8 @@
     <title>Village</title>
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/fullpage.js@4.0.10/dist/fullpage.min.css" />
     <link rel="stylesheet" href="css/main.css"/>
 
-    <script src="https://unpkg.com/fullpage.js@4.0.10/dist/fullpage.min.js"></script>
     <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <script src="https://unpkg.com/webrtc-adapter@8.1.1/out/adapter.js"></script>
@@ -24,7 +22,33 @@
 <body>
 
 <div id="main">
-    <div id="fullpage">
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="">
+                <img src="/logo.png" class="logo" alt="logo">
+            </a>
+
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a id="storeTab" class="navbar-item is-tab is-size-5">
+                    Store
+                </a>
+
+                <a id="networkTab" class="navbar-item is-size-5">
+                    Network
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="pages">
         <div class="section" id="appStoreScreen" data-anchor="appStoreScreenAnchor">
             <div class="tile is-ancestor">
                 <div class="tile is-vertical is-8">
@@ -37,17 +61,15 @@
                     </div>
                 </div>
                 <div class="tile is-parent">
-                    <div class="tile is-parent">
-                        <article class="tile is-child notification is-warning">
-                            <div id="developerAppsCardContainer"></div>
-                        </article>
-                    </div>
+                    <article class="tile is-child notification is-warning">
+                        <div id="developerAppsCardContainer"></div>
+                    </article>
                 </div>
             </div>
 
         </div>
 
-        <div class="section" id="networkScreen" data-anchor="networkScreenAnchor">
+        <div class="section is-hidden" id="networkScreen" data-anchor="networkScreenAnchor">
             <div class="tile is-ancestor">
                 <div class="tile is-vertical is-8">
                     <div class="tile">
@@ -59,22 +81,13 @@
                     </div>
                 </div>
                 <div class="tile is-parent">
-                    <div class="tile is-parent">
-                        <article class="tile is-child notification is-success">
-                            <div id="rightPaneContainer"></div>
-                        </article>
-                    </div>
+                    <article class="tile is-child notification is-success">
+                        <div id="rightPaneContainer"></div>
+                    </article>
                 </div>
             </div>
         </div>
     </div>
-
-    <ul id="menu">
-        <li><img class="logo" src="villagers.jpg" alt="logo"></li>
-        <li>Village | </li>
-        <li data-menuanchor="appStoreScreenAnchor"><a href="#appStoreScreenAnchor">Store</a></li>
-        <li data-menuanchor="networkScreenAnchor"><a href="#networkScreenAnchor">Network</a></li>
-    </ul>
 
     <div id="appContainer"></div>
     <div id="sandbox"></div>

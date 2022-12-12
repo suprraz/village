@@ -1,13 +1,12 @@
-.logo {
-  height: 30px;
-  margin-bottom: -5px;
-  border-radius: 3px;
+.navbar .logo {
+  max-height: 3.25rem;
+  margin-bottom: -3px;
 }
 
 #overlayContainer {
   position: fixed;
   background-color: rgba(10,10,10,.86);
-  z-index: 2;
+  z-index: 99;
 }
 
 #sandboxIframe {
@@ -64,6 +63,11 @@
   }
 }
 
+#pages {
+  margin-top: 2rem;
+
+}
+
 .scrollable {
   overflow: scroll;
   max-height: 80vh;
@@ -100,4 +104,13 @@
 
 .progress-small {
   width: 200px;
+}
+
+.buttons.card-content {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.loader {
+  @include loader;
 }

@@ -229,25 +229,25 @@ class _DeveloperAppsCard {
 
 const devAppsContainerHtml = `
 <div id="developerAppsCard">
-    <p class="title">Earnings</p>
+    <p class="title is-4">Earnings</p>
     
    <div class="px-1 mx-3 mt-3">
-        <div class="is-size-5">Developer Wallet Balance: 
+        <div class="is-size-6">Developer Wallet Balance: 
           <div class="is-family-monospace"><span id="devWalletBalance">-</span> satoshis</div>
         </div>
         <a href="#blank" id="withdrawDev" style="display: none">Withdraw</a>  
     </div>
     
     <div class="px-1 mx-3 mt-3">
-      <div class="is-size-5 my-3">Distributor Wallet Balance: 
+      <div class="is-size-6 my-3">Distributor Wallet Balance: 
         <div class="is-family-monospace"><span id="brokerWalletBalance">-</span> satoshis</div>
       </div>
       <a href="#blank" id="withdrawBroker" style="display: none">Withdraw</a> 
     </div>
     
     <div class="mt-5">
-        <button id="newAppBtn" class="button is-info appRunButton mt-5 mr-2">New App</button>
-        <button id="newEbookBtn" class="button is-info appRunButton mt-5">New eBook</button>
+        <button id="newAppBtn" class="button is-primary appRunButton mt-5 mr-2">New App</button>
+        <button id="newEbookBtn" class="button is-primary appRunButton mt-5">New eBook</button>
     </div>
 </div>
 `;

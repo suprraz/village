@@ -46,7 +46,7 @@ class _VillageStateCard {
 
     const nodeNameDiv = document.createElement('div');
     nodeNameDiv.className = "card-header-title";
-    nodeNameDiv.innerText = node.getProfile().nodeId;
+    nodeNameDiv.innerText = 'Id: ' + node.getProfile().nodeId;
 
     const rankDiv = document.createElement('div');
     rankDiv.className = "card-content py-0";
@@ -69,7 +69,7 @@ class _VillageStateCard {
     signalProtocolDiv.innerText =  `Signaling Protocol: ${node.getSignalProtocol()}`;
 
     nodeDiv.appendChild(nodeNameDiv);
-    nodeDiv.appendChild(rankDiv);
+    // nodeDiv.appendChild(rankDiv);
     nodeDiv.appendChild(iceDiv);
     nodeDiv.appendChild(connDiv);
     nodeDiv.appendChild(candidateTypeDiv);
@@ -81,10 +81,10 @@ class _VillageStateCard {
 }
 
 const villageStateHtml = `
-<div id="villageState" class="scrollable">
-    <p class="title">Neighbors</p>
-    <div class="subtitle" id="nodeId"></div>
-    <div class="subtitle"> 
+<div id="villageState">
+    <p class="title is-4">Network</p>
+    <span class="mb-3" >My Id: <span id="nodeId"></span></span>
+    <div class="mb-4"> 
         Connections: <span id="livePeersCount"></span>
     </div>
    

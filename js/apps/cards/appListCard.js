@@ -78,10 +78,10 @@ class _AppListCard {
     })
 
     if(NodeStore.getConnectedNodeIds().length < 1 || this.#availableApps.length < 1) {
-      const progressDiv = document.createElement('div');
-      progressDiv.className = "progress-small my-1";
-      progressDiv.innerHTML = '<progress class="progress is-small is-primary " max="100"></progress>';
-      availableAppsDiv.appendChild(progressDiv);
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = "is-flex is-flex-direction-row is-align-items-center";
+      loadingDiv.innerHTML = '<div class="loader"></div> <div class="ml-2">Searching network ... </div>';
+      availableAppsDiv.appendChild(loadingDiv);
     }
 
     const unpublishedApps = await AppStore.getUnpublishedApps();
@@ -108,7 +108,7 @@ class _AppListCard {
 
     const appNameDiv = document.createElement('div');
     appNameDiv.className = "card-header-title is-size-5 appName";
-    appNameDiv.innerText = app.type === 'eBook-app-type' ? 'eBook: ' + app.name : app.name;
+    appNameDiv.innerText = app.type === 'eBook-app-type' ? 'eBook: ' + app.name : 'App: ' + app.name;
 
     const buttonsDiv = document.createElement('div');
     buttonsDiv.className = "buttons card-content";
@@ -225,15 +225,14 @@ class _AppListCard {
 
 
 const appListHtml = `
-<div id="appList" class="scrollable">
-    <p class="title">Apps</p>
-    <p class="subtitle mt-1">Installed Apps</p>
+<div id="appList">
+    <p class="subtitle is-5 mt-1">Installed Apps</p>
     <div id="publishedApps" class="is-flex is-flex-direction-column"></div>
     <br />
-    <p class="subtitle mt-1">Available Apps</p>
+    <p class="subtitle is-5 mt-1">Available Apps</p>
     <div id="availableApps" class="is-flex is-flex-direction-column"></div>
     <br />
-    <p class="subtitle mt-1">Apps I Created</p>
+    <p class="subtitle is-5 mt-1">Apps I Created</p>
     <div id="unpublishedApps" class="is-flex is-flex-direction-column"></div>
 </div>
 `

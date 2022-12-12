@@ -67,7 +67,7 @@ class _LoggerCardApp {
 
 const loggerCardAppHtml = `
 <div id="loggerCardApp" class="content">
-    <p class="title">Logs</p>
+    <p class="title is-4">Logs</p>
     <div class="loggerCardApplog" id="loggerCardApplog"></div>
 
   <div>
