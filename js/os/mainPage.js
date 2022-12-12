@@ -7,16 +7,6 @@ class _MainPage {
   #networkBtn
 
   constructor() {
-    if (document.readyState === "complete" || document.readyState === "loaded") {
-      this.#init();
-    } else {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.#init();
-      });
-    }
-  }
-
-  #init() {
     this.#navbarBurgersEls = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
     this.#navbarMenuBtn = document.getElementById('navbarMenu');
     this.#storeBtn = document.getElementById('storeTab');
