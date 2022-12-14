@@ -114,3 +114,22 @@
 .loader {
   @include loader;
 }
+
+.app-container {
+  width: 200px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+
+.app-container .app {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 5px;
+}
+
+.app-container .app-name {
+  text-align: center;
+}

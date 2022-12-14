@@ -104,6 +104,11 @@ class _AppListCard {
 
   createPublishedAppDiv(app, isOwner, showPublished){
     const appDiv = document.createElement('div');
+    appDiv.className = "app-container mb-5";
+    appDiv.innerHTML = `<div class="box app"></div><div class="app-name">${app.name}</div>`
+    return appDiv;
+
+
     appDiv.className = "installedApp card my-1";
 
     const appNameDiv = document.createElement('div');
@@ -178,6 +183,10 @@ class _AppListCard {
 
   createAvailableAppDiv(app){
     const appDiv = document.createElement('div');
+    appDiv.className = "app-container mb-5";
+    appDiv.innerHTML = `<div class="box app"></div><div class="app-name">${app.name}</div>`
+    return appDiv;
+
     appDiv.className = "availableApp card my-1";
 
     const appNameDiv = document.createElement('div');
@@ -227,13 +236,13 @@ class _AppListCard {
 const appListHtml = `
 <div id="appList">
     <p class="subtitle is-5 mt-1">Installed Apps</p>
-    <div id="publishedApps" class="is-flex is-flex-direction-column"></div>
+    <div id="publishedApps" class="is-flex is-flex-direction-row is-flex-wrap-wrap"></div>
     <br />
     <p class="subtitle is-5 mt-1">Available Apps</p>
-    <div id="availableApps" class="is-flex is-flex-direction-column"></div>
+    <div id="availableApps" class="is-flex is-flex-direction-row is-flex-wrap-wrap"></div>
     <br />
     <p class="subtitle is-5 mt-1">Apps I Created</p>
-    <div id="unpublishedApps" class="is-flex is-flex-direction-column"></div>
+    <div id="unpublishedApps" class="is-flex is-flex-direction-row is-flex-wrap-wrap"></div>
 </div>
 `
 
