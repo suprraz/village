@@ -98,6 +98,8 @@ class _DeveloperAppsCard {
   }
 
   async newApp() {
+    MessageRouter.progress('Loading editor', -1, 1);
+
     if(!this.#newAppTemplate) {
       try {
         this.#newAppTemplate = await this.loadTemplate(NEW_APP_TEMPLATE_PATH);
@@ -129,6 +131,8 @@ class _DeveloperAppsCard {
   }
 
   async newEbook() {
+    MessageRouter.progress('Loading editor', -1, 1);
+
     if(!this.#newEbookTemplate) {
       try {
         this.#newEbookTemplate = await this.loadTemplate(NEW_EBOOK_TEMPLATE_PATH);
@@ -246,8 +250,8 @@ const devAppsContainerHtml = `
     </div>
     
     <div class="mt-5">
-        <button id="newAppBtn" class="button is-primary appRunButton mt-5 mr-2">New App</button>
-        <button id="newEbookBtn" class="button is-primary appRunButton mt-5">New eBook</button>
+        <button id="newAppBtn" class="button is-success appRunButton mt-5 mr-2">New App</button>
+        <button id="newEbookBtn" class="button is-success appRunButton mt-5">New eBook</button>
     </div>
 </div>
 `;

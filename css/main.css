@@ -87,15 +87,6 @@
   text-overflow: ellipsis;
 }
 
-.installedApp {
-  display: flex;
-  flex-direction: row;
-}
-
-.installedApp > * {
-  margin-right: 5px;
-}
-
 #notifyContainer {
   position: fixed;
   background-color: rgba(10,10,10,.86);
@@ -116,20 +107,100 @@
 }
 
 .app-container {
-  width: 200px;
-  min-height: 120px;
+  width: 140px;
+  min-height: 90px;
   display: flex;
   flex-direction: column;
   justify-content: start;
   align-items: center;
 }
 
-.app-container .app {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 5px;
+.app-container-list .app-container {
+  margin-bottom: 20px;
+  margin-right: 20px;
 }
 
-.app-container .app-name {
-  text-align: center;
+.app {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 5px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  position: relative;
+}
+
+.app-container .app.can-run {
+  cursor: pointer;
+}
+
+.app img {
+  width: 100%;
+  height: 100%;
+}
+.app img path {
+  color: #61dafb;
+  fill: #61dafb;
+}
+
+.app .delete {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: black;
+}
+
+.app .disk, .app .pencil {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+}
+
+.disk {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 290486px;
+  cursor: pointer;
+  pointer-events: auto;
+  display: inline-block;
+  flex-grow: 0;
+  flex-shrink: 0;
+  font-size: 0;
+  height: 20px;
+  max-height: 20px;
+  max-width: 20px;
+  min-height: 20px;
+  min-width: 20px;
+  outline: 0;
+  position: relative;
+  vertical-align: top;
+  width: 20px;
+  transform: rotate(30deg);
+  background-color: black;
+}
+
+.pencil {
+  width: 2px;
+  height: 10px;
+  background: white;
+  position: relative;
+  transform: rotate(30deg);
+  z-index: 10;
+  margin-left: 9px;
+  margin-top: 5px;
+}
+
+.pencil::after {
+  content: "";
+  position: absolute;
+  width: 1.6px;
+  height: 1.6px;
+  background: white;
+  left: 0.2px;
+  bottom: -0.8px;
+  transform: rotate(45deg);
+  z-index: 10;
 }

@@ -71,6 +71,9 @@ class _Sandbox {
 
     this.#runningAppId = app.id;
     this.#runningAppName = app.name;
+
+    // hide progress bar
+    MessageRouter.progress('', 0,0);
   }
 
   getRunningAppId() {

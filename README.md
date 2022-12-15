@@ -2,7 +2,7 @@
 
 ## Try it now: &nbsp;&nbsp;[The Village Protocol](https://suprraz.github.io/village/)
 
-![screenshot.png](screenshot.png)
+![screenshot.png](img/screenshot.png)
 
 ### What is The Village?
 

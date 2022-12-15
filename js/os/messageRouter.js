@@ -101,6 +101,7 @@ class _MessageRouter {
     if(app.brokerNodeId) {
       const brokerNode = NodeStore.getNodeById(app.brokerNodeId);
       if(brokerNode) {
+        this.progress('Initiating download', -1, 1);
         brokerNode.send({
           type: 'app-broker-request',
           app

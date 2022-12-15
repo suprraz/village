@@ -4,19 +4,26 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="favicon.ico" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="Village"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json" />
 
     <title>Village</title>
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
     <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="css/csshake-little.css"/>
 
     <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js"></script>
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <script src="https://unpkg.com/webrtc-adapter@8.1.1/out/adapter.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha256.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
 
     <script src="js/os/main.js" type="module" async></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha256.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
 </head>
 
 <body>
@@ -25,7 +32,7 @@
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="">
-                <img src="logo.png" class="logo" alt="logo">
+                <img src="img/logo.png" class="logo" alt="logo">
             </a>
 
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
@@ -66,7 +73,6 @@
                     </article>
                 </div>
             </div>
-
         </div>
 
         <div class="section is-hidden" id="networkScreen" data-anchor="networkScreenAnchor">
