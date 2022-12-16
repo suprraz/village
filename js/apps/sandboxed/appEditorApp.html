@@ -86,10 +86,16 @@
             });
 
             const saveBtn = document.getElementById('saveBtn');
-            saveBtn.addEventListener('click', () => this.saveAndRun(this.#code, false));
+            saveBtn.addEventListener('click', async () => {
+              await this.buildEbookApp();
+              this.saveAndRun(this.#code, false)
+            });
 
             const runBtn = document.getElementById('runBtn');
-            runBtn.addEventListener('click', () => this.saveAndRun(this.#code, true));
+            runBtn.addEventListener('click', async () => {
+              await this.buildEbookApp();
+              this.saveAndRun(this.#code, true)
+            });
           });
         }
 
@@ -119,10 +125,16 @@
             });
 
             const saveBtn = document.getElementById('saveBtn');
-            saveBtn.addEventListener('click', () => this.saveAndRun(this.#code, false));
+            saveBtn.addEventListener('click', async () => {
+              await this.buildAudioApp();
+              this.saveAndRun(this.#code, false)
+            });
 
             const runBtn = document.getElementById('runBtn');
-            runBtn.addEventListener('click', () => this.saveAndRun(this.#code, true));
+            runBtn.addEventListener('click', async () => {
+              await this.buildAudioApp();
+              this.saveAndRun(this.#code, true)
+            });
           });
         }
 
@@ -158,18 +170,21 @@
 
         async buildAudioApp() {
           try {
-            const pdfDataUrl = await this.fileToDataUrl(this.#uploader.files[0]);
+            const audioDataUrl = await this.fileToDataUrl(this.#uploader.files[0]);
 
             if(this.#params?.app?.code)
             {
+              const appName = document.getElementById('appName').value;
+              const appDescription = document.getElementById('appDescription').value;
+
               this.#code = this.#params.app.code.replace(
-                /<script/, `<script>window.audioDataUrl = '${pdfDataUrl}'; <\/script> <script`);
+                /<script id="params">.*?<\/script>/, `<script id="params">window.data = \{ appName: '${appName}', appDesc: '${appDescription}', audioDataUrl: '${audioDataUrl}' }; <\/script>`);
             } else {
               throw new Error('Failed to load template');
             }
           } catch (error) {
             this.#code = null;
-            window.parent.postMessage({type: 'alert', payload: {alertMsg: 'PDF conversion error: ' + error}}, '*');
+            window.parent.postMessage({type: 'alert', payload: {alertMsg: 'Audio conversion error: ' + error}}, '*');
           }
         }
 

@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/solar/bulmaswatch.min.css">
 
 
+    <script id="params"></script>
     <script type="text/javascript">
       class _Page {
         constructor() {
@@ -30,7 +31,13 @@
         }
 
         async loadAudio() {
-          const audioDataUrl = window.audioDataUrl;
+          const audioDataUrl = window.data.audioDataUrl;
+
+          const appName = document.getElementById('appName');
+          appName.innerText = window.data.appName;
+
+          const appDesc = document.getElementById('appDescription');
+          appDesc.innerText = window.data.appDesc;
 
           const blob = await (await fetch(audioDataUrl)).blob();
           const blobUrl = URL.createObjectURL( blob );
@@ -38,12 +45,13 @@
           const newTabLink = document.getElementById('newTabLink');
           newTabLink.setAttribute('href', blobUrl)
 
+          const audioPlayerSource = document.getElementById('audioPlayerSource');
+          audioPlayerSource.setAttribute('src', blobUrl);
+
           const closeBtn = document.getElementById('closeBtn');
           closeBtn.addEventListener('click',
             () => window.parent.postMessage({type: 'closeApp', payload: {}},'*')
           );
-
-          window.open(blobUrl, '_blank');
         }
       }
 
@@ -53,10 +61,18 @@
 
 <body>
 <div id="audioContainer">
-    <p class="is-size-5 ml-4 mt-4">
-        Audio opened in a <a href="#" id="newTabLink" target="_blank">new tab</a>.  Please enable popups.
-    </p>
-    <button class="button ml-4 mt-6" id="closeBtn">Close</button>
+    <section class="section">
+        <div class="is-size-5 mb-2" id="appName"></div>
+        <div class="is-size-6 mb-6" id="appDescription"></div>
+        <audio controls autoplay id="audioPlayerSource">
+            Your browser does not support playing audio files directly.
+        </audio>
+        <p class="is-size-5 mt-4 is-flex-direction-row is-align-items-center">
+            <button class="button" id="closeBtn">Close</button>
+            <a href="#" id="newTabLink" target="_blank" class="ml-4">Open in new tab</a>
+        </p>
+
+    </section>
 </div>
 </body>
 </html>
