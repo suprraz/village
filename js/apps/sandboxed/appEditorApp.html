@@ -31,6 +31,7 @@
         #editorEl
         #editor
         #ebook
+        #audio
         #uploader
         #code = null
 
@@ -48,7 +49,10 @@
             case 'eBook-app-type':
               this.initEbookEditor();
               break;
-            case 'regular-app-type':
+            case 'audio-app-type':
+              this.initAudioEditor();
+              break;
+            case 'application-app-type':
             default:
               this.initAppEditor();
               break;
@@ -59,10 +63,15 @@
         initEbookEditor() {
           document.addEventListener('DOMContentLoaded', () => {
             this.#ebook = document.getElementById('ebook');
-            this.#uploader = this.#ebook.querySelector('#uploader');
+            this.#uploader = this.#ebook.querySelector('#ebookUploader');
+            this.#code = this.#params?.app?.code;
 
             if (this.#params?.app?.name) {
               document.getElementById('appName').value = this.#params.app.name;
+            }
+
+            if (this.#params?.app?.description) {
+              document.getElementById('appDescription').value = this.#params.app.description;
             }
 
             if (typeof this.#params?.app?.price === "string") {
@@ -74,6 +83,39 @@
             this.#uploader.addEventListener('change', () => {
               document.getElementById('appName').value = this.#uploader.files[0].name.replace(/\.pdf$/i, '');
               this.buildEbookApp();
+            });
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.addEventListener('click', () => this.saveAndRun(this.#code, false));
+
+            const runBtn = document.getElementById('runBtn');
+            runBtn.addEventListener('click', () => this.saveAndRun(this.#code, true));
+          });
+        }
+
+        initAudioEditor() {
+          document.addEventListener('DOMContentLoaded', () => {
+            this.#audio = document.getElementById('audio');
+            this.#uploader = this.#audio.querySelector('#audioUploader');
+            this.#code = this.#params?.app?.code;
+
+            if (this.#params?.app?.name) {
+              document.getElementById('appName').value = this.#params.app.name;
+            }
+
+            if (this.#params?.app?.description) {
+              document.getElementById('appDescription').value = this.#params.app.description;
+            }
+
+            if (typeof this.#params?.app?.price === "string") {
+              document.getElementById('appPrice').value = this.#params.app.price;
+            }
+
+            this.#audio.classList.remove("is-hidden");
+
+            this.#uploader.addEventListener('change', () => {
+              document.getElementById('appName').value = this.#uploader.files[0].name.replace(/\.mp3$/i, '');
+              this.buildAudioApp();
             });
 
             const saveBtn = document.getElementById('saveBtn');
@@ -114,6 +156,22 @@
           }
         }
 
+        async buildAudioApp() {
+          try {
+            const pdfDataUrl = await this.fileToDataUrl(this.#uploader.files[0]);
+
+            if(this.#params?.app?.code)
+            {
+              this.#code = this.#params.app.code.replace(
+                /<script/, `<script>window.audioDataUrl = '${pdfDataUrl}'; <\/script> <script`);
+            } else {
+              throw new Error('Failed to load template');
+            }
+          } catch (error) {
+            this.#code = null;
+            window.parent.postMessage({type: 'alert', payload: {alertMsg: 'PDF conversion error: ' + error}}, '*');
+          }
+        }
 
         initAppEditor() {
           this.progress('Loading editor', -1, 1);
@@ -134,6 +192,7 @@
             if (this.#params?.app?.code) {
               this.#editor.session.setValue(this.#params.app.code);
             }
+
             if (this.#params?.app?.name) {
               document.getElementById('appName').value = this.#params.app.name;
             }
@@ -158,10 +217,23 @@
 
         saveAndRun(code, runAfterSave) {
           const name = document.getElementById('appName').value;
+          const description = document.getElementById('appDescription').value;
           const price = document.getElementById('appPrice').value;
 
           if (typeof code !== 'string' || !code.length) {
-            const error = this.#params.app.type === 'eBook-app-type' ? 'You must upload a PDF' : 'Invalid source code';
+            let error;
+            switch (this.#params.app.type) {
+              case 'eBook-app-type':
+                error = 'You must upload a PDF';
+                break;
+              case 'audio-app-type':
+                error = 'You must upload an MP3';
+                break;
+              case 'application-app-type':
+              default:
+                error = 'Invalid source code';
+            }
+
             window.parent.postMessage({type: 'alert', payload: {alertMsg: error}}, '*');
             return;
           }
@@ -179,6 +251,7 @@
           const app = {
             ...this.#params.app,
             name,
+            description,
             code,
             price
           }
@@ -196,7 +269,11 @@
     <div class="">
         <div id="ebook" class="my-4 is-hidden is-size-5">
             <p class="mb-2">Upload PDF file</p>
-            <input class="is-size-5" type="file" id="uploader" name="uploader" accept="application/pdf">
+            <input class="is-size-5" type="file" id="ebookUploader" name="ebookUploader" accept="application/pdf">
+        </div>
+        <div id="audio" class="my-4 is-hidden is-size-5">
+            <p class="mb-2">Upload MP3 file</p>
+            <input class="is-size-5" type="file" id="audioUploader" name="audioUploader" accept="audio/mpeg3,audio/x-mpeg-3">
         </div>
 
         <div class="is-flex mt-4">
@@ -209,6 +286,17 @@
                         <p class="control">
                             <input type="text" class="input is-static" name="appName" id="appName"
                                    placeholder="App name"/>
+                        </p>
+                    </div>
+                </div>
+                <div class="field-label is-normal">
+                    <label class="label">Description</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <p class="control">
+                            <input type="text" class="input is-static" name="appDescription" id="appDescription"
+                                   placeholder="App description"/>
                         </p>
                     </div>
                 </div>

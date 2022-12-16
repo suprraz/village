@@ -10,7 +10,7 @@
           background-color: #0a0a0a;
       }
 
-      #ebookContainer {
+      #audioContainer {
           height: 100%;
           position: absolute;
           width: 100%;
@@ -25,14 +25,14 @@
       class _Page {
         constructor() {
           document.addEventListener('DOMContentLoaded', () => {
-            this.loadPdf();
+            this.loadAudio();
           })
         }
 
-        async loadPdf() {
-          const ebookDataUrl = window.ebookDataUrl;
+        async loadAudio() {
+          const audioDataUrl = window.audioDataUrl;
 
-          const blob = await (await fetch(ebookDataUrl)).blob();
+          const blob = await (await fetch(audioDataUrl)).blob();
           const blobUrl = URL.createObjectURL( blob );
 
           const newTabLink = document.getElementById('newTabLink');
@@ -52,9 +52,9 @@
 </head>
 
 <body>
-<div id="ebookContainer">
+<div id="audioContainer">
     <p class="is-size-5 ml-4 mt-4">
-        Ebook opened in a <a href="#" id="newTabLink" target="_blank">new tab</a>.  Please enable popups.
+        Audio opened in a <a href="#" id="newTabLink" target="_blank">new tab</a>.  Please enable popups.
     </p>
     <button class="button ml-4 mt-6" id="closeBtn">Close</button>
 </div>

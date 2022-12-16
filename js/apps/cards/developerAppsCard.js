@@ -7,6 +7,7 @@ import WalletStore from "../../os/store/walletStore.js";
 
 const NEW_APP_TEMPLATE_PATH = 'js/apps/sandboxed/newAppTemplate.html';
 const NEW_EBOOK_TEMPLATE_PATH = 'js/apps/sandboxed/newEbookTemplate.html';
+const NEW_AUDIO_TEMPLATE_PATH = 'js/apps/sandboxed/newAudioTemplate.html';
 
 const MIN_SATS_WITHDRAWAL = 10;
 const MIN_SATS_BUFFER = 5;
@@ -14,8 +15,10 @@ const MIN_SATS_BUFFER = 5;
 class _DeveloperAppsCard {
   #newAppTemplate = null;
   #newEbookTemplate = null;
+  #newAudioTemplate = null;
   #newAppBtn
   #newEbookBtn
+  #newAudioBtn
   #devWalletBalanceAmt
   #brokerWalletBalanceAmt
   #devWalletBalanceEl
@@ -28,6 +31,7 @@ class _DeveloperAppsCard {
     containerEl.innerHTML = devAppsContainerHtml;
     this.#newAppBtn = containerEl.querySelector('#newAppBtn');
     this.#newEbookBtn = containerEl.querySelector('#newEbookBtn');
+    this.#newAudioBtn = containerEl.querySelector('#newAudioBtn');
     this.#devWalletBalanceEl = containerEl.querySelector('#devWalletBalance');
     this.#brokerWalletBalanceEl = containerEl.querySelector('#brokerWalletBalance');
     this.#withdrawDevEl = containerEl.querySelector('#withdrawDev');
@@ -93,6 +97,7 @@ class _DeveloperAppsCard {
   registerListeners() {
     this.#newAppBtn.addEventListener('click', () => this.newApp());
     this.#newEbookBtn.addEventListener('click', () => this.newEbook());
+    this.#newAudioBtn.addEventListener('click', () => this.newAudio());
     this.#withdrawDevEl.addEventListener('click', (e) => this.withdrawDev(e));
     this.#withdrawBrokerEl.addEventListener('click', (e) => this.withdrawBroker(e));
   }
@@ -156,6 +161,39 @@ class _DeveloperAppsCard {
       creationDate: (new Date()).getTime(),
       isPublished: 0,
       type: 'eBook-app-type'
+    }
+
+    app.signature = AppStore.signApp(app);
+
+    MessageRouter.onRunApp({appFileName: 'appEditorApp.html'}, {app});
+  }
+
+  async newAudio() {
+    MessageRouter.progress('Loading editor', -1, 1);
+
+    if(!this.#newAudioTemplate) {
+      try {
+        this.#newAudioTemplate = await this.loadTemplate(NEW_AUDIO_TEMPLATE_PATH);
+      } catch (e) {
+        MessageRouter.alert('There was an error loading the New Audio Template');
+        logError(`DeveloperAppsCard Error loading template ${e}`);
+        return;
+      }
+    }
+
+    const app = {
+      id: `app-${uuidv4()}`,
+      name: 'Hello World',
+      authorId: Settings.get('userId'),
+      authorWalletId: await WalletStore.getPrimaryWalletId(),
+      code: this.#newAudioTemplate,
+      version: 1,
+      price: '1',
+      installDate: (new Date()).getTime(),
+      updateDate: (new Date()).getTime(),
+      creationDate: (new Date()).getTime(),
+      isPublished: 0,
+      type: 'audio-app-type'
     }
 
     app.signature = AppStore.signApp(app);
@@ -251,7 +289,8 @@ const devAppsContainerHtml = `
     
     <div class="mt-5">
         <button id="newAppBtn" class="button is-success appRunButton mt-5 mr-2">New App</button>
-        <button id="newEbookBtn" class="button is-success appRunButton mt-5">New eBook</button>
+        <button id="newEbookBtn" class="button is-success appRunButton mt-5 mr-2">New eBook</button>
+        <button id="newAudioBtn" class="button is-success appRunButton mt-5">New Audio</button>
     </div>
 </div>
 `;

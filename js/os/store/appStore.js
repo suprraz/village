@@ -197,6 +197,7 @@ class _AppStore {
           return app;
         });
       });
+
       this.#appStoreDb.version(57).stores({
         installedApps: `
         id,
@@ -209,7 +210,10 @@ class _AppStore {
         installDate,
         updateDate,
         creationDate,       
-        isPublished  `,
+        isPublished,  
+        type,
+        icon,
+        description `,
       }).upgrade((trans) => {
         return trans.installedApps.toCollection().modify(app => {
           app.icon = app.icon || null;
@@ -221,6 +225,35 @@ class _AppStore {
     } catch (e) {
       logError(`AppStore Error ${e}`);
     }
+
+    this.#appStoreDb.version(58).stores({
+      installedApps: `
+        id,
+        name,
+        version,
+        authorId,
+        authorWalletId,
+        signature,
+        price,
+        installDate,
+        updateDate,
+        creationDate,       
+        isPublished,
+        type,
+        icon,
+        description`,
+    }).upgrade((trans) => {
+      return trans.installedApps.toCollection().modify(app => {
+        if(!app.type || app.type === 'regular-app-type') {
+          app.type = 'application-app-type';
+        }
+
+        return app;
+      });
+    });
+
+  } catch (e) {
+    logError(`AppStore Error ${e}`);
   }
 
   async saveApp(app) {

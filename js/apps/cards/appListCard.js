@@ -4,6 +4,7 @@ import MessageRouter from "../../os/messageRouter.js";
 import {logError} from "../../utils/logger.js";
 import Settings from "../../os/settings.js";
 import Profile from "../../riverNetwork/profile.js";
+import {appTypeToString, appTypeToVerb, defaultIconForAppType} from "../../utils/appUtils.js";
 
 class _AppListCard {
   #availableApps
@@ -129,7 +130,7 @@ class _AppListCard {
   }
 
   deleteApp(app) {
-    MessageRouter.confirm(`Delete ${app.type === 'eBook' ? 'eBook' : 'app'} ${app.name}?`, () => {
+    MessageRouter.confirm(`Delete ${appTypeToString(app.type)} ${app.name}?`, () => {
       this.#isEditing = false;
       AppStore.removeApp(app.id);
       this.updateAppList();
@@ -145,7 +146,7 @@ class _AppListCard {
   }
 
   unpublishApp(app) {
-    MessageRouter.confirm(`Unpublish ${app.type === 'eBook' ? 'eBook' : 'app'} ${app.name}?`, () => {
+    MessageRouter.confirm(`Unpublish ${appTypeToString(app.type)} ${app.name}?`, () => {
       this.#isEditing = false;
       AppStore.unpublishApp(app.id).then(() => {
         this.updateAppList();
@@ -185,7 +186,7 @@ class _AppListCard {
     }
     const appIconEl = document.createElement('img');
 
-    const iconSrc = app.icon ? app.icon : app.type === 'eBook-app-type' ? 'img/default-ebook-icon.svg' : 'img/default-app-icon.svg';
+    const iconSrc = app.icon ? app.icon : defaultIconForAppType(app.type);
     appIconEl.setAttribute("src", iconSrc );
 
     appEl.appendChild(appIconEl);
@@ -247,7 +248,7 @@ class _AppListCard {
 
     const appRunBtn = document.createElement('button');
     appRunBtn.className = "button is-success appRunButton";
-    appRunBtn.innerText = app.type === 'eBook-app-type' ? 'Read' : "Run";
+    appRunBtn.innerText = appTypeToVerb(app.type);
     appRunBtn.onclick = () => {
       this.runApp(app)
     };
