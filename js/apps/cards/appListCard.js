@@ -10,19 +10,77 @@ class _AppListCard {
   #availableApps
   #isEditing
   #installedAppsEditBtn
+  #search
+  #searchQueryEl
+  #clearSearchBtn
 
   constructor() {
     this.#availableApps = [];
     this.#isEditing = false;
 
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('encryptionKey')) {
+      document.getElementById('main').style = 'display: none;'
+      window.parent.postMessage({type: 'closeApp', payload: {sourceApp: 'PaymentApp'}}, '*');
+      window.parent.postMessage({
+        type: 'invoicePaid',
+        payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}
+      }, '*');
+      return;
+    }
+
     const appListContainer = document.getElementById('appListContainer');
     appListContainer.innerHTML = appListHtml;
 
+    this.#registerListeners();
+
+    this.loadSearchFromUrl();
+  }
+
+  #registerListeners() {
     this.#installedAppsEditBtn = document.getElementById('installedAppsEditBtn');
     this.#installedAppsEditBtn.onclick = () => {
       this.#isEditing = !this.#isEditing;
       this.#installedAppsEditBtn.innerText = this.#isEditing ? 'Done' : 'Edit';
       this.updateAppList();
+    }
+
+    this.#searchQueryEl = document.getElementById('searchQuery');
+    this.#searchQueryEl.oninput = (e) => {
+      this.#search = e.target.value || null;
+      this.#searchUpdated();
+    }
+
+    this.#clearSearchBtn = document.getElementById('clearSearchBtn');
+    this.#clearSearchBtn.onclick = () => {
+      this.#search = null;
+      this.#searchQueryEl.value = '';
+      this.#searchUpdated();
+    }
+  }
+
+  #searchUpdated() {
+    if (!this.#search) {
+      this.#clearSearchBtn.classList.add('is-hidden')
+    } else {
+      this.#clearSearchBtn.classList.remove('is-hidden');
+    }
+
+    if (window.history.replaceState) {
+      window.history.replaceState(null, document.title,
+        this.#search ? "?search=" + this.#search.replace(/ /g, '+') : location.pathname);
+    }
+
+    this.updateAppList();
+  }
+
+  loadSearchFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('search')) {
+      this.#search = urlParams.get('search');
+      this.#searchQueryEl.value = this.#search;
+
+      this.#searchUpdated();
     }
   }
 
@@ -65,8 +123,8 @@ class _AppListCard {
 
     const publishedAppsDiv = document.getElementById("publishedApps");
 
-    if(!publishedApps.length) {
-      publishedAppsDiv.innerText = "No apps installed.";
+    if (!publishedApps.length) {
+      publishedAppsDiv.innerText = "Nothing here yet.";
       this.#installedAppsEditBtn.classList.add("is-hidden");
     } else {
       this.#installedAppsEditBtn.classList.remove("is-hidden");
@@ -86,11 +144,24 @@ class _AppListCard {
       availableAppsDiv.removeChild(availableAppsDiv.firstChild);
     }
 
-    this.#availableApps.map((app) => {
+    if (this.#search) {
+      const searchInfo = document.createElement('div');
+      searchInfo.className = "mb-2";
+      searchInfo.innerText = `Filtering for "${this.#search}"`
+      availableAppsDiv.appendChild(searchInfo);
+    }
+
+    const visibleApps = this.#availableApps
+      .filter(app =>
+        !this.#search
+        || app.name.toLowerCase().includes(this.#search.toLowerCase())
+        || app.description.toLowerCase().includes(this.#search.toLowerCase()));
+
+    visibleApps.map((app) => {
       availableAppsDiv.appendChild(this.createLongformAppEl(app, false));
     })
 
-    if(NodeStore.getConnectedNodeIds().length < 1 || this.#availableApps.length < 1) {
+    if (NodeStore.getConnectedNodeIds().length < 1 || this.#availableApps.length < 1) {
       const loadingDiv = document.createElement('div');
       loadingDiv.className = "is-flex is-flex-direction-row is-align-items-center";
       loadingDiv.innerHTML = '<div class="loader"></div> <div class="ml-2">Searching network ... </div>';
@@ -100,8 +171,8 @@ class _AppListCard {
     const unpublishedApps = await AppStore.getUnpublishedApps();
     const unpublishedAppsDiv = document.getElementById("unpublishedApps");
 
-    if(!unpublishedApps.length) {
-      unpublishedAppsDiv.innerText = "No unpublished apps.";
+    if (!unpublishedApps.length) {
+      unpublishedAppsDiv.innerText = "Nothing here yet.";
     } else {
       // remove all children and listeners
       while (unpublishedAppsDiv.firstChild) {
@@ -116,7 +187,7 @@ class _AppListCard {
   }
 
   async runApp(app) {
-    if(!this.#isEditing) {
+    if (!this.#isEditing) {
       const reloadedApp = await AppStore.getApp(app.id);
 
       AppStore.runApp(reloadedApp)
@@ -135,7 +206,8 @@ class _AppListCard {
       AppStore.removeApp(app.id);
       this.updateAppList();
       this.sendApps();
-    }, () => {});
+    }, () => {
+    });
   }
 
   publishApp(app) {
@@ -159,7 +231,7 @@ class _AppListCard {
     const appEl = document.createElement('div');
     appEl.className = `button is-info app ${isEditing ? 'shake-little shake-constant' : canRun ? 'can-run' : ''}`;
 
-    if(isEditing) {
+    if (isEditing) {
       const deleteBtnEl = document.createElement('div');
       deleteBtnEl.className = "delete";
       deleteBtnEl.onclick = () => {
@@ -167,7 +239,7 @@ class _AppListCard {
       };
       appEl.appendChild(deleteBtnEl);
 
-      if(isOwner) {
+      if (isOwner) {
         const diskEl = document.createElement('div');
         diskEl.className = "disk";
         diskEl.onclick = () => {
@@ -187,7 +259,7 @@ class _AppListCard {
     const appIconEl = document.createElement('img');
 
     const iconSrc = app.icon ? app.icon : defaultIconForAppType(app.type);
-    appIconEl.setAttribute("src", iconSrc );
+    appIconEl.setAttribute("src", iconSrc);
 
     appEl.appendChild(appIconEl);
 
@@ -204,7 +276,7 @@ class _AppListCard {
     appNameEl.className = "has-text-centered mt-2";
     appNameEl.innerText = app.name;
 
-    if(canRun) {
+    if (canRun) {
       appContEl.onclick = () => {
         this.runApp(app)
       };
@@ -236,7 +308,7 @@ class _AppListCard {
     const buttonsDiv = document.createElement('div');
     buttonsDiv.className = "buttons is-flex";
 
-    if( !isOwner ) {
+    if (!isOwner) {
       const appBuyBtn = document.createElement('button');
       appBuyBtn.className = "button is-success appBuyButton";
       appBuyBtn.innerText = "Buy for " + app.price + " sats";
@@ -282,7 +354,7 @@ class _AppListCard {
     return buttonsDiv;
   }
 
-  createLongformAppEl(app, isOwner){
+  createLongformAppEl(app, isOwner) {
     const appCont = document.createElement('div');
     appCont.className = "installedApp card my-1 p-5 is-flex is-flex-direction-row is-justify-content-space-between is-align-items-flex-start";
 
@@ -291,7 +363,7 @@ class _AppListCard {
 
     const appEl = this.createContainedAppEl(app, false, isOwner, false);
 
-    const appTextEl =  document.createElement('div');
+    const appTextEl = document.createElement('div');
     appTextEl.className = "is-flex is-flex-direction-column is-justify-content-space-between ml-5";
 
     const appDescEl = document.createElement('div');
@@ -313,15 +385,27 @@ class _AppListCard {
 const appListHtml = `
 <div id="appList">
     <div class="is-flex is-flex-direction-row is-align-items-center is-justify-content-space-between mt-1 mb-5"> 
-        <p class="is-size-5">Installed Apps</p>
+        <p class="is-size-5">Installed Items</p>
         <button id="installedAppsEditBtn" class="button is-primary is-inverted is-outlined ml-5">Edit</button>
     </div>
     <div id="publishedApps" class="app-container-list is-flex is-flex-direction-row is-flex-wrap-wrap"></div>
     <br />
-    <p class="subtitle is-5 mt-1">Available Apps</p>
-    <div id="availableApps" class="is-flex is-flex-direction-column"></div>
-    <br />
-    <p class="subtitle is-5 mt-1">Apps I Created</p>
+    <div class="is-flex is-flex-direction-row is-align-items-center is-justify-content-space-between mt-1 mb-5"> 
+      <p class="is-size-5 mt-1">Available Items</p>
+      <div class="field has-addons">
+        <div class="control has-icons-left  has-icons-right">
+          <input id="searchQuery" class="input is-inverted is-outlined" type="text" placeholder="Search">
+          <span class="icon is-left">
+            <i class="fa fa-search"></i>
+          </span>
+          <span class="icon is-right is-hidden" id="clearSearchBtn" style="pointer-events: all; cursor: pointer">
+            <i class="fa fa-times-circle"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div id="availableApps" class="is-flex is-flex-direction-column mb-6"></div>
+    <p class="subtitle is-5 mt-1">Items I'm Selling</p>
     <div id="unpublishedApps" class="is-flex is-flex-direction-column"></div>
 </div>
 `

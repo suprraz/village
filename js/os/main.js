@@ -5,7 +5,6 @@ import SandboxStore from "./store/sandboxStore.js";
 import UpgradeStore from "./store/upgradeStore.js";
 import _Sandbox from "./sandbox.js";
 import _InvoiceStore from "./store/invoiceStore.js";
-import _AddPeerCard from "../apps/cards/addPeerCard.js";
 import _VillageStateCard from "../apps/cards/villageStateCard.js";
 import _AppListCard from "../apps/cards/appListCard.js";
 import _LoggerAppCard from "../apps/cards/loggerAppCard.js";
@@ -33,10 +32,6 @@ class _Village {
 
     MessageRouter.init(riverApi, this.#coreApps);
 
-    if(urlParams.has('offerKey')) {
-      this.#coreApps.AddPeerCard.run();
-    }
-
     const showLanding = Settings.get('showLanding');
 
     if(urlParams.has('runAppFromUrl')) {
@@ -53,7 +48,6 @@ class _Village {
   }
 
   #initCoreApps() {
-    const AddPeerCard = new _AddPeerCard();
     const AppListCard = new _AppListCard();
     const DeveloperAppsCard = new _DeveloperAppsCard(document.getElementById('developerAppsCardContainer'));
     const LoggerAppCard = new _LoggerAppCard(document.getElementById('rightPaneContainer'));
@@ -62,7 +56,6 @@ class _Village {
     const Sandbox = new _Sandbox();
 
     this.#coreApps = {
-      AddPeerCard,
       AppListCard,
       DeveloperAppsCard,
       LoggerAppCard,

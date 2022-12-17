@@ -40,7 +40,6 @@ class _MessageRouter {
   }
 
   onNodeConnected() {
-    this.#coreApps.AddPeerCard.stop();
     this.#coreApps.AppListCard.updateAppList();
     this.#coreApps.AppListCard.sendApps();
   }

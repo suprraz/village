@@ -244,7 +244,7 @@ class _AppStore {
         description`,
     }).upgrade((trans) => {
       return trans.installedApps.toCollection().modify(app => {
-        if(!app.type || app.type === 'regular-app-type') {
+        if (!app.type || app.type === 'regular-app-type') {
           app.type = 'application-app-type';
         }
 
@@ -252,7 +252,7 @@ class _AppStore {
       });
     });
 
-  } catch (e) {
+  } catch(e) {
     logError(`AppStore Error ${e}`);
   }
 
@@ -303,13 +303,13 @@ class _AppStore {
       updateDate: (new Date()).getTime()
     });
 
-    if(runAfterSave && savedApp) {
+    if (runAfterSave && savedApp) {
       this.runApp(savedApp);
     }
   }
 
   async installApp(app) {
-    if(this.verifyApp(app)) {
+    if (this.verifyApp(app)) {
       app.installDate = (new Date()).getTime();
       app.signature = AppStore.signApp(app);
 
@@ -326,9 +326,13 @@ class _AppStore {
     return this.getApp(app.id);
   }
 
-  async getPublishedApps() {
+  async getPublishedApps(search) {
     try {
-      return await this.#appStoreDb.installedApps.where('isPublished').equals(1).toArray();
+      if (!!search) {
+        return this.#appStoreDb.installedApps.where('isPublished').equals(1)
+          .filter((app) => /Star/.test(app.name)).toArray();
+      }
+      return this.#appStoreDb.installedApps.where('isPublished').equals(1).toArray();
     } catch (e) {
       logError(`AppStore Error getting apps ${e}`)
       return [];
@@ -357,7 +361,7 @@ class _AppStore {
   }
 
   runApp(app) {
-    if(this.verifyApp(app)) {
+    if (this.verifyApp(app)) {
       MessageRouter.onRunApp(app);
     } else {
       MessageRouter.alert('Error: Invalid app')
