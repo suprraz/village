@@ -4,15 +4,15 @@ export default {
   appNameConcat: 'VillageOS',
   appVersion: '0.1',
   maxLogSize: 100,
-  mqttBrokers: ['ws://test.mosquitto.org:8080/mqtt'],
+  mqttBrokers: ['wss://mqtt.flespi.io:443'],
   mqttOptions: {
     keepalive: 60,
     protocolId: 'MQTT',
-    protocolVersion: 4,
+    protocolVersion: 5,
     clean: true,
     reconnectPeriod: 1000,
     connectTimeout: 4000,                  // 4 sec
-    useSSL: true,
+    username: 'FlespiToken xV4HrIugGoaWLMG7Kxpd4WrBhGumf0jDMd83Kt8gF62gIwdiRrkLdBaj8utdlDEV',
   },
   mqttParallelReqs: 3,
   villageParallelReqs: 3,
