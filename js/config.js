@@ -4,7 +4,7 @@ export default {
   appNameConcat: 'VillageOS',
   appVersion: '0.1',
   maxLogSize: 100,
-  mqttBrokers: ['wss://test.mosquitto.org:8081/mqtt'],
+  mqttBrokers: ['ws://test.mosquitto.org:8080/mqtt'],
   mqttOptions: {
     keepalive: 60,
     protocolId: 'MQTT',
