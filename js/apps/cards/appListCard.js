@@ -7,7 +7,6 @@ import Profile from "../../riverNetwork/profile.js";
 import {appTypeToString, appTypeToVerb, defaultIconForAppType} from "../../utils/appUtils.js";
 
 class _AppListCard {
-  #availableApps
   #isEditing
   #installedAppsEditBtn
   #search
@@ -16,19 +15,7 @@ class _AppListCard {
   #appsByNodeId = {}
 
   constructor() {
-    this.#availableApps = [];
     this.#isEditing = false;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('encryptionKey')) {
-      document.getElementById('main').style = 'display: none;'
-      window.parent.postMessage({type: 'closeApp', payload: {sourceApp: 'PaymentApp'}}, '*');
-      window.parent.postMessage({
-        type: 'invoicePaid',
-        payload: {decryptApp: true, encryptionKey: urlParams.get('encryptionKey'), appId: urlParams.get('appId')}
-      }, '*');
-      return;
-    }
 
     const appListContainer = document.getElementById('appListContainer');
     appListContainer.innerHTML = appListHtml;
@@ -85,19 +72,23 @@ class _AppListCard {
     }
   }
 
-  installApp(app) {
+  async installApp(app) {
     try {
-      AppStore.installApp(app)
-      this.#availableApps = this.#availableApps.filter((availableApp) => !availableApp.id === app.id);
-      this.updateAppList();
-      this.sendApps();
+      await AppStore.installApp(app)
+      await this.updateAppList();
+      await this.sendApps();
     } catch (e) {
       logError(e);
     }
   }
 
   async computeAvailableApps() {
-    const localApps = await AppStore.getPublishedApps();
+    let localApps = [];
+    try {
+      localApps = await AppStore.getPublishedApps();
+    } catch (e) {
+      logError('AppListCard failed to load apps');
+    }
 
     const allNodeIds = Object.keys(this.#appsByNodeId);
 
@@ -119,7 +110,7 @@ class _AppListCard {
       return !isInstalled;
     });
 
-    this.#availableApps = appsByIdRemote.sort((a, b) => (a.updated - b.updated));
+    return appsByIdRemote?.sort((a, b) => (a.updated - b.updated));
   }
 
   async onAvailableApps(apps) {
@@ -131,7 +122,6 @@ class _AppListCard {
     });
 
     try {
-      await this.computeAvailableApps();
       await this.updateAppList();
     } catch (e) {
       logError(e);
@@ -139,6 +129,8 @@ class _AppListCard {
   }
 
   async updateAppList() {
+    const availableApps = await this.computeAvailableApps();
+
     const userId = Settings.get('userId');
 
     const publishedApps = await AppStore.getPublishedApps();
@@ -173,7 +165,7 @@ class _AppListCard {
       availableAppsDiv.appendChild(searchInfo);
     }
 
-    const visibleApps = this.#availableApps
+    const visibleApps = availableApps
       .filter(app =>
         !this.#search
         || app.name.toLowerCase().includes(this.#search.toLowerCase())
@@ -183,7 +175,7 @@ class _AppListCard {
       availableAppsDiv.appendChild(this.createLongformAppEl(app, false));
     })
 
-    if (NodeStore.getConnectedNodeIds().length < 1 || this.#availableApps.length < 1) {
+    if (NodeStore.getConnectedNodeIds().length < 1 || availableApps.length < 1) {
       const loadingDiv = document.createElement('div');
       loadingDiv.className = "is-flex is-flex-direction-row is-align-items-center";
       loadingDiv.innerHTML = '<div class="loader"></div> <div class="ml-2">Searching network ... </div>';
