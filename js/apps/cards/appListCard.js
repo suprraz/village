@@ -1,6 +1,6 @@
 import AppStore from "../../os/store/appStore.js";
 import NodeStore from "../../riverNetwork/nodeStore.js";
-import MessageRouter from "../../os/messageRouter.js";
+import MessageRouter from "../../os/messaging/messageRouter.js";
 import {logError} from "../../utils/logger.js";
 import Settings from "../../os/settings.js";
 import Profile from "../../riverNetwork/profile.js";
@@ -13,6 +13,7 @@ class _AppListCard {
   #search
   #searchQueryEl
   #clearSearchBtn
+  #appsByNodeId = {}
 
   constructor() {
     this.#availableApps = [];
@@ -95,21 +96,42 @@ class _AppListCard {
     }
   }
 
-  async onAvailableApps(apps) {
+  async computeAvailableApps() {
     const localApps = await AppStore.getPublishedApps();
-    let newApps = [];
+
+    const allNodeIds = Object.keys(this.#appsByNodeId);
+
+    let appsById = {};
+    allNodeIds.map(nodeId => {
+      const appIds = Object.keys(this.#appsByNodeId[nodeId]);
+      appIds.map(appId => {
+        if(!appsById[appId] || appsById[appId].version < this.#appsByNodeId[nodeId][appId].version) {
+          appsById[appId] = this.#appsByNodeId[nodeId][appId];
+        }
+      })
+    });
+
+    const appsByIdArr = Object.values(appsById);
+    const appsByIdRemote = appsByIdArr.filter((remoteApp) => {
+      const isInstalled = localApps.some(
+        (localApp => localApp.id === remoteApp.id));
+
+      return !isInstalled;
+    });
+
+    this.#availableApps = appsByIdRemote.sort((a, b) => (a.updated - b.updated));
+  }
+
+  async onAvailableApps(apps) {
+    apps.map(app => {
+      if(!this.#appsByNodeId[app.brokerNodeId]) {
+        this.#appsByNodeId[app.brokerNodeId] = {}
+      }
+      this.#appsByNodeId[app.brokerNodeId][app.id] = app;
+    });
+
     try {
-      newApps = apps.filter((remoteApp) => {
-        const isInstalled = localApps.some(
-          (localApp => localApp.id === remoteApp.id));
-
-        const isAvailable = this.#availableApps.some(
-          (availableApp => availableApp.id === remoteApp.id));
-
-        return !isInstalled && !isAvailable;
-      });
-
-      this.#availableApps.push(...newApps);
+      await this.computeAvailableApps();
       await this.updateAppList();
     } catch (e) {
       logError(e);

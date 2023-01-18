@@ -1,7 +1,7 @@
-import {logError, logMessage} from "../utils/logger.js";
-import Settings from "./settings.js";
-import AppStore from "./store/appStore.js";
-import NodeStore from "../riverNetwork/nodeStore.js";
+import {logError, logMessage} from "../../utils/logger.js";
+import AppStore from "../store/appStore.js";
+import NodeStore from "../../riverNetwork/nodeStore.js";
+import registerAppMessageListeners from "./appMessageListeners.js";
 
 class _MessageRouter {
   #riverApi
@@ -45,6 +45,9 @@ class _MessageRouter {
   }
 
   onNetworkChange() {
+    if(this.#coreApps.Sandbox.getRunningAppId()) {
+      this.#coreApps.Sandbox.postMessage({type: 'message', payload: { method: 'networkChange'}});
+    }
     this.#coreApps.VillageStateCard.refresh();
   }
 
@@ -132,72 +135,7 @@ class _MessageRouter {
   }
 
   registerListeners() {
-    window.addEventListener('message', async (event) => {
-      const data = event.data;
-      if (data) {
-        switch (data.type) {
-          case 'hideLanding':
-            if(data.payload.sourceApp === 'landingAppId') {
-              Settings.update('showLanding', false);
-            }
-            break;
-          case 'closeApp':
-            this.onCloseApp(data.payload.sourceApp);
-            if(data.payload.sourceApp === 'landingAppId') {
-              this.onNetworkChange();
-            }
-            break;
-          case 'saveAndRunApp':
-            if (data.payload.runAfterSave) {
-              this.onCloseApp(data.payload.sourceApp);
-            }
-
-            AppStore.updateApp(data.payload.app, data.payload.runAfterSave);
-
-            this.#coreApps.AppListCard.updateAppList();
-            break;
-          case 'invoicePaid':
-            this.#coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey);
-            break;
-          case 'saveData':
-            try {
-              await this.#coreApps.SandboxStore.save(this.#coreApps.Sandbox.getRunningAppId(), data.payload?.key, data.payload?.value);
-              this.#coreApps.Sandbox.postMessage({type: 'saveDataSuccess', payload: data.payload})
-            } catch (e) {
-              this.#coreApps.Sandbox.postMessage({type: 'saveDataFailure', payload: data.payload})
-            }
-            break;
-          case 'readData':
-            const { key } = data?.payload;
-            try {
-              const storedObject = await this.#coreApps.SandboxStore.read(this.#coreApps.Sandbox.getRunningAppId(), data.payload.key);
-              this.#coreApps.Sandbox.postMessage({type: 'readDataSuccess', payload: {key, value: storedObject.value}});
-            } catch (e) {
-              this.#coreApps.Sandbox.postMessage({type: 'readDataFailure', payload: data.payload})
-            }
-            break;
-          case 'broadcastMessage':
-            NodeStore.broadcast({
-              app: this.#coreApps.Sandbox.getRunningAppId(),
-              payload: data?.payload,
-              type: 'app'
-            });
-            break;
-          case 'alert':
-            if (typeof data.payload?.alertMsg === "string") {
-              this.alert(data.payload.alertMsg);
-            }
-            break;
-          case 'progress':
-            if (typeof data.payload?.progressLabel === "string" && typeof data.payload?.progressValue === "number" && typeof data.payload?.progressTotal === "number") {
-              this.progress( data.payload.progressLabel, data.payload.progressValue, data.payload.progressTotal );
-            }
-            break;
-          default:
-            logError(`MessageRouter Unhandled iframe message: ${JSON.stringify(data)}`);
-        }
-      }
-    }, false);
+    registerAppMessageListeners(this.#coreApps);
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {

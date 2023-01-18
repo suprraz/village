@@ -1,4 +1,4 @@
-import MessageRouter from "./messageRouter.js";
+import MessageRouter from "./messaging/messageRouter.js";
 import Settings from "./settings.js";
 import AppStore from "./store/appStore.js";
 import SandboxStore from "./store/sandboxStore.js";

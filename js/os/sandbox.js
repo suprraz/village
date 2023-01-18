@@ -1,4 +1,4 @@
-import MessageRouter from "./messageRouter.js";
+import MessageRouter from "./messaging/messageRouter.js";
 
 class _Sandbox {
   #sandboxContainer
@@ -28,6 +28,9 @@ class _Sandbox {
   }
 
   stop() {
+    this.#runningAppId = null;
+    this.#runningAppName = null;
+
     while (this.#sandboxContainer.firstChild) {
       // remove all children and listeners
       this.#sandboxContainer.removeChild(this.#sandboxContainer.firstChild);
@@ -48,6 +51,9 @@ class _Sandbox {
     if(app.runUrl) {
       this.#iframe.setAttribute("src", app.runUrl);
       this.#iframe.removeAttribute("srcDoc");
+
+      this.#runningAppId = 'appFromUrl';
+      this.#runningAppName = 'Run app by url';
       return;
     }
 

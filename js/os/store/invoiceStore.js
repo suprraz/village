@@ -1,4 +1,4 @@
-import MessageRouter from "../messageRouter.js";
+import MessageRouter from "../messaging/messageRouter.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import config from "../../config.js";
