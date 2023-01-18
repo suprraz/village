@@ -128,6 +128,24 @@ class _AppListCard {
     }
   }
 
+  removeUnavailableApps() {
+    const nodeIds = NodeStore.getConnectedNodeIds();
+    const cachedNodeIds = Object.keys(this.#appsByNodeId);
+    let obsoleteNodeIds = []
+    cachedNodeIds.map(cachedNodeId => {
+      if(!nodeIds.find((id => id === cachedNodeId))) {
+        obsoleteNodeIds.push(cachedNodeId);
+      }
+    });
+    if(obsoleteNodeIds.length) {
+      obsoleteNodeIds.map(obsoleteNodeId => {
+        delete this.#appsByNodeId[obsoleteNodeId];
+      });
+
+      this.updateAppList();
+    }
+  }
+
   async updateAppList() {
     const availableApps = await this.computeAvailableApps();
 

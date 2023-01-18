@@ -45,6 +45,7 @@ class _MessageRouter {
   }
 
   onNetworkChange() {
+    this.#coreApps.AppListCard.removeUnavailableApps();
     if(this.#coreApps.Sandbox.getRunningAppId()) {
       this.#coreApps.Sandbox.postMessage({type: 'message', payload: { method: 'networkChange'}});
     }
