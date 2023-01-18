@@ -46,8 +46,15 @@ class _MessageRouter {
 
   onNetworkChange() {
     this.#coreApps.AppListCard.removeUnavailableApps();
-    if(this.#coreApps.Sandbox.getRunningAppId()) {
-      this.#coreApps.Sandbox.postMessage({type: 'message', payload: { method: 'networkChange'}});
+    const runningAppId = this.#coreApps.Sandbox.getRunningAppId();
+    if(runningAppId) {
+      this.#coreApps.Sandbox.postMessage({
+        type: 'message',
+        payload: {
+          method: 'networkChange',
+          peerIds: this.#coreApps.AppListCard.getOwnerNodeIds(runningAppId),
+        }
+      });
     }
     this.#coreApps.VillageStateCard.refresh();
   }

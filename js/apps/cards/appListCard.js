@@ -83,7 +83,7 @@ class _AppListCard {
     }
   }
 
-  async computeAvailableApps() {
+  async #computeAvailableApps() {
     let localApps = [];
     try {
       localApps = await AppStore.getPublishedApps();
@@ -161,7 +161,7 @@ class _AppListCard {
   }
 
   async updateAppList() {
-    const availableApps = await this.computeAvailableApps();
+    const availableApps = await this.#computeAvailableApps();
 
     const userId = Settings.get('userId');
 
