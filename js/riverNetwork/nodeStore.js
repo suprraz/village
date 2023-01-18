@@ -17,6 +17,12 @@ class _NodeStore {
     this.#nodes.map((node) => node.send(msgObj));
   }
 
+  multicast(msgObj, nodeIds) {
+    this.#nodes
+      .filter(node => (nodeIds.includes(node.getProfile()?.nodeId) ))
+      .map((node) => node.send(msgObj));
+  }
+
   addNode(node) {
     this.#nodes.push(node);
     logMessage(`NodeStore Added node: ${node.getProfile().nodeId}`);
@@ -115,12 +121,6 @@ class _NodeStore {
 
     routes.map((hop, i) => logMessage(`NodeStore ${i} hop routes: ${hop}`));
     return routes;
-  }
-
-  getAllAccessibleNodeIds() {
-    return this.getRoutes().reduce((total, curr) => {
-      return [... new Set([...total, ...curr])];
-    }, []);
   }
 
   prune() {

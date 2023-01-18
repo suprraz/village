@@ -1,10 +1,11 @@
-import AppStore from "../../os/store/appStore.js";
+import AppStore, {appTypes} from "../../os/store/appStore.js";
 import NodeStore from "../../riverNetwork/nodeStore.js";
 import MessageRouter from "../../os/messaging/messageRouter.js";
 import {logError} from "../../utils/logger.js";
 import Settings from "../../os/settings.js";
 import Profile from "../../riverNetwork/profile.js";
 import {appTypeToString, appTypeToVerb, defaultIconForAppType} from "../../utils/appUtils.js";
+import getSearchParam from "../../utils/getSearchParam.js";
 
 class _AppListCard {
   #isEditing
@@ -131,7 +132,7 @@ class _AppListCard {
   removeUnavailableApps() {
     const nodeIds = NodeStore.getConnectedNodeIds();
     const cachedNodeIds = Object.keys(this.#appsByNodeId);
-    let obsoleteNodeIds = []
+    const obsoleteNodeIds = []
     cachedNodeIds.map(cachedNodeId => {
       if(!nodeIds.find((id => id === cachedNodeId))) {
         obsoleteNodeIds.push(cachedNodeId);
@@ -144,6 +145,19 @@ class _AppListCard {
 
       this.updateAppList();
     }
+  }
+
+  getOwnerNodeIds(appId) {
+    const allNodeIds = Object.keys(this.#appsByNodeId);
+    const ownerNodeIds = [];
+
+    allNodeIds.map(nodeId => {
+      if(this.#appsByNodeId[nodeId][appId]) {
+        ownerNodeIds.push(nodeId)
+      }
+    })
+
+    return ownerNodeIds;
   }
 
   async updateAppList() {
@@ -187,7 +201,8 @@ class _AppListCard {
       .filter(app =>
         !this.#search
         || app.name.toLowerCase().includes(this.#search.toLowerCase())
-        || app.description.toLowerCase().includes(this.#search.toLowerCase()));
+        || app.description.toLowerCase().includes(this.#search.toLowerCase()))
+      .filter(app => app.type !== appTypes.debug);
 
     visibleApps.map((app) => {
       availableAppsDiv.appendChild(this.createLongformAppEl(app, false));
@@ -329,6 +344,14 @@ class _AppListCard {
         brokerNodeId: Profile.getNodeID()
       };
     });
+
+    if(getSearchParam('runAppFromUrl')) {
+      appsForBroadcast.push({
+        id: 'appFromUrl',
+        type: appTypes.debug,
+        brokerNodeId: Profile.getNodeID()
+      });
+    }
 
     NodeStore.broadcast({
       type: 'app-list',

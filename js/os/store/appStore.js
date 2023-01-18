@@ -4,6 +4,13 @@ import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
 import config from "../../config.js";
 
+export const appTypes = {
+  ebook: 'eBook-app-type',
+  audio: 'audio-app-type',
+  application: 'application-app-type',
+  debug: 'debug-app-type',
+}
+
 class _AppStore {
   #appStoreDb
 
@@ -245,7 +252,7 @@ class _AppStore {
     }).upgrade((trans) => {
       return trans.installedApps.toCollection().modify(app => {
         if (!app.type || app.type === 'regular-app-type') {
-          app.type = 'application-app-type';
+          app.type = appTypes.application;
         }
 
         return app;

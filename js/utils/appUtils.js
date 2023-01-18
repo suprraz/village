@@ -1,11 +1,12 @@
+import {appTypes} from "../os/store/appStore.js";
 
 function appTypeToString(type) {
   switch (type) {
-    case 'eBook-app-type':
+    case appTypes.ebook:
       return 'ebook';
-    case 'audio-app-type':
+    case appTypes.audio:
       return 'audio'
-    case 'application-app-type':
+    case appTypes.application:
     default:
       return 'app'
   }
@@ -13,11 +14,11 @@ function appTypeToString(type) {
 
 function appTypeToVerb(type) {
   switch (type) {
-    case 'eBook-app-type':
+    case appTypes.ebook:
       return 'Read';
-    case 'audio-app-type':
+    case appTypes.audio:
       return 'Listen'
-    case 'application-app-type':
+    case appTypes.application:
     default:
       return 'Run'
   }
@@ -25,11 +26,11 @@ function appTypeToVerb(type) {
 
 function defaultIconForAppType(type) {
   switch (type) {
-    case 'eBook-app-type':
+    case appTypes.ebook:
       return 'img/default-ebook-icon.svg';
-    case 'audio-app-type':
+    case appTypes.audio:
       return 'img/default-audio-icon.svg'
-    case 'application-app-type':
+    case appTypes.application:
     default:
       return 'img/default-app-icon.svg'
   }

@@ -56,6 +56,7 @@ class _InvoiceStore {
         ...paywalledApp,
         code: CryptoJS.AES.decrypt(paywalledApp.encryptedCode, encryptionKey).toString(CryptoJS.enc.Utf8),
         encryptedCode: undefined,
+        paywall: undefined,
       }
 
       this.#invoices = this.#invoices.filter(i => i.paywalledApp.id !== appId && (new Date() - config.invoiceExpiration > i.date));

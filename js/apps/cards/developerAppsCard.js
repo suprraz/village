@@ -1,4 +1,4 @@
-import AppStore from "../../os/store/appStore.js";
+import AppStore, {appTypes} from "../../os/store/appStore.js";
 import MessageRouter from "../../os/messaging/messageRouter.js";
 import {logError} from "../../utils/logger.js";
 import uuidv4 from "../../utils/uuid.js";
@@ -160,7 +160,7 @@ class _DeveloperAppsCard {
       updateDate: (new Date()).getTime(),
       creationDate: (new Date()).getTime(),
       isPublished: 0,
-      type: 'eBook-app-type'
+      type: appTypes.ebook
     }
 
     app.signature = AppStore.signApp(app);
@@ -193,7 +193,7 @@ class _DeveloperAppsCard {
       updateDate: (new Date()).getTime(),
       creationDate: (new Date()).getTime(),
       isPublished: 0,
-      type: 'audio-app-type'
+      type: appTypes.audio
     }
 
     app.signature = AppStore.signApp(app);
