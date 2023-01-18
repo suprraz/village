@@ -60,7 +60,7 @@ class _MessageRouter {
     const { app } = data;
 
     if(app === this.#coreApps.Sandbox.getRunningAppId()) {
-      this.#coreApps.Sandbox.postMessage({type: 'message', payload: data.payload});
+      this.#coreApps.Sandbox.postMessage({type: 'message', payload: data.payload, senderId: data.senderId});
     } else {
       logError(`MessageRouter Unhandled message: ${JSON.stringify(data)}`);
     }

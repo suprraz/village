@@ -23,6 +23,13 @@ class _NodeStore {
       .map((node) => node.send(msgObj));
   }
 
+  sendMsg(msgObj, nodeId) {
+    const node = this.getNodeById( nodeId );
+    if(node) {
+     node.send(msgObj)
+    }
+  }
+
   addNode(node) {
     this.#nodes.push(node);
     logMessage(`NodeStore Added node: ${node.getProfile().nodeId}`);

@@ -56,14 +56,27 @@ function broadcastMessage(coreApps, data) {
 
 function appOwnerMessage(coreApps, data) {
   const appId = coreApps.Sandbox.getRunningAppId();
+
+  if(data.destinationId) {
+    NodeStore.sendMsg({
+      app: appId,
+      payload: data?.payload,
+      type: 'app'
+    }, data.destinationId);
+  }
+}
+
+function appOwnerMulticast(coreApps, data) {
+  const appId = coreApps.Sandbox.getRunningAppId();
   const nodeIds = coreApps.AppListCard.getOwnerNodeIds(appId);
-  
+
   NodeStore.multicast({
     app: appId,
     payload: data?.payload,
     type: 'app'
   }, nodeIds);
 }
+
 
 async function invoicePaid(coreApps, data) {
   await coreApps.InvoiceStore.updateInvoice(data.payload.appId, data.payload.encryptionKey);
@@ -103,6 +116,8 @@ export default function registerAppMessageListeners(coreApps) {
           return broadcastMessage(coreApps, data);
         case 'appOwnerMessage':
           return appOwnerMessage(coreApps, data);
+        case 'appOwnerMulticast':
+          return appOwnerMulticast(coreApps, data);
         case 'alert':
           return showAlert( data);
         case 'progress':
