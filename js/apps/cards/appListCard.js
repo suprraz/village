@@ -198,11 +198,11 @@ class _AppListCard {
     }
 
     const visibleApps = availableApps
+      .filter(app => app.type !== appTypes.debug)
       .filter(app =>
         !this.#search
         || app.name.toLowerCase().includes(this.#search.toLowerCase())
-        || app.description.toLowerCase().includes(this.#search.toLowerCase()))
-      .filter(app => app.type !== appTypes.debug);
+        || app.description.toLowerCase().includes(this.#search.toLowerCase()));
 
     visibleApps.map((app) => {
       availableAppsDiv.appendChild(this.createLongformAppEl(app, false));
