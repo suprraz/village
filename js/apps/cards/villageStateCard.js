@@ -90,7 +90,7 @@ const villageStateHtml = `
    
     <div id="nodeStateList" class="is-flex is-flex-direction-column"></div>
     <br />
-</divi>
+</div>
 `
 
 export default _VillageStateCard;
