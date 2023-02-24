@@ -5,7 +5,8 @@ const defaultSettings = {
   showLanding: true,
   enableLogging: true,
   privateKey: `private-key-${uuidv4()}`,
-  userId: `user-${uuidv4()}`
+  userId: `user-${uuidv4()}`,
+  nostrSecretKey: null,
 }
 
 class _Settings {

@@ -1,14 +1,14 @@
 import Profile from "./profile.js";
 import NodeStore from "./nodeStore.js";
-import {logError, logMessage} from "../utils/logger.js";
+import { logError, logMessage } from "../utils/logger.js";
 import config from "../config.js";
 
 class _riverMessenger {
-  #handlers
-  #onNodeConnected
-  #onNetworkChangeHandler
-  #onDownloadProgressHandler
-  #riverApps
+  #handlers;
+  #onNodeConnected;
+  #onNetworkChangeHandler;
+  #onDownloadProgressHandler;
+  #riverApps;
 
   init(riverApps) {
     this.#riverApps = riverApps;
@@ -19,12 +19,12 @@ class _riverMessenger {
   }
 
   connect() {
-    this.#riverApps.MqttWorker.seekNodes();
+    this.#riverApps.SignalWorker.seekNodes();
   }
 
   registerHandler(type, handler) {
-    if(this.#handlers[type]) {
-      logError(`RiverMessenger Handler registration overwrite on ${type}`)
+    if (this.#handlers[type]) {
+      logError(`RiverMessenger Handler registration overwrite on ${type}`);
     }
 
     this.#handlers[type] = handler;
@@ -42,75 +42,87 @@ class _riverMessenger {
     this.#onDownloadProgressHandler = onDownloadProgressHandler;
   }
 
-  onMessage (data, node) {
+  onMessage(data, node) {
     const { destinationId, type } = data;
 
-    if(!!destinationId && destinationId !== Profile.getNodeID()) {
+    if (!!destinationId && destinationId !== Profile.getNodeID()) {
       // forward message
       const nextHopNode = NodeStore.getNextHopNode(destinationId);
-      if(nextHopNode) {
+      if (nextHopNode) {
         nextHopNode.send(data);
       } else {
-        logMessage(`RiverMessenger Route not found for ${destinationId}.`)
+        logMessage(`RiverMessenger Route not found for ${destinationId}.`);
       }
       return;
     }
 
     switch (type) {
-      case 'routing':
-        this.onRoutingMessage(data, node)
+      case "routing":
+        this.onRoutingMessage(data, node);
         break;
       default:
-        if(typeof this.#handlers[type] === 'function') {
+        if (typeof this.#handlers[type] === "function") {
           this.#handlers[type](data);
-          return
+          return;
         }
 
         logError(`RiverMessenger Unhandled message: ${JSON.stringify(data)}`);
     }
   }
 
-
   onRoutingMessage(data, node) {
-    const {senderId, offer, answer, candidate, subtype, profile} = data;
+    const { senderId, offer, answer, candidate, subtype, profile } = data;
     switch (subtype) {
-      case 'request-connection':
+      case "request-connection":
         if (senderId) {
-          logMessage('RiverMessenger Evaluating connection request')
+          logMessage("RiverMessenger Evaluating connection request");
           this.#riverApps.RouteBalancer.onRouteRequest(senderId);
         }
         break;
-      case 'accept-connection':
+      case "accept-connection":
         if (senderId) {
-          logMessage('RiverMessenger Connection accepted, creating offer')
-          this.#riverApps.RouteBalancer.getVillageSignaler().createOffer(senderId);
+          logMessage("RiverMessenger Connection accepted, creating offer");
+          this.#riverApps.RouteBalancer.getVillageSignaler().createOffer(
+            senderId
+          );
         }
         break;
-      case 'reject-connection-busy':
+      case "reject-connection-busy":
         if (senderId) {
-          logMessage('RiverMessenger Connection refused, too busy')
+          logMessage("RiverMessenger Connection refused, too busy");
           this.#riverApps.RouteBalancer.onRouteBusy(senderId);
         }
         break;
-      case 'offer':
+      case "offer":
         if (offer && senderId) {
-          logMessage('RiverMessenger Accepting automated offer')
-          this.#riverApps.RouteBalancer.getVillageSignaler().acceptOffer(offer, senderId, node);
+          logMessage("RiverMessenger Accepting automated offer");
+          this.#riverApps.RouteBalancer.getVillageSignaler().acceptOffer(
+            offer,
+            senderId,
+            node
+          );
         }
         break;
-      case 'answer':
+      case "answer":
         if (answer && senderId) {
-          logMessage('RiverMessenger Accepting automated answer')
-          this.#riverApps.RouteBalancer.getVillageSignaler().acceptAnswer(answer, senderId, node);
+          logMessage("RiverMessenger Accepting automated answer");
+          this.#riverApps.RouteBalancer.getVillageSignaler().acceptAnswer(
+            answer,
+            senderId,
+            node
+          );
         }
         break;
-      case 'ice-candidate':
-        if(senderId && candidate ) {
+      case "ice-candidate":
+        if (senderId && candidate) {
           logMessage(`RiverMessenger Received ice candidate for ${senderId}`);
-          this.#riverApps.RouteBalancer.getVillageSignaler().onCandidate(senderId, candidate);
+          this.#riverApps.RouteBalancer.getVillageSignaler().onCandidate(
+            senderId,
+            candidate
+          );
         }
         break;
-      case 'profile-update':
+      case "profile-update":
         if (profile) {
           logMessage(`RiverMessenger Received profile for ${profile.nodeId}`);
           node.setProfile(profile);
@@ -124,15 +136,15 @@ class _riverMessenger {
   }
 
   onConnection(node) {
-    const profile =  Profile.getShareable();
+    const profile = Profile.getShareable();
     logMessage(`RiverMessenger Sending profile for ${profile.nodeId}`);
     node.send({
-      type: 'routing',
-      subtype: 'profile-update',
-      profile
+      type: "routing",
+      subtype: "profile-update",
+      profile,
     });
 
-    if(typeof this.#onNodeConnected === 'function') {
+    if (typeof this.#onNodeConnected === "function") {
       this.#onNodeConnected(node);
     }
   }
@@ -142,19 +154,19 @@ class _riverMessenger {
     NodeStore.prune();
     const nodeCountEnd = NodeStore.getNodes().length;
 
-    if(nodeCountEnd < config.mqttParallelReqs) {
-      this.#riverApps.MqttWorker.seekNodes();
+    if (nodeCountEnd < config.mqttParallelReqs) {
+      this.#riverApps.SignalWorker.seekNodes();
     } else if (nodeCountEnd < nodeCountStart) {
       this.#riverApps.RouteBalancer.rebuildRoutes();
     }
 
-    if(typeof this.#onNetworkChangeHandler === 'function') {
+    if (typeof this.#onNetworkChangeHandler === "function") {
       this.#onNetworkChangeHandler();
     }
   }
 
   onDownloadProgress(text, value, total) {
-    if(typeof this.#onDownloadProgressHandler === 'function') {
+    if (typeof this.#onDownloadProgressHandler === "function") {
       this.#onDownloadProgressHandler(text, value, total);
     }
   }

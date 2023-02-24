@@ -1,18 +1,18 @@
-import config from '../../config.js';
+import config from "../../config.js";
 import Profile from "../profile.js";
-import {logError, logMessage} from "../../utils/logger.js";
+import { logError, logMessage } from "../../utils/logger.js";
 import _Node from "../node.js";
 import NodeStore from "../nodeStore.js";
 
 class _MqttWorker {
-  #onNetworkChangeHandler
-  #onConnectionHandler
-  #onMessageHandler
-  #client
-  #broadcastTopic
-  #msgTopic
-  #mqttBroker
-  #connectingNodes
+  #onNetworkChangeHandler;
+  #onConnectionHandler;
+  #onMessageHandler;
+  #client;
+  #broadcastTopic;
+  #msgTopic;
+  #mqttBroker;
+  #connectingNodes;
 
   constructor(onNetworkChangeHandler, onConnectionHandler, onMessageHandler) {
     this.#onNetworkChangeHandler = onNetworkChangeHandler;
@@ -23,27 +23,28 @@ class _MqttWorker {
     this.#broadcastTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/bcast`;
     this.#msgTopic = `mqtt/${config.appNameConcat}/${config.appVersion}/msg`;
 
-    this.#mqttBroker = config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
+    this.#mqttBroker =
+      config.mqttBrokers[Math.floor(Math.random() * config.mqttBrokers.length)];
 
     this.#connectingNodes = [];
   }
 
   seekNodes() {
-    if(this.#connectingNodes.length >= config.mqttParallelReqs) {
+    if (this.#connectingNodes.length >= config.mqttParallelReqs) {
       return;
     }
 
-    logMessage('MQTT Seeking nodes')
-    if(this.#client) {
-      logMessage('MQTT Client ready')
+    logMessage("MQTT Seeking nodes");
+    if (this.#client) {
+      logMessage("MQTT Client ready");
       this.broadcastAvailable();
     } else {
-      logMessage('MQTT Initializing connection.')
+      logMessage("MQTT Initializing connection.");
       try {
         this.connect();
 
-        this.#client.once('connect', () => {
-          logMessage('MQTT Connected.')
+        this.#client.once("connect", () => {
+          logMessage("MQTT Connected.");
 
           this.registerListeners();
           this.broadcastAvailable();
@@ -61,17 +62,17 @@ class _MqttWorker {
       will: {
         topic: `${this.#msgTopic}/${Profile.getNodeID()}`,
         payload: JSON.stringify({
-          type: 'offline',
+          type: "offline",
           fromId: Profile.getNodeID(),
-          date: new Date()
+          date: new Date(),
         }),
         qos: 0,
-        retain: false
+        retain: false,
       },
-    }
+    };
 
     try {
-      logMessage('MQTT Client connecting');
+      logMessage("MQTT Client connecting");
       this.#client = mqtt.connect(this.#mqttBroker, options);
     } catch (e) {
       throw e;
@@ -91,7 +92,7 @@ class _MqttWorker {
   }
 
   onNotification(topic, payload) {
-    if(topic === `${this.#msgTopic}/${Profile.getNodeID()}`) {
+    if (topic === `${this.#msgTopic}/${Profile.getNodeID()}`) {
       try {
         const message = JSON.parse(payload);
 
@@ -99,7 +100,10 @@ class _MqttWorker {
       } catch (e) {
         logError(`MQTT notification error: ${e}`);
       }
-    } else if(topic.startsWith(this.#broadcastTopic) && !topic.endsWith(Profile.getNodeID())) {
+    } else if (
+      topic.startsWith(this.#broadcastTopic) &&
+      !topic.endsWith(Profile.getNodeID())
+    ) {
       try {
         const message = JSON.parse(payload);
 
@@ -111,21 +115,25 @@ class _MqttWorker {
   }
 
   async acceptOffer(message) {
-    if(message.fromId !== Profile.getNodeID() && !NodeStore.getNodeById(message.fromId)) {
+    if (
+      message.fromId !== Profile.getNodeID() &&
+      !NodeStore.getNodeById(message.fromId)
+    ) {
       let answerKey = null;
       try {
         const node = new _Node({
           nodeId: message.fromId,
           onConnection: (node) => this.#onConnectionHandler(node),
           onMessage: (data, node) => this.onMessage(data, node),
-          signalProtocol: 'mqtt'
+          signalProtocol: "mqtt",
         });
 
         answerKey = await node.acceptOffer(message.offerKey);
 
-        this.#connectingNodes = this.#connectingNodes.filter( nId => nId !== message.fromId);
-        if(NodeStore.getNodeById(message.fromId))
-        {
+        this.#connectingNodes = this.#connectingNodes.filter(
+          (nId) => nId !== message.fromId
+        );
+        if (NodeStore.getNodeById(message.fromId)) {
           logMessage(`MQTT terminating node duplicate ${message.fromId}`);
           node.terminate();
           return;
@@ -135,7 +143,7 @@ class _MqttWorker {
 
         const answerMsg = {
           fromId: Profile.getNodeID(),
-          type: 'answer-key',
+          type: "answer-key",
           date: new Date(),
           answerKey,
         };
@@ -149,16 +157,15 @@ class _MqttWorker {
   }
 
   async onAnswer(message) {
-    if(message.fromId !== Profile.getNodeID()) {
+    if (message.fromId !== Profile.getNodeID()) {
       try {
         const connectionObj = JSON.parse(atob(message.answerKey));
 
         const node = NodeStore.getNodeById(message.fromId);
 
-        if(node) {
+        if (node) {
           node.setRemoteDescription(connectionObj);
         }
-
       } catch (e) {
         logError(e);
       }
@@ -167,8 +174,8 @@ class _MqttWorker {
 
   sendCandidate(toId, candidate) {
     const candidateMsg = {
-      type: 'routing',
-      subtype: 'ice-candidate',
+      type: "routing",
+      subtype: "ice-candidate",
       fromId: Profile.getNodeID(),
       toId,
       date: new Date(),
@@ -182,8 +189,10 @@ class _MqttWorker {
   onCandidate(message) {
     try {
       const node = NodeStore.getNodeById(message.fromId);
-      if(node) {
-        logMessage(`MQTT Adding Ice candidate to ${node?.getProfile()?.nodeId}`);
+      if (node) {
+        logMessage(
+          `MQTT Adding Ice candidate to ${node?.getProfile()?.nodeId}`
+        );
         node.addIceCandidate(message.candidate);
       }
     } catch (e) {
@@ -192,11 +201,17 @@ class _MqttWorker {
   }
 
   async sendOffer(toId) {
-    if(toId !== Profile.getNodeID() && !NodeStore.getNodeById(toId) && !this.#connectingNodes.includes(toId)) {
+    if (
+      toId !== Profile.getNodeID() &&
+      !NodeStore.getNodeById(toId) &&
+      !this.#connectingNodes.includes(toId)
+    ) {
       this.#connectingNodes.push(toId);
 
       setTimeout(() => {
-        this.#connectingNodes = this.#connectingNodes.filter( nId => nId !== toId);
+        this.#connectingNodes = this.#connectingNodes.filter(
+          (nId) => nId !== toId
+        );
       }, config.RTC.handshakeTimeout);
 
       try {
@@ -204,14 +219,15 @@ class _MqttWorker {
           nodeId: toId,
           onConnection: (node) => this.#onConnectionHandler(node),
           onMessage: (data, node) => this.onMessage(data, node),
-          signalProtocol: 'mqtt'
+          signalProtocol: "mqtt",
         });
 
         const offerKey = await node.createOffer();
 
-        this.#connectingNodes = this.#connectingNodes.filter( nId => nId !== toId);
-        if(NodeStore.getNodeById(toId))
-        {
+        this.#connectingNodes = this.#connectingNodes.filter(
+          (nId) => nId !== toId
+        );
+        if (NodeStore.getNodeById(toId)) {
           logMessage(`MQTT terminating node duplicate ${toId}`);
           node.terminate();
           return;
@@ -220,7 +236,7 @@ class _MqttWorker {
         NodeStore.addNode(node);
 
         const offerMsg = {
-          type: 'offer-key',
+          type: "offer-key",
           fromId: Profile.getNodeID(),
           toId,
           date: new Date(),
@@ -236,43 +252,49 @@ class _MqttWorker {
   }
 
   registerListeners() {
-    logMessage('MQTT Registering listeners')
+    logMessage("MQTT Registering listeners");
 
     this.#client.subscribe(`${this.#broadcastTopic}/+`);
     this.#client.subscribe(`${this.#msgTopic}/${Profile.getNodeID()}`);
 
-    this.#client.on("message", (topic, payload) => this.onNotification(topic, payload));
+    this.#client.on("message", (topic, payload) =>
+      this.onNotification(topic, payload)
+    );
 
-    this.#client.on('error', (err) => {
-      logMessage('MQTT Connection error: ', err);
+    this.#client.on("error", (err) => {
+      logMessage("MQTT Connection error: ", err);
     });
 
-    this.#client.on('reconnect', () => {
-      logMessage('MQTT Reconnected');
+    this.#client.on("reconnect", () => {
+      logMessage("MQTT Reconnected");
       this.#onNetworkChangeHandler();
     });
   }
 
   broadcastAvailable() {
     const message = {
-      type: 'available',
+      type: "available",
       fromId: Profile.getNodeID(),
       date: new Date(),
-    }
+    };
 
     logMessage(`MQTT Broadcasting available, source: ${Profile.getNodeID()}`);
     this.broadcastMessage(message);
   }
 
   channelAvailable(toId) {
-    if(NodeStore.getNodeById(toId) || toId === Profile.getNodeID() || this.#connectingNodes.includes(toId)) {
+    if (
+      NodeStore.getNodeById(toId) ||
+      toId === Profile.getNodeID() ||
+      this.#connectingNodes.includes(toId)
+    ) {
       return;
     }
 
-    if((NodeStore.getNodes().length < config.maxConnectedNeighbors)) {
+    if (NodeStore.getNodes().length < config.maxConnectedNeighbors) {
       logMessage(`MQTT sending channel-available to ${toId}`);
       this.sendMessage(toId, {
-        type: 'channel-available',
+        type: "channel-available",
         fromId: Profile.getNodeID(),
         toId,
         date: new Date(),
@@ -281,18 +303,15 @@ class _MqttWorker {
   }
 
   channelRequest(toId) {
-    if(this.#connectingNodes.length < config.mqttParallelReqs && !NodeStore.getNodeById(toId) && !this.#connectingNodes.includes(toId)) {
-
-      this.#connectingNodes.push(toId);
-
-      setTimeout(() => {
-        this.#connectingNodes = this.#connectingNodes.filter( nId => nId !== toId);
-      }, config.RTC.handshakeTimeout);
-
+    if (
+      this.#connectingNodes.length < config.mqttParallelReqs &&
+      !NodeStore.getNodeById(toId) &&
+      !this.#connectingNodes.includes(toId)
+    ) {
       logMessage(`MQTT Sending channel-request to: ${toId}`);
 
       this.sendMessage(toId, {
-        type: 'channel-request',
+        type: "channel-request",
         fromId: Profile.getNodeID(),
         toId,
         date: new Date(),
@@ -301,38 +320,45 @@ class _MqttWorker {
   }
 
   sendMessage(toId, message) {
-    this.#client.publish(`${this.#msgTopic}/${toId}`, JSON.stringify(message), {qos: 1, retain: false});
+    this.#client.publish(`${this.#msgTopic}/${toId}`, JSON.stringify(message), {
+      qos: 1,
+      retain: false,
+    });
   }
 
   broadcastMessage(message) {
-    this.#client.publish(`${this.#broadcastTopic}/${Profile.getNodeID()}`, JSON.stringify(message), {qos: 0, retain: false});
+    this.#client.publish(
+      `${this.#broadcastTopic}/${Profile.getNodeID()}`,
+      JSON.stringify(message),
+      { qos: 0, retain: false }
+    );
   }
 
   parseBroadcast(message) {
-    logMessage('MQTT Parsing broadcast from: '+ message.fromId);
+    logMessage("MQTT Parsing broadcast from: " + message.fromId);
     switch (message.type) {
-      case 'available':
+      case "available":
         this.channelAvailable(message.fromId);
         break;
     }
   }
 
   parseMessage(message) {
-    logMessage('MQTT Parsing message of type: '+ message.type);
+    logMessage("MQTT Parsing message of type: " + message.type);
     switch (message.type) {
-      case 'channel-available':
+      case "channel-available":
         this.channelRequest(message.fromId);
         break;
-      case 'channel-request':
+      case "channel-request":
         this.sendOffer(message.fromId);
         break;
-      case 'offer-key':
+      case "offer-key":
         this.acceptOffer(message);
         break;
-      case 'answer-key':
+      case "answer-key":
         this.onAnswer(message);
         break;
-      case 'candidate':
+      case "candidate":
         this.onCandidate(message);
         break;
       default:
