@@ -3,7 +3,7 @@ export default {
   appNameConcat: "VillageProtocol",
   appVersion: "0.1",
   maxLogSize: 100,
-  signalingNetwork: "nostr",
+  signalingNetwork: "mqtt",
   mqttBrokers: ["wss://mqtt.flespi.io:443"],
   mqttOptions: {
     keepalive: 60,
