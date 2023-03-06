@@ -4,7 +4,7 @@ export default {
   appVersion: "0.1",
   maxLogSize: 100,
   signalingNetwork: "mqtt",
-  mqttBrokers: ["wss://mqtt.flespi.io:443"],
+  mqttBrokers: ["wss://test.mosquitto.org:8081/mqtt"],
   mqttOptions: {
     keepalive: 60,
     protocolId: "MQTT",
@@ -12,8 +12,7 @@ export default {
     clean: true,
     reconnectPeriod: 1000,
     connectTimeout: 4000, // 4 sec
-    username:
-      "FlespiToken xV4HrIugGoaWLMG7Kxpd4WrBhGumf0jDMd83Kt8gF62gIwdiRrkLdBaj8utdlDEV",
+    useSSL: true,
   },
   mqttParallelReqs: 3,
   villageParallelReqs: 3,
