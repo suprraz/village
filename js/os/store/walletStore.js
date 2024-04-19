@@ -330,46 +330,38 @@ class _WalletStore {
   async #createWallet(name) {
     let wallet = null;
 
-    const res = await fetch("https://legend.lnbits.com/wallet?nme=" + encodeURIComponent(name), {
+    const res =await fetch("https://legend.lnbits.com/api/v1/account", {
+      "credentials": "omit",
       "headers": {
-        "Accept": "text/html",
+        "Accept": "application/json, text/plain, */*",
         "Accept-Language": "en-US,en;q=0.5",
+        "Content-Type": "application/json",
       },
-      "method": "GET",
+      "referrer": "https://legend.lnbits.com/",
+      "body": JSON.stringify({
+        "name": name
+      }),
+      "method": "POST",
       "mode": "cors"
     });
 
-    if(res.url) {
-      let url = new URL(res.url);
-      const userId = url.searchParams.get("usr");
-      const walletId = url.searchParams.get("wal");
+    // If the request was successful, parse the response
+    if (res.ok) {
 
-      const res2 = await fetch(res.url, {
-        "headers": {
-          "Accept": "text/html",
-          "Accept-Language": "en-US,en;q=0.5",
-        },
-        "method": "GET",
-        "mode": "cors"
-      });
-
-      const html = await res2.text();
-
-      const parser = new DOMParser();
-      const htmlDoc = parser.parseFromString(html, 'text/html');
-
-      const apiInfoItems = htmlDoc.querySelectorAll('[label="API info"] > q-card-section > em');
-
-      if(apiInfoItems && apiInfoItems.length === 3) {
+      try {
+        const walletDetails = await res.json();
         wallet = {
-          userId,
-          walletId,
-          adminKey: apiInfoItems[1].innerText,
-          readKey: apiInfoItems[2].innerText
+          name: walletDetails.name,
+          walletId: walletDetails.id,
+          userId: walletDetails.user,
+          adminKey: walletDetails.adminKey,
+          readKey: walletDetails.inkey,
         };
-
-        return wallet;
+      } catch (e) {
+        logError(`WalletStore Error ${e}`);
       }
+
+      return wallet;
     }
   }
 
